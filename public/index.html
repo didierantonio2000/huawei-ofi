@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>OLT Dashboard — BARCELONA</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:700;color:#58a6ff;white-space:nowrap}
+.hinfo{color:#8b949e;font-size:12px}
+.nav-link{margin-left:auto;font-size:13px}
+
+#syncBar{background:#161b22;border-bottom:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;flex-wrap:wrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#8b949e;flex-shrink:0}
+.sync-dot.running{background:#d29922;animation:pulse 1s ease-in-out infinite}
+.sync-dot.ok{background:#3fb950}
+.sync-dot.err{background:#f85149}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#syncText{color:#8b949e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.btn{padding:5px 12px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;transition:all .15s}
+.btn:hover{background:#30363d}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:#1f6feb;border-color:#1f6feb;color:#fff}.btn.primary:hover{background:#388bfd}
+.btn.danger{background:#21262d;border-color:#da3633;color:#f85149}.btn.danger:hover{background:#3d1a1a}
+
+.toolbar{padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #21262d}
+.filter-input{padding:5px 10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:13px;width:240px;outline:none}
+.filter-input:focus{border-color:#58a6ff}
+#countBadge{margin-left:auto;font-size:12px;color:#8b949e}
+
+/* ─── Stats Dashboard ──────────────────────────────────────────────────────── */
+#statsDashboard{
+  background:linear-gradient(135deg,#10151c 0%,#0d1117 100%);
+  border-bottom:1px solid #21262d;
+  padding:14px 20px;
+  display:grid;
+  grid-template-columns:auto 1fr 1fr 1fr;
+  gap:16px;
+  align-items:center;
+}
+@media(max-width:900px){
+  #statsDashboard{grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(max-width:560px){
+  #statsDashboard{grid-template-columns:1fr}
+}
+
+/* Tarjetas de números grandes */
+.stat-cards{display:flex;gap:10px;flex-wrap:wrap}
+.stat-card{
+  background:#0d1117;border:1px solid #30363d;border-radius:10px;
+  padding:8px 16px;min-width:80px;text-align:center;
+  transition:border-color .2s;
+}
+.stat-card:hover{border-color:#484f58}
+.stat-card .num{font-size:22px;font-weight:800;font-family:'Consolas',monospace;line-height:1.2}
+.stat-card .lbl{font-size:9px;color:#8b949e;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.stat-card.c-total .num{color:#c9d1d9}
+.stat-card.c-online .num{color:#3fb950}
+.stat-card.c-offline .num{color:#f85149}
+.stat-card.c-other .num{color:#d29922}
+
+/* Grupos de barras */
+.bar-group{display:flex;flex-direction:column;gap:4px;min-width:0}
+.bar-group .bar-title{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.bar-track{
+  height:22px;background:#0d1117;border:1px solid #21262d;border-radius:6px;
+  display:flex;overflow:hidden;position:relative;
+}
+.bar-seg{
+  height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:#fff;overflow:hidden;
+  transition:width .6s ease;min-width:0;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;
+}
+.bar-seg:hover{filter:brightness(1.2)}
+.bar-seg.seg-on{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-off{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-oth{background:linear-gradient(90deg,#9e6a03,#d29922)}
+.bar-seg.seg-rx-good{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-rx-warn{background:linear-gradient(90deg,#9e6a03,#d29922)}
+.bar-seg.seg-rx-bad{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-rx-na{background:#21262d;color:#484f58}
+.bar-seg.seg-match{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-mismatch{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-match-na{background:#21262d;color:#484f58}
+.bar-legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:1px}
+.bar-legend span{font-size:9px;color:#8b949e;display:flex;align-items:center;gap:3px}
+.bar-legend i{display:inline-block;width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.bar-legend i.lg-on{background:#3fb950}
+.bar-legend i.lg-off{background:#f85149}
+.bar-legend i.lg-oth{background:#d29922}
+.bar-legend i.lg-rg{background:#3fb950}
+.bar-legend i.lg-rw{background:#d29922}
+.bar-legend i.lg-rb{background:#f85149}
+.bar-legend i.lg-rn{background:#30363d}
+.bar-legend i.lg-m{background:#3fb950}
+.bar-legend i.lg-mm{background:#f85149}
+
+/* ─── Tabla ────────────────────────────────────────────────────────────────── */
+.tbl-wrap{overflow:auto;max-height:calc(100vh - 260px)}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+thead th{background:#161b22;padding:9px 10px;text-align:left;font-size:11px;color:#8b949e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #30363d;position:sticky;top:0;z-index:2;white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:#c9d1d9}
+thead th .sort-arrow{margin-left:4px;opacity:.4;font-size:10px}
+thead th.sorted .sort-arrow{opacity:1;color:#58a6ff}
+thead th.nosort{cursor:default}
+thead th.nosort:hover{color:#8b949e}
+
+tbody tr{border-bottom:1px solid #21262d;transition:background .1s}
+tbody tr:hover{background:#161b22}
+td{padding:7px 10px;font-size:12px;vertical-align:middle}
+
+.fsp{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#8b949e;letter-spacing:.3px}
+.ont-id{font-family:'Consolas','Courier New',monospace;font-size:11px;text-align:center;color:#c9d1d9}
+.sn{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#79c0ff;letter-spacing:.3px}
+.desc{font-size:11px;color:#e6edf3;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.badge.online{background:#0f2a14;color:#3fb950;border:1px solid #238636}
+.badge.offline{background:#2a0f0f;color:#f85149;border:1px solid #da3633}
+.badge.other{background:#2a1f0f;color:#d29922;border:1px solid #9e6a03}
+
+.badge-match{display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.badge-match.match{background:#0f2a14;color:#3fb950;border:1px solid #238636}
+.badge-match.mismatch{background:#2a0f0f;color:#f85149;border:1px solid #da3633}
+.badge-match.unknown{background:#1c1c1c;color:#484f58;border:1px solid #30363d}
+
+.rx{font-family:'Consolas','Courier New',monospace;font-size:12px;font-weight:600}
+.rx.good{color:#3fb950}.rx.warn{color:#d29922}.rx.bad{color:#f85149}.rx.na{color:#484f58}
+
+.dist{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#8b949e}
+.temp-val{font-family:'Consolas','Courier New',monospace;font-size:11px}
+.temp-val.ok{color:#3fb950}.temp-val.warn{color:#d29922}.temp-val.hot{color:#f85149}.temp-val.na{color:#484f58}
+
+.btn-sm{padding:3px 9px;border-radius:5px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;cursor:pointer;font-size:11px;white-space:nowrap}
+.btn-sm:hover{background:#388bfd;border-color:#388bfd;color:#fff}
+
+.stale{opacity:.5}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#161b22;border:1px solid #30363d;border-radius:12px;width:min(780px,96vw);max-height:90vh;overflow-y:auto;padding:24px;position:relative}
+.modal h2{font-size:15px;font-weight:700;color:#58a6ff;margin-bottom:4px}
+.modal .subtitle{font-size:12px;color:#8b949e;margin-bottom:16px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#8b949e;cursor:pointer;font-size:20px;line-height:1;padding:4px}
+.modal-close:hover{color:#f85149}
+
+.optical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px}
+.opt-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center}
+.opt-card .v{font-size:20px;font-weight:700;margin-bottom:3px;font-family:'Consolas',monospace}
+.opt-card .l{font-size:9px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px}
+
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #21262d;border-radius:6px;overflow:hidden}
+.kv-k{background:#0d1117;padding:5px 10px;font-size:11px;color:#8b949e;border-bottom:1px solid #21262d}
+.kv-v{background:#161b22;padding:5px 10px;font-size:11px;color:#c9d1d9;border-bottom:1px solid #21262d;font-family:'Consolas',monospace;word-break:break-all}
+
+.alert{padding:10px 14px;border-radius:6px;margin-top:10px;font-size:12px}
+.alert.err{background:#1c0a09;border:1px solid #da3633;color:#f85149}
+.alert.ok{background:#0a190d;border:1px solid #238636;color:#3fb950}
+
+.sec-title{font-size:11px;font-weight:700;color:#58a6ff;text-transform:uppercase;letter-spacing:.7px;margin:14px 0 8px}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:50px;color:#484f58}
+
+#progressBar{height:2px;background:#1f6feb;transition:width .4s;width:0}
+
+td .desc[title]{cursor:help}
+tbody tr.offline-row{background:rgba(248,81,73,.03)}
+tbody tr.offline-row:hover{background:rgba(248,81,73,.07)}
+</style>
+</head>
+<body>
+<header>
+  <h1>OLT Dashboard</h1>
+  <span class="hinfo">BARCELONA · 45.162.79.228:2333</span>
+  <a href="/autorizar.html" class="nav-link">Autorizar ONTs</a>
+</header>
+
+<div id="syncBar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncText">Cargando estado...</span>
+  <button class="btn primary" id="syncBtnQuick" onclick="triggerSync('quick')">Sincronizar</button>
+  <button class="btn" id="syncBtnFull" onclick="triggerSync('full')">Sincronizar Todo</button>
+
+  <button class="btn" onclick="loadFromCache()">Refrescar Tabla</button>
+</div>
+<div id="progressBar"></div>
+
+<!-- ─── Mini gráficas de estadísticas ─────────────────────────────────────── -->
+<div id="statsDashboard">
+  <div class="stat-cards">
+    <div class="stat-card c-total"><div class="num" id="sTotal">--</div><div class="lbl">Total</div></div>
+    <div class="stat-card c-online"><div class="num" id="sOnline">--</div><div class="lbl">Online</div></div>
+    <div class="stat-card c-offline"><div class="num" id="sOffline">--</div><div class="lbl">Offline</div></div>
+    <div class="stat-card c-other"><div class="num" id="sOther">--</div><div class="lbl">Otros</div></div>
+  </div>
+
+  <div class="bar-group">
+    <div class="bar-title">Estado ONT</div>
+    <div class="bar-track" id="barState"></div>
+    <div class="bar-legend">
+      <span><i class="lg-on"></i>Online</span>
+      <span><i class="lg-off"></i>Offline</span>
+      <span><i class="lg-oth"></i>Otros</span>
+    </div>
+  </div>
+
+  <div class="bar-group">
+    <div class="bar-title">Potencia RX</div>
+    <div class="bar-track" id="barRx"></div>
+    <div class="bar-legend">
+      <span><i class="lg-rg"></i>Buena</span>
+      <span><i class="lg-rw"></i>Alerta</span>
+      <span><i class="lg-rb"></i>Critica</span>
+      <span><i class="lg-rn"></i>S/D</span>
+    </div>
+  </div>
+
+  <div class="bar-group">
+    <div class="bar-title">Match State</div>
+    <div class="bar-track" id="barMatch"></div>
+    <div class="bar-legend">
+      <span><i class="lg-m"></i>Match</span>
+      <span><i class="lg-mm"></i>Mismatch</span>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <input class="filter-input" id="filterInput" type="text" placeholder="Filtrar: serial, PON, descripcion, RX..." oninput="filterTable(this.value)"/>
+  <select class="filter-input" style="width:140px" id="stateFilter" onchange="filterTable(document.getElementById('filterInput').value)">
+    <option value="">Todos los estados</option>
+    <option value="online">Online</option>
+    <option value="offline">Offline</option>
+  </select>
+  <select class="filter-input" style="width:140px" id="matchFilter" onchange="filterTable(document.getElementById('filterInput').value)">
+    <option value="">Match / Mismatch</option>
+    <option value="match">Match</option>
+    <option value="mismatch">Mismatch</option>
+  </select>
+  <span id="countBadge">--</span>
+</div>
+
+<div class="tbl-wrap">
+<table id="ontTable">
+  <thead>
+    <tr>
+      <th onclick="sortBy('fsp')" id="th-fsp">F/S/P <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('ontId')" id="th-ontId">ID <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('sn')" id="th-sn">Serial <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('description')" id="th-description">Descripcion <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('runState')" id="th-runState">Estado <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('matchState')" id="th-matchState">Match <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('rxPower')" id="th-rxPower">RX (dBm) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('txPower')" id="th-txPower">TX (dBm) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('temperature')" id="th-temperature">Temp (C) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('distance')" id="th-distance">Dist (m) <span class="sort-arrow">&#8597;</span></th>
+      <th class="nosort">Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="ontBody"><tr><td colspan="11" class="empty"><span class="spinner"></span> Cargando...</td></tr></tbody>
+</table>
+</div>
+
+<!-- Modal detalle -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">&#10005;</button>
+  <h2 id="modalTitle">Detalles ONT</h2>
+  <div class="subtitle" id="modalSub"></div>
+  <div id="opticalSection" style="display:none">
+    <div class="sec-title">Potencia Optica (tiempo real)</div>
+    <div class="optical-grid" id="opticalCards"></div>
+  </div>
+  <div class="sec-title">Informacion general</div>
+  <div class="kv-grid" id="kvGrid"></div>
+  <div id="modalAlert"></div>
+  <button class="btn primary" id="syncOntBtn" onclick="syncOnt()" style="width:100%;margin-top:14px;padding:9px">
+    Actualizar potencia optica en tiempo real
+  </button>
+</div>
+</div>
+
+<script>
+let allOnts=[], currentOnt=null;
+let _sortDir={};
+
+/* ─── Helpers ──────────────────────────────────────────────────────────────── */
+function cleanSn(raw) {
+  if (!raw) return '--';
+  const m = raw.match(/^([0-9A-Fa-f]{12,16})/);
+  return m ? m[1] : raw.split(' ')[0];
+}
+
+function rxClass(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return 'na';
+  if (n >= -27) return 'good';
+  if (n >= -30) return 'warn';
+  return 'bad';
+}
+
+function tempClass(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return 'na';
+  if (n <= 60) return 'ok';
+  if (n <= 75) return 'warn';
+  return 'hot';
+}
+
+function stateClass(s) {
+  return s === 'online' ? 'online' : s === 'offline' ? 'offline' : 'other';
+}
+
+function matchBadgeClass(s) {
+  if (s === 'match') return 'match';
+  if (s === 'mismatch') return 'mismatch';
+  return 'unknown';
+}
+
+function fmtOrDash(v) {
+  if (v === null || v === undefined || v === 'null' || v === 'N/A' || v === '-') return null;
+  return v;
+}
+
+function ageMins(ts) {
+  if (!ts) return null;
+  return Math.round((Date.now() - ts) / 60000);
+}
+
+const ontKey = o => `${o.frame}/${o.slot}/${o.pon}/${o.ontId}`;
+
+/* ─── Stats / Mini graficas ────────────────────────────────────────────────── */
+function updateStats(onts) {
+  const total = onts.length;
+  let online = 0, offline = 0, other = 0;
+  let rxGood = 0, rxWarn = 0, rxBad = 0, rxNa = 0;
+  let matchCnt = 0, mismatchCnt = 0, matchNa = 0;
+
+  for (const o of onts) {
+    const rs = (o.runState || '').toLowerCase();
+    if (rs === 'online') online++;
+    else if (rs === 'offline') offline++;
+    else other++;
+
+    const ms = (o.matchState || '').toLowerCase();
+    if (ms === 'match') matchCnt++;
+    else if (ms === 'mismatch') mismatchCnt++;
+    else matchNa++;
+
+    const rx = parseFloat(o.rxPower);
+    if (isNaN(rx)) rxNa++;
+    else if (rx >= -27) rxGood++;
+    else if (rx >= -30) rxWarn++;
+    else rxBad++;
+  }
+
+  // Numeros grandes
+  document.getElementById('sTotal').textContent = total;
+  document.getElementById('sOnline').textContent = online;
+  document.getElementById('sOffline').textContent = offline;
+  document.getElementById('sOther').textContent = other;
+
+  // Barra de estado
+  renderBar('barState', [
+    { cls: 'seg-on', val: online, label: online ? pct(online, total) : '' },
+    { cls: 'seg-off', val: offline, label: offline ? pct(offline, total) : '' },
+    { cls: 'seg-oth', val: other, label: other ? pct(other, total) : '' },
+  ]);
+
+  // Barra RX
+  renderBar('barRx', [
+    { cls: 'seg-rx-good', val: rxGood, label: rxGood ? pct(rxGood, total) : '' },
+    { cls: 'seg-rx-warn', val: rxWarn, label: rxWarn ? pct(rxWarn, total) : '' },
+    { cls: 'seg-rx-bad', val: rxBad, label: rxBad ? pct(rxBad, total) : '' },
+    { cls: 'seg-rx-na', val: rxNa, label: rxNa ? pct(rxNa, total) : '' },
+  ]);
+
+  // Barra Match
+  renderBar('barMatch', [
+    { cls: 'seg-match', val: matchCnt, label: matchCnt ? pct(matchCnt, total) : '' },
+    { cls: 'seg-mismatch', val: mismatchCnt, label: mismatchCnt ? pct(mismatchCnt, total) : '' },
+    { cls: 'seg-match-na', val: matchNa, label: '' },
+  ]);
+}
+
+function pct(val, total) {
+  if (!total) return '0%';
+  const p = Math.round(val / total * 100);
+  return val > 0 && p < 5 ? val + '' : p + '%';
+}
+
+function renderBar(containerId, segments) {
+  const el = document.getElementById(containerId);
+  const total = segments.reduce((s, seg) => s + seg.val, 0);
+  if (!total) { el.innerHTML = '<div style="width:100%;text-align:center;color:#484f58;font-size:10px;line-height:22px">Sin datos</div>'; return; }
+
+  el.innerHTML = segments.map(seg => {
+    const w = (seg.val / total * 100);
+    if (w < 0.5) return ''; // no mostrar segmentos menores a 0.5%
+    return `<div class="bar-seg ${seg.cls}" style="width:${w}%" title="${seg.val} ONTs">${seg.label}</div>`;
+  }).join('');
+}
+
+/* ─── Sync status + tiempo real (websocket) ───────────────────────────────── */
+let socket = null;
+let wsConnected = false;
+
+function renderSyncStatus(s) {
+  const dot  = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  const btnQuick = document.getElementById('syncBtnQuick');
+  const btnFull  = document.getElementById('syncBtnFull');
+  const bar  = document.getElementById('progressBar');
+
+  if (s.running) {
+    dot.className = 'sync-dot running';
+    const modeLbl = s.mode === 'full' ? ' [Completa]' : s.mode === 'quick' ? ' [Incremental]' : '';
+    text.textContent = s.step + modeLbl + (s.total ? ` (${s.progress}/${s.total})` : '');
+    btnQuick.disabled = true;
+    btnFull.disabled = true;
+    bar.style.width = (s.total ? Math.round(s.progress / s.total * 100) : 0) + '%';
+  } else {
+    dot.className = s.lastError ? 'sync-dot err' : (s.lastSync ? 'sync-dot ok' : 'sync-dot');
+    text.textContent = s.lastError
+      ? 'Error: ' + s.lastError
+      : (s.lastSync ? 'Ultima sync: ' + new Date(s.lastSync).toLocaleString() : 'Sin sincronizar');
+    btnQuick.disabled = false;
+    btnFull.disabled = false;
+    bar.style.width = s.lastSync ? '100%' : '0';
+    if (s.lastSync && !allOnts.length) loadFromCache(true);
+  }
+}
+
+function initSocket() {
+  socket = io();
+
+  socket.on('connect', () => { wsConnected = true; });
+  socket.on('disconnect', () => { wsConnected = false; });
+
+  // Estado de sincronizacion en vivo — ya no hace falta hacer polling para esto
+  socket.on('sync:status', renderSyncStatus);
+
+  // La lista base (frame/slot/pon/sn) queda lista antes que la optica/detalle;
+  // la mezclamos con lo que ya tengamos para no perder datos que ya estaban.
+  socket.on('onts:base', (baseOnts) => {
+    const byKey = new Map(allOnts.map(o => [ontKey(o), o]));
+    allOnts = baseOnts.map(o => ({ ...(byKey.get(ontKey(o)) || {}), ...o }));
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
+  });
+
+  // Una ONT puntual se acaba de sincronizar (durante un sync, o al abrir su
+  // detalle) — se actualiza esa fila nada más, sin resetear filtro/orden.
+  socket.on('ont:update', (ont) => {
+    const key = ontKey(ont);
+    const idx = allOnts.findIndex(o => ontKey(o) === key);
+    if (idx >= 0) allOnts[idx] = { ...allOnts[idx], ...ont }; else allOnts.push(ont);
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
+    if (currentOnt && ontKey(currentOnt) === key) currentOnt = { ...currentOnt, ...ont };
+  });
+
+  // Alguien borró una ONT (desde esta pestaña u otra)
+  socket.on('ont:removed', ({ frame, slot, pon, ontId }) => {
+    allOnts = allOnts.filter(o => !(String(o.frame) === String(frame) && String(o.slot) === String(slot) && String(o.pon) === String(pon) && String(o.ontId) === String(ontId)));
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
+  });
+}
+
+// Respaldo por si el websocket se cae un momento: solo actúa cuando NO hay
+// conexión activa, para no duplicar refrescos innecesarios.
+async function pollStatusFallback() {
+  if (wsConnected) return;
+  try {
+    const r = await fetch('/api/status');
+    renderSyncStatus(await r.json());
+    loadFromCache(false);
+  } catch {}
+}
+
+async function triggerSync(mode) {
+  const url = mode === 'full' ? '/api/sync/full' : '/api/sync';
+  const r = await fetch(url, { method: 'POST' });
+  const d = await r.json();
+  if (!d.ok) { alert(d.message); return; }
+  document.getElementById('syncBtnQuick').disabled = true;
+  document.getElementById('syncBtnFull').disabled = true;
+  document.getElementById('progressBar').style.width = '0';
+}
+
+/* ─── Tabla ────────────────────────────────────────────────────────────────── */
+async function loadFromCache(resetFilters = true) {
+  try {
+    const r = await fetch('/api/onts');
+    const d = await r.json();
+    if (!r.ok || !d.onts) { renderEmpty(d.message || 'Sin datos'); return; }
+    allOnts = d.onts;
+    if (resetFilters) {
+      document.getElementById('filterInput').value = '';
+      document.getElementById('stateFilter').value = '';
+      document.getElementById('matchFilter').value = '';
+      updateStats(allOnts);
+      renderTable(allOnts);
+    } else {
+      // Refresco en vivo (ej. mientras sincroniza): no tocar lo que el usuario
+      // tenga escrito en el filtro, solo refrescar los datos.
+      updateStats(allOnts);
+      filterTable(document.getElementById('filterInput').value);
+    }
+  } catch (e) { renderEmpty('Error: ' + e.message); }
+}
+
+function renderEmpty(msg) {
+  document.getElementById('ontBody').innerHTML = `<tr><td colspan="11" class="empty">${msg}</td></tr>`;
+  document.getElementById('countBadge').textContent = '--';
+  updateStats([]);
+}
+
+function renderTable(onts) {
+  if (!onts.length) { renderEmpty('Sin ONTs que coincidan'); return; }
+
+  const onlineCount = onts.filter(o => o.runState === 'online').length;
+  const offlineCount = onts.filter(o => o.runState === 'offline').length;
+  document.getElementById('countBadge').innerHTML =
+    `<span style="color:#3fb950">${onlineCount} on</span> · <span style="color:#f85149">${offlineCount} off</span> · ${onts.length} total`;
+
+  document.getElementById('ontBody').innerHTML = onts.map(o => {
+    const age = ageMins(o.optTs);
+    const stale = age !== null && age > 60;
+    const isOff = o.runState === 'offline';
+    const rx = fmtOrDash(o.rxPower);
+    const tx = fmtOrDash(o.txPower);
+    const temp = fmtOrDash(o.temperature);
+    const dist = fmtOrDash(o.distance);
+    const desc = o.description || '--';
+
+    return `<tr class="${isOff ? 'offline-row' : ''}">
+      <td class="fsp">${o.frame}/${o.slot}/${o.pon}</td>
+      <td class="ont-id">${o.ontId}</td>
+      <td class="sn" title="${o.sn || ''}">${cleanSn(o.sn)}</td>
+      <td class="desc" title="${desc}">${desc}</td>
+      <td><span class="badge ${stateClass(o.runState)}">${o.runState || '--'}</span></td>
+      <td><span class="badge-match ${matchBadgeClass(o.matchState)}">${o.matchState || '--'}</span></td>
+      <td><span class="rx ${rxClass(rx)} ${stale ? 'stale' : ''}" title="${stale ? 'Dato de hace >1h' : ''}">${rx || '--'}</span></td>
+      <td><span class="rx na">${tx || '--'}</span></td>
+      <td><span class="temp-val ${tempClass(temp)}">${temp !== null ? temp + '\u00B0' : '--'}</span></td>
+      <td class="dist">${dist !== null ? Number(dist).toLocaleString() : '--'}</td>
+      <td><button class="btn-sm" onclick='openModal(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Detalle</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable(q) {
+  const sq = q.toLowerCase();
+  const st = document.getElementById('stateFilter').value;
+  const mt = document.getElementById('matchFilter').value;
+
+  const r = allOnts.filter(o => {
+    const desc = o.description || '';
+    const matchQ = !sq
+      || (o.sn || '').toLowerCase().includes(sq)
+      || cleanSn(o.sn).toLowerCase().includes(sq)
+      || `${o.frame}/${o.slot}/${o.pon}`.includes(sq)
+      || o.ontId.toString().includes(sq)
+      || (o.runState || '').toLowerCase().includes(sq)
+      || (o.rxPower || '').toString().includes(sq)
+      || desc.toLowerCase().includes(sq);
+    const matchS = !st || o.runState === st;
+    const matchM = !mt || o.matchState === mt;
+    return matchQ && matchS && matchM;
+  });
+  updateStats(r);
+  renderTable(r);
+}
+
+function sortBy(key) {
+  _sortDir[key] = _sortDir[key] === 'asc' ? 'desc' : 'asc';
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+  const th = document.getElementById('th-' + key);
+  if (th) th.classList.add('sorted');
+
+  const dir = _sortDir[key] === 'asc' ? 1 : -1;
+
+  allOnts.sort((a, b) => {
+    let av, bv;
+
+    if (key === 'fsp') {
+      av = `${a.frame}/${a.slot}/${a.pon}`;
+      bv = `${b.frame}/${b.slot}/${b.pon}`;
+      return av.localeCompare(bv, undefined, { numeric: true }) * dir;
+    }
+
+    if (key === 'description') {
+      av = (a.description || '').toLowerCase();
+      bv = (b.description || '').toLowerCase();
+      return av.localeCompare(bv) * dir;
+    }
+
+    av = a[key] || '';
+    bv = b[key] || '';
+
+    const an = parseFloat(av);
+    const bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+
+    if (key === 'runState') {
+      const order = { online: 0, offline: 1 };
+      return ((order[av.toLowerCase()] ?? 2) - (order[bv.toLowerCase()] ?? 2)) * dir;
+    }
+    if (key === 'matchState') {
+      const order = { match: 0, mismatch: 1 };
+      return ((order[av.toLowerCase()] ?? 2) - (order[bv.toLowerCase()] ?? 2)) * dir;
+    }
+
+    return av.toString().localeCompare(bv.toString()) * dir;
+  });
+
+  filterTable(document.getElementById('filterInput').value);
+}
+
+/* ─── Modal ────────────────────────────────────────────────────────────────── */
+function openModal(o) {
+  currentOnt = o;
+  const desc = o.description || '--';
+  document.getElementById('modalTitle').textContent = cleanSn(o.sn) + ' \u2014 ' + desc;
+  document.getElementById('modalSub').textContent =
+    `F/S/P: ${o.frame}/${o.slot}/${o.pon} \u00B7 ONT-ID: ${o.ontId} \u00B7 ${o.runState || '--'}${o.matchState ? ' \u00B7 Match: ' + o.matchState : ''}`;
+  document.getElementById('opticalSection').style.display = 'none';
+  document.getElementById('opticalCards').innerHTML = '';
+  document.getElementById('modalAlert').innerHTML = '';
+  document.getElementById('syncOntBtn').disabled = false;
+
+  if (o.rxPower || o.txPower || o.temperature) {
+    renderOptical({
+      "Rx optical power(dBm)": o.rxPower,
+      "Tx optical power(dBm)": o.txPower,
+      "Temperature(C)": o.temperature,
+      "Laser bias current(mA)": o.laserBias,
+      "Voltage(V)": o.voltage,
+    });
+  }
+
+  const skip = new Set(['rxPower', 'txPower', 'temperature', 'laserBias', 'voltage', 'optTs']);
+  const kv = {};
+  for (const [k, v] of Object.entries(o)) {
+    if (!skip.has(k) && v !== null && v !== undefined && v !== 'null') kv[k] = v;
+  }
+  renderKV(kv);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  currentOnt = null;
+}
+
+function renderOptical(opt) {
+  const labels = {
+    "Rx optical power(dBm)": ["RX Power", "dBm"],
+    "Tx optical power(dBm)": ["TX Power", "dBm"],
+    "Temperature(C)": ["Temp", "\u00B0C"],
+    "Laser bias current(mA)": ["Laser Bias", "mA"],
+    "Voltage(V)": ["Voltaje", "V"],
+  };
+  const cards = Object.entries(opt)
+    .filter(([, v]) => v && v !== 'null' && v !== null && v !== '-')
+    .map(([k, v]) => {
+      const lbl = labels[k] || [k, ''];
+      const cls = k.toLowerCase().includes('rx') ? rxClass(v)
+        : k.toLowerCase().includes('temp') ? tempClass(v)
+        : 'na';
+      return `<div class="opt-card"><div class="v rx ${cls}">${v}</div><div class="l">${lbl[0]} ${lbl[1]}</div></div>`;
+    }).join('');
+  if (!cards) return;
+  document.getElementById('opticalSection').style.display = 'block';
+  document.getElementById('opticalCards').innerHTML = cards;
+}
+
+function renderKV(kv) {
+  document.getElementById('kvGrid').innerHTML = Object.entries(kv)
+    .map(([k, v]) => `<div class="kv-k">${k}</div><div class="kv-v">${v ?? '--'}</div>`)
+    .join('');
+}
+
+async function syncOnt() {
+  if (!currentOnt) return;
+  const btn = document.getElementById('syncOntBtn');
+  btn.disabled = true;
+  btn.textContent = 'Obteniendo potencia...';
+  document.getElementById('modalAlert').innerHTML = '';
+  try {
+    const { frame: f, slot: s, pon: p, ontId: id } = currentOnt;
+    const r = await fetch(`/api/ont/${f}/${s}/${p}/${id}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Error');
+
+    if (d.optical && Object.keys(d.optical).length) renderOptical(d.optical);
+    if (d.kv) renderKV(d.kv);
+
+    document.getElementById('modalAlert').innerHTML =
+      '<div class="alert ok">Potencia optica actualizada en tiempo real</div>';
+
+    const key = ontKey(currentOnt);
+    const idx = allOnts.findIndex(o => ontKey(o) === key);
+    if (idx >= 0) {
+      const opt = d.optical || {};
+      allOnts[idx].rxPower = opt["Rx optical power(dBm)"] || opt["RX optical power(dBm)"] || allOnts[idx].rxPower;
+      allOnts[idx].txPower = opt["Tx optical power(dBm)"] || opt["TX optical power(dBm)"] || allOnts[idx].txPower;
+      allOnts[idx].temperature = opt["Temperature(C)"] || allOnts[idx].temperature;
+      allOnts[idx].laserBias = opt["Laser bias current(mA)"] || allOnts[idx].laserBias;
+      allOnts[idx].voltage = opt["Voltage(V)"] || allOnts[idx].voltage;
+      allOnts[idx].optTs = Date.now();
+
+      if (d.kv) {
+        if (d.kv["Description"]) allOnts[idx].description = d.kv["Description"];
+        if (d.kv["Run state"]) allOnts[idx].runState = d.kv["Run state"];
+        if (d.kv["Match state"]) allOnts[idx].matchState = d.kv["Match state"];
+        if (d.kv["ONT distance(m)"]) allOnts[idx].distance = d.kv["ONT distance(m)"];
+      }
+
+      filterTable(document.getElementById('filterInput').value);
+    }
+  } catch (e) {
+    document.getElementById('modalAlert').innerHTML =
+      `<div class="alert err">${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Actualizar potencia optica en tiempo real';
+  }
+}
+
+/* ─── Init ─────────────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  loadFromCache();
+  initSocket();
+  pollStatusFallback();
+  setInterval(pollStatusFallback, 5000);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

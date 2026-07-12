@@ -1,0 +1,1538 @@
+{
+  "0/0/0/0": {
+    "rxPower": "-23.37",
+    "txPower": "2.36",
+    "laserBias": "15",
+    "temperature": "55",
+    "voltage": "3.360",
+    "ts": 1783888249529
+  },
+  "0/0/0/1": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888251471
+  },
+  "0/0/0/2": {
+    "rxPower": "-23.18",
+    "txPower": "2.48",
+    "laserBias": "11",
+    "temperature": "44",
+    "voltage": "3.240",
+    "ts": 1783888253349
+  },
+  "0/0/0/3": {
+    "rxPower": "-21.94",
+    "txPower": "2.29",
+    "laserBias": "9",
+    "temperature": "43",
+    "voltage": "3.320",
+    "ts": 1783888257459
+  },
+  "0/0/0/4": {
+    "rxPower": "-24.56",
+    "txPower": "2.08",
+    "laserBias": "16",
+    "temperature": "44",
+    "voltage": "3.320",
+    "ts": 1783888259509
+  },
+  "0/0/0/5": {
+    "rxPower": "-25.23",
+    "txPower": "1.94",
+    "laserBias": "8",
+    "temperature": "49",
+    "voltage": "3.360",
+    "ts": 1783888261649
+  },
+  "0/0/0/6": {
+    "rxPower": "-22.00",
+    "txPower": "2.27",
+    "laserBias": "11",
+    "temperature": "31",
+    "voltage": "3.260",
+    "ts": 1783888263629
+  },
+  "0/0/0/7": {
+    "rxPower": "-23.56",
+    "txPower": "2.05",
+    "laserBias": "11",
+    "temperature": "30",
+    "voltage": "3.260",
+    "ts": 1783888265598
+  },
+  "0/0/0/8": {
+    "rxPower": "-23.46",
+    "txPower": "1.24",
+    "laserBias": "18",
+    "temperature": "37",
+    "voltage": "3.340",
+    "ts": 1783888267930
+  },
+  "0/0/0/9": {
+    "rxPower": "-22.36",
+    "txPower": "2.36",
+    "laserBias": "13",
+    "temperature": "47",
+    "voltage": "3.300",
+    "ts": 1783888270119
+  },
+  "0/0/0/10": {
+    "rxPower": "-23.66",
+    "txPower": "1.61",
+    "laserBias": "11",
+    "temperature": "39",
+    "voltage": "3.320",
+    "ts": 1783888274479
+  },
+  "0/0/1/0": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888277449
+  },
+  "0/0/1/1": {
+    "rxPower": "-21.30",
+    "txPower": "2.07",
+    "laserBias": "12",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888279560
+  },
+  "0/0/1/2": {
+    "rxPower": "-19.58",
+    "txPower": "2.29",
+    "laserBias": "11",
+    "temperature": "44",
+    "voltage": "3.240",
+    "ts": 1783888281648
+  },
+  "0/0/1/3": {
+    "rxPower": "-20.00",
+    "txPower": "2.21",
+    "laserBias": "15",
+    "temperature": "29",
+    "voltage": "3.300",
+    "ts": 1783888283710
+  },
+  "0/0/1/4": {
+    "rxPower": "-19.46",
+    "txPower": "1.29",
+    "laserBias": "11",
+    "temperature": "31",
+    "voltage": "3.300",
+    "ts": 1783888287109
+  },
+  "0/0/1/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888289048
+  },
+  "0/0/1/6": {
+    "rxPower": "-21.02",
+    "txPower": "2.08",
+    "laserBias": "9",
+    "temperature": "45",
+    "voltage": "3.340",
+    "ts": 1783888290939
+  },
+  "0/0/1/7": {
+    "rxPower": "-21.94",
+    "txPower": "1.50",
+    "laserBias": "13",
+    "temperature": "39",
+    "voltage": "3.320",
+    "ts": 1783888294238
+  },
+  "0/0/1/8": {
+    "rxPower": "-19.70",
+    "txPower": "1.95",
+    "laserBias": "12",
+    "temperature": "46",
+    "voltage": "3.280",
+    "ts": 1783888296298
+  },
+  "0/0/1/9": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888298220
+  },
+  "0/0/1/10": {
+    "rxPower": "-23.46",
+    "txPower": "1.67",
+    "laserBias": "11",
+    "temperature": "42",
+    "voltage": "3.320",
+    "ts": 1783888301972
+  },
+  "0/0/1/11": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888303949
+  },
+  "0/0/1/12": {
+    "rxPower": "-19.13",
+    "txPower": "2.34",
+    "laserBias": "17",
+    "temperature": "51",
+    "voltage": "3.300",
+    "ts": 1783888305808
+  },
+  "0/0/1/13": {
+    "rxPower": "-20.04",
+    "txPower": "2.53",
+    "laserBias": "11",
+    "temperature": "40",
+    "voltage": "3.240",
+    "ts": 1783888308020
+  },
+  "0/0/1/14": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888309940
+  },
+  "0/0/1/15": {
+    "rxPower": "-19.91",
+    "txPower": "2.32",
+    "laserBias": "10",
+    "temperature": "59",
+    "voltage": "3.320",
+    "ts": 1783888312059
+  },
+  "0/0/1/16": {
+    "rxPower": "-19.83",
+    "txPower": "2.11",
+    "laserBias": "18",
+    "temperature": "49",
+    "voltage": "3.280",
+    "ts": 1783888314121
+  },
+  "0/0/1/17": {
+    "rxPower": "-24.31",
+    "txPower": "2.21",
+    "laserBias": "16",
+    "temperature": "55",
+    "voltage": "3.280",
+    "ts": 1783888316211
+  },
+  "0/0/1/18": {
+    "rxPower": "-20.36",
+    "txPower": "2.10",
+    "laserBias": "14",
+    "temperature": "48",
+    "voltage": "3.280",
+    "ts": 1783888318281
+  },
+  "0/0/1/19": {
+    "rxPower": "-27.21",
+    "txPower": "2.25",
+    "laserBias": "14",
+    "temperature": "45",
+    "voltage": "3.280",
+    "ts": 1783888320480
+  },
+  "0/0/1/20": {
+    "rxPower": "-19.39",
+    "txPower": "2.12",
+    "laserBias": "17",
+    "temperature": "48",
+    "voltage": "3.280",
+    "ts": 1783888322541
+  },
+  "0/0/1/21": {
+    "rxPower": "-19.13",
+    "txPower": "2.05",
+    "laserBias": "12",
+    "temperature": "25",
+    "voltage": "3.260",
+    "ts": 1783888324831
+  },
+  "0/0/1/22": {
+    "rxPower": "-24.56",
+    "txPower": "1.97",
+    "laserBias": "12",
+    "temperature": "41",
+    "voltage": "3.260",
+    "ts": 1783888326760
+  },
+  "0/0/1/23": {
+    "rxPower": "-19.95",
+    "txPower": "1.40",
+    "laserBias": "18",
+    "temperature": "45",
+    "voltage": "3.340",
+    "ts": 1783888328840
+  },
+  "0/0/2/0": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888331710
+  },
+  "0/0/2/1": {
+    "rxPower": "-19.10",
+    "txPower": "2.00",
+    "laserBias": "13",
+    "temperature": "45",
+    "voltage": "3.280",
+    "ts": 1783888333820
+  },
+  "0/0/2/2": {
+    "rxPower": "-18.47",
+    "txPower": "1.62",
+    "laserBias": "20",
+    "temperature": "38",
+    "voltage": "3.320",
+    "ts": 1783888336151
+  },
+  "0/0/2/3": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888338071
+  },
+  "0/0/2/4": {
+    "rxPower": "-20.50",
+    "txPower": "1.29",
+    "laserBias": "14",
+    "temperature": "37",
+    "voltage": "3.340",
+    "ts": 1783888340421
+  },
+  "0/0/2/5": {
+    "rxPower": "-23.98",
+    "txPower": "2.22",
+    "laserBias": "7",
+    "temperature": "50",
+    "voltage": "3.360",
+    "ts": 1783888342390
+  },
+  "0/0/2/6": {
+    "rxPower": "-21.02",
+    "txPower": "1.79",
+    "laserBias": "10",
+    "temperature": "38",
+    "voltage": "3.300",
+    "ts": 1783888344718
+  },
+  "0/0/2/7": {
+    "rxPower": "-18.12",
+    "txPower": "2.16",
+    "laserBias": "14",
+    "temperature": "47",
+    "voltage": "3.340",
+    "ts": 1783888346791
+  },
+  "0/0/2/8": {
+    "rxPower": "-18.38",
+    "txPower": "1.91",
+    "laserBias": "14",
+    "temperature": "32",
+    "voltage": "3.240",
+    "ts": 1783888348860
+  },
+  "0/0/2/9": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888350790
+  },
+  "0/0/2/10": {
+    "rxPower": "-19.66",
+    "txPower": "2.24",
+    "laserBias": "9",
+    "temperature": "27",
+    "voltage": "3.280",
+    "ts": 1783888352773
+  },
+  "0/0/2/11": {
+    "rxPower": "-23.87",
+    "txPower": "2.23",
+    "laserBias": "17",
+    "temperature": "51",
+    "voltage": "3.280",
+    "ts": 1783888354741
+  },
+  "0/0/2/12": {
+    "rxPower": "-19.20",
+    "txPower": "2.35",
+    "laserBias": "12",
+    "temperature": "57",
+    "voltage": "3.260",
+    "ts": 1783888356923
+  },
+  "0/0/2/13": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888359710
+  },
+  "0/0/2/14": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888361670
+  },
+  "0/0/2/15": {
+    "rxPower": "-23.28",
+    "txPower": "2.34",
+    "laserBias": "11",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888363791
+  },
+  "0/0/2/16": {
+    "rxPower": "-20.36",
+    "txPower": "2.14",
+    "laserBias": "12",
+    "temperature": "43",
+    "voltage": "3.280",
+    "ts": 1783888365731
+  },
+  "0/0/2/17": {
+    "rxPower": "-23.56",
+    "txPower": "1.50",
+    "laserBias": "19",
+    "temperature": "42",
+    "voltage": "3.320",
+    "ts": 1783888368058
+  },
+  "0/0/2/19": {
+    "rxPower": "-18.69",
+    "txPower": "2.46",
+    "laserBias": "7",
+    "temperature": "51",
+    "voltage": "3.360",
+    "ts": 1783888369912
+  },
+  "0/0/2/21": {
+    "rxPower": "-19.39",
+    "txPower": "2.07",
+    "laserBias": "12",
+    "temperature": "38",
+    "voltage": "3.240",
+    "ts": 1783888372098
+  },
+  "0/0/2/24": {
+    "rxPower": "-19.74",
+    "txPower": "2.41",
+    "laserBias": "7",
+    "temperature": "48",
+    "voltage": "3.340",
+    "ts": 1783888374187
+  },
+  "0/0/3/0": {
+    "rxPower": "-22.29",
+    "txPower": "2.02",
+    "laserBias": "40",
+    "temperature": "54",
+    "voltage": "3.280",
+    "ts": 1783888377437
+  },
+  "0/0/3/1": {
+    "rxPower": "-26.99",
+    "txPower": "2.54",
+    "laserBias": "12",
+    "temperature": "45",
+    "voltage": "3.220",
+    "ts": 1783888379628
+  },
+  "0/0/3/3": {
+    "rxPower": "-23.76",
+    "txPower": "2.22",
+    "laserBias": "9",
+    "temperature": "39",
+    "voltage": "3.300",
+    "ts": 1783888381717
+  },
+  "0/0/3/4": {
+    "rxPower": "-21.42",
+    "txPower": "2.21",
+    "laserBias": "7",
+    "temperature": "45",
+    "voltage": "3.240",
+    "ts": 1783888384158
+  },
+  "0/0/3/5": {
+    "rxPower": "-25.37",
+    "txPower": "2.33",
+    "laserBias": "7",
+    "temperature": "51",
+    "voltage": "3.360",
+    "ts": 1783888386228
+  },
+  "0/0/3/6": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888388167
+  },
+  "0/0/3/7": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888390137
+  },
+  "0/0/3/8": {
+    "rxPower": "-24.20",
+    "txPower": "2.00",
+    "laserBias": "14",
+    "temperature": "46",
+    "voltage": "3.260",
+    "ts": 1783888392128
+  },
+  "0/0/3/9": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888393938
+  },
+  "0/0/3/10": {
+    "rxPower": "-22.36",
+    "txPower": "2.28",
+    "laserBias": "10",
+    "temperature": "39",
+    "voltage": "3.260",
+    "ts": 1783888396057
+  },
+  "0/0/3/11": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888398117
+  },
+  "0/0/3/12": {
+    "rxPower": "-25.23",
+    "txPower": "2.33",
+    "laserBias": "12",
+    "temperature": "48",
+    "voltage": "3.260",
+    "ts": 1783888400088
+  },
+  "0/0/3/13": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888402028
+  },
+  "0/0/3/14": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888403757
+  },
+  "0/0/3/15": {
+    "rxPower": "-23.87",
+    "txPower": "2.34",
+    "laserBias": "7",
+    "temperature": "50",
+    "voltage": "3.360",
+    "ts": 1783888405858
+  },
+  "0/0/3/16": {
+    "rxPower": "-20.60",
+    "txPower": "2.18",
+    "laserBias": "13",
+    "temperature": "41",
+    "voltage": "3.280",
+    "ts": 1783888408037
+  },
+  "0/0/3/17": {
+    "rxPower": "-22.51",
+    "txPower": "2.14",
+    "laserBias": "12",
+    "temperature": "41",
+    "voltage": "3.200",
+    "ts": 1783888410237
+  },
+  "0/0/3/18": {
+    "rxPower": "-5.72",
+    "txPower": "32.50",
+    "laserBias": "6075",
+    "temperature": "28",
+    "voltage": "0.164",
+    "ts": 1783888412318
+  },
+  "0/0/3/19": {
+    "rxPower": "-20.86",
+    "txPower": "2.34",
+    "laserBias": "11",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888414048
+  },
+  "0/0/3/20": {
+    "rxPower": "-25.85",
+    "txPower": "2.22",
+    "laserBias": "13",
+    "temperature": "44",
+    "voltage": "3.280",
+    "ts": 1783888416108
+  },
+  "0/0/3/21": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888417814
+  },
+  "0/0/3/22": {
+    "rxPower": "-22.22",
+    "txPower": "1.87",
+    "laserBias": "12",
+    "temperature": "28",
+    "voltage": "3.240",
+    "ts": 1783888419919
+  },
+  "0/0/3/23": {
+    "rxPower": "-28.86",
+    "txPower": "2.08",
+    "laserBias": "11",
+    "temperature": "28",
+    "voltage": "3.260",
+    "ts": 1783888421998
+  },
+  "0/0/4/0": {
+    "rxPower": "-25.08",
+    "txPower": "2.38",
+    "laserBias": "13",
+    "temperature": "47",
+    "voltage": "3.280",
+    "ts": 1783888425036
+  },
+  "0/0/4/1": {
+    "rxPower": "-27.21",
+    "txPower": "2.00",
+    "laserBias": "13",
+    "temperature": "47",
+    "voltage": "3.240",
+    "ts": 1783888426864
+  },
+  "0/0/4/2": {
+    "rxPower": "-20.17",
+    "txPower": "2.29",
+    "laserBias": "17",
+    "temperature": "56",
+    "voltage": "3.300",
+    "ts": 1783888428603
+  },
+  "0/0/4/3": {
+    "rxPower": "-23.28",
+    "txPower": "2.14",
+    "laserBias": "17",
+    "temperature": "48",
+    "voltage": "3.260",
+    "ts": 1783888430923
+  },
+  "0/0/4/4": {
+    "rxPower": "-21.36",
+    "txPower": "1.81",
+    "laserBias": "11",
+    "temperature": "46",
+    "voltage": "3.260",
+    "ts": 1783888432753
+  },
+  "0/0/4/5": {
+    "rxPower": "-22.75",
+    "txPower": "1.19",
+    "laserBias": "10",
+    "temperature": "39",
+    "voltage": "3.320",
+    "ts": 1783888434813
+  },
+  "0/0/4/6": {
+    "rxPower": "-20.81",
+    "txPower": "2.43",
+    "laserBias": "16",
+    "temperature": "56",
+    "voltage": "3.320",
+    "ts": 1783888436653
+  },
+  "0/0/4/7": {
+    "rxPower": "-19.91",
+    "txPower": "2.07",
+    "laserBias": "11",
+    "temperature": "25",
+    "voltage": "3.280",
+    "ts": 1783888438603
+  },
+  "0/0/4/8": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888440293
+  },
+  "0/0/4/9": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888442143
+  },
+  "0/0/4/10": {
+    "rxPower": "-20.41",
+    "txPower": "2.34",
+    "laserBias": "13",
+    "temperature": "50",
+    "voltage": "3.320",
+    "ts": 1783888444003
+  },
+  "0/0/4/11": {
+    "rxPower": "-19.78",
+    "txPower": "1.77",
+    "laserBias": "14",
+    "temperature": "42",
+    "voltage": "3.320",
+    "ts": 1783888446215
+  },
+  "0/0/4/12": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888447913
+  },
+  "0/0/4/13": {
+    "rxPower": "-20.81",
+    "txPower": "2.30",
+    "laserBias": "13",
+    "temperature": "46",
+    "voltage": "3.260",
+    "ts": 1783888449663
+  },
+  "0/0/4/14": {
+    "rxPower": "-24.43",
+    "txPower": "2.14",
+    "laserBias": "5",
+    "temperature": "40",
+    "voltage": "3.240",
+    "ts": 1783888451883
+  },
+  "0/0/4/15": {
+    "rxPower": "-18.41",
+    "txPower": "1.27",
+    "laserBias": "12",
+    "temperature": "32",
+    "voltage": "3.260",
+    "ts": 1783888453732
+  },
+  "0/0/4/16": {
+    "rxPower": "-20.97",
+    "txPower": "2.05",
+    "laserBias": "13",
+    "temperature": "45",
+    "voltage": "3.260",
+    "ts": 1783888455684
+  },
+  "0/0/4/17": {
+    "rxPower": "-21.67",
+    "txPower": "2.70",
+    "laserBias": "10",
+    "temperature": "43",
+    "voltage": "3.260",
+    "ts": 1783888459094
+  },
+  "0/0/4/19": {
+    "rxPower": "-16.86",
+    "txPower": "2.32",
+    "laserBias": "13",
+    "temperature": "45",
+    "voltage": "3.240",
+    "ts": 1783888461042
+  },
+  "0/0/4/20": {
+    "rxPower": "-15.88",
+    "txPower": "2.70",
+    "laserBias": "13",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888462993
+  },
+  "0/0/4/21": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888464693
+  },
+  "0/0/4/22": {
+    "rxPower": "-21.36",
+    "txPower": "2.21",
+    "laserBias": "9",
+    "temperature": "39",
+    "voltage": "3.260",
+    "ts": 1783888466563
+  },
+  "0/0/4/23": {
+    "rxPower": "-19.10",
+    "txPower": "2.11",
+    "laserBias": "17",
+    "temperature": "46",
+    "voltage": "3.280",
+    "ts": 1783888468274
+  },
+  "0/0/4/24": {
+    "rxPower": "-18.24",
+    "txPower": "2.31",
+    "laserBias": "11",
+    "temperature": "46",
+    "voltage": "3.260",
+    "ts": 1783888470102
+  },
+  "0/0/4/25": {
+    "rxPower": "-20.41",
+    "txPower": "2.27",
+    "laserBias": "12",
+    "temperature": "49",
+    "voltage": "3.280",
+    "ts": 1783888472053
+  },
+  "0/0/4/26": {
+    "rxPower": "-21.74",
+    "txPower": "2.50",
+    "laserBias": "12",
+    "temperature": "42",
+    "voltage": "3.260",
+    "ts": 1783888476433
+  },
+  "0/0/4/27": {
+    "rxPower": "-20.81",
+    "txPower": "2.27",
+    "laserBias": "13",
+    "temperature": "48",
+    "voltage": "3.280",
+    "ts": 1783888478393
+  },
+  "0/0/4/28": {
+    "rxPower": "-25.08",
+    "txPower": "2.14",
+    "laserBias": "14",
+    "temperature": "47",
+    "voltage": "3.260",
+    "ts": 1783888480224
+  },
+  "0/0/4/29": {
+    "rxPower": "-18.96",
+    "txPower": "1.60",
+    "laserBias": "11",
+    "temperature": "56",
+    "voltage": "3.240",
+    "ts": 1783888482183
+  },
+  "0/0/4/30": {
+    "rxPower": "-19.87",
+    "txPower": "2.17",
+    "laserBias": "10",
+    "temperature": "56",
+    "voltage": "3.260",
+    "ts": 1783888484133
+  },
+  "0/0/4/31": {
+    "rxPower": "-26.02",
+    "txPower": "2.06",
+    "laserBias": "11",
+    "temperature": "59",
+    "voltage": "3.260",
+    "ts": 1783888486203
+  },
+  "0/0/5/0": {
+    "rxPower": "-20.65",
+    "txPower": "2.32",
+    "laserBias": "19",
+    "temperature": "55",
+    "voltage": "3.300",
+    "ts": 1783888489237
+  },
+  "0/0/5/1": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888491047
+  },
+  "0/0/5/2": {
+    "rxPower": "-25.37",
+    "txPower": "1.56",
+    "laserBias": "17",
+    "temperature": "42",
+    "voltage": "3.320",
+    "ts": 1783888493506
+  },
+  "0/0/5/3": {
+    "rxPower": "-24.56",
+    "txPower": "2.12",
+    "laserBias": "12",
+    "temperature": "27",
+    "voltage": "3.260",
+    "ts": 1783888495497
+  },
+  "0/0/5/4": {
+    "rxPower": "-20.97",
+    "txPower": "2.34",
+    "laserBias": "14",
+    "temperature": "52",
+    "voltage": "3.360",
+    "ts": 1783888497557
+  },
+  "0/0/5/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888499597
+  },
+  "0/0/5/6": {
+    "rxPower": "-22.44",
+    "txPower": "2.20",
+    "laserBias": "37",
+    "temperature": "56",
+    "voltage": "3.340",
+    "ts": 1783888501717
+  },
+  "0/0/5/7": {
+    "rxPower": "-24.68",
+    "txPower": "2.01",
+    "laserBias": "3",
+    "temperature": "48",
+    "voltage": "3.360",
+    "ts": 1783888503808
+  },
+  "0/0/5/8": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888505846
+  },
+  "0/0/6/0": {
+    "rxPower": "-21.30",
+    "txPower": "1.93",
+    "laserBias": "8",
+    "temperature": "52",
+    "voltage": "3.340",
+    "ts": 1783888508673
+  },
+  "0/0/6/1": {
+    "rxPower": "-22.52",
+    "txPower": "2.14",
+    "laserBias": "15",
+    "temperature": "54",
+    "voltage": "3.300",
+    "ts": 1783888510654
+  },
+  "0/0/6/2": {
+    "rxPower": "-20.70",
+    "txPower": "1.50",
+    "laserBias": "14",
+    "temperature": "45",
+    "voltage": "3.300",
+    "ts": 1783888512709
+  },
+  "0/0/6/3": {
+    "rxPower": "-20.97",
+    "txPower": "2.79",
+    "laserBias": "10",
+    "temperature": "46",
+    "voltage": "3.280",
+    "ts": 1783888516213
+  },
+  "0/0/6/4": {
+    "rxPower": "-21.55",
+    "txPower": "1.40",
+    "laserBias": "11",
+    "temperature": "41",
+    "voltage": "3.300",
+    "ts": 1783888518292
+  },
+  "0/0/6/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888520093
+  },
+  "0/0/6/7": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888521823
+  },
+  "0/0/6/8": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888523643
+  },
+  "0/0/6/10": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888525623
+  },
+  "0/0/7/0": {
+    "rxPower": "-22.00",
+    "txPower": "2.40",
+    "laserBias": "14",
+    "temperature": "47",
+    "voltage": "3.260",
+    "ts": 1783888529147
+  },
+  "0/0/7/1": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888531068
+  },
+  "0/0/7/2": {
+    "rxPower": "-23.10",
+    "txPower": "2.34",
+    "laserBias": "15",
+    "temperature": "51",
+    "voltage": "3.240",
+    "ts": 1783888533309
+  },
+  "0/0/7/3": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888535339
+  },
+  "0/0/7/4": {
+    "rxPower": "-24.20",
+    "txPower": "1.39",
+    "laserBias": "13",
+    "temperature": "38",
+    "voltage": "3.320",
+    "ts": 1783888537688
+  },
+  "0/0/7/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888539507
+  },
+  "0/0/7/6": {
+    "rxPower": "-22.92",
+    "txPower": "2.30",
+    "laserBias": "12",
+    "temperature": "45",
+    "voltage": "3.240",
+    "ts": 1783888541507
+  },
+  "0/0/7/7": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888543427
+  },
+  "0/0/7/8": {
+    "rxPower": "-23.28",
+    "txPower": "2.15",
+    "laserBias": "11",
+    "temperature": "42",
+    "voltage": "3.260",
+    "ts": 1783888545538
+  },
+  "0/0/7/9": {
+    "rxPower": "-21.25",
+    "txPower": "2.33",
+    "laserBias": "16",
+    "temperature": "53",
+    "voltage": "3.360",
+    "ts": 1783888547368
+  },
+  "0/0/7/10": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888549399
+  },
+  "0/0/7/11": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888551371
+  },
+  "0/0/7/12": {
+    "rxPower": "-23.01",
+    "txPower": "2.34",
+    "laserBias": "12",
+    "temperature": "42",
+    "voltage": "3.260",
+    "ts": 1783888554681
+  },
+  "0/0/7/13": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888556630
+  },
+  "0/0/7/14": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888559480
+  },
+  "0/0/7/15": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888561040
+  },
+  "0/0/7/16": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888562771
+  },
+  "0/0/7/17": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888564609
+  },
+  "0/0/7/18": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888566450
+  },
+  "0/0/7/19": {
+    "rxPower": "-20.13",
+    "txPower": "2.33",
+    "laserBias": "16",
+    "temperature": "60",
+    "voltage": "3.360",
+    "ts": 1783888568570
+  },
+  "0/1/0/0": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888571926
+  },
+  "0/1/0/1": {
+    "rxPower": "-24.56",
+    "txPower": "2.21",
+    "laserBias": "9",
+    "temperature": "45",
+    "voltage": "3.300",
+    "ts": 1783888573786
+  },
+  "0/1/0/2": {
+    "rxPower": "-20.86",
+    "txPower": "2.36",
+    "laserBias": "13",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888575646
+  },
+  "0/1/0/3": {
+    "rxPower": "-25.53",
+    "txPower": "2.43",
+    "laserBias": "6",
+    "temperature": "47",
+    "voltage": "3.380",
+    "ts": 1783888577606
+  },
+  "0/1/0/4": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888579406
+  },
+  "0/1/0/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888581386
+  },
+  "0/1/0/6": {
+    "rxPower": "-21.55",
+    "txPower": "2.18",
+    "laserBias": "17",
+    "temperature": "59",
+    "voltage": "3.360",
+    "ts": 1783888583267
+  },
+  "0/1/0/7": {
+    "rxPower": "-20.22",
+    "txPower": "1.41",
+    "laserBias": "19",
+    "temperature": "43",
+    "voltage": "3.320",
+    "ts": 1783888585336
+  },
+  "0/1/0/9": {
+    "rxPower": "-20.45",
+    "txPower": "2.19",
+    "laserBias": "16",
+    "temperature": "48",
+    "voltage": "3.340",
+    "ts": 1783888587277
+  },
+  "0/1/0/10": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888589206
+  },
+  "0/1/0/11": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888591047
+  },
+  "0/1/0/12": {
+    "rxPower": "-20.36",
+    "txPower": "2.25",
+    "laserBias": "15",
+    "temperature": "48",
+    "voltage": "3.340",
+    "ts": 1783888592919
+  },
+  "0/1/0/13": {
+    "rxPower": "-20.70",
+    "txPower": "2.57",
+    "laserBias": "13",
+    "temperature": "45",
+    "voltage": "3.280",
+    "ts": 1783888594756
+  },
+  "0/1/0/14": {
+    "rxPower": "-20.27",
+    "txPower": "1.92",
+    "laserBias": "14",
+    "temperature": "48",
+    "voltage": "3.360",
+    "ts": 1783888596377
+  },
+  "0/1/0/15": {
+    "rxPower": "-20.97",
+    "txPower": "2.19",
+    "laserBias": "12",
+    "temperature": "44",
+    "voltage": "3.280",
+    "ts": 1783888598327
+  },
+  "0/1/0/16": {
+    "rxPower": "-20.65",
+    "txPower": "2.16",
+    "laserBias": "11",
+    "temperature": "29",
+    "voltage": "3.260",
+    "ts": 1783888600046
+  },
+  "0/1/0/17": {
+    "rxPower": "-20.86",
+    "txPower": "2.11",
+    "laserBias": "12",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888601876
+  },
+  "0/1/0/18": {
+    "rxPower": "-22.00",
+    "txPower": "2.88",
+    "laserBias": "9",
+    "temperature": "34",
+    "voltage": "3.280",
+    "ts": 1783888603611
+  },
+  "0/1/0/19": {
+    "rxPower": "-21.19",
+    "txPower": "2.29",
+    "laserBias": "11",
+    "temperature": "39",
+    "voltage": "3.260",
+    "ts": 1783888605536
+  },
+  "0/1/0/20": {
+    "rxPower": "-21.42",
+    "txPower": "2.28",
+    "laserBias": "12",
+    "temperature": "41",
+    "voltage": "3.260",
+    "ts": 1783888607486
+  },
+  "0/1/0/21": {
+    "rxPower": "-21.87",
+    "txPower": "2.01",
+    "laserBias": "12",
+    "temperature": "44",
+    "voltage": "3.260",
+    "ts": 1783888609326
+  },
+  "0/1/0/22": {
+    "rxPower": "-21.94",
+    "txPower": "1.95",
+    "laserBias": "11",
+    "temperature": "30",
+    "voltage": "3.280",
+    "ts": 1783888611175
+  },
+  "0/1/0/23": {
+    "rxPower": "-20.97",
+    "txPower": "2.23",
+    "laserBias": "13",
+    "temperature": "47",
+    "voltage": "3.280",
+    "ts": 1783888613144
+  },
+  "0/1/0/24": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888614604
+  },
+  "0/1/1/0": {
+    "rxPower": "-20.65",
+    "txPower": "1.62",
+    "laserBias": "12",
+    "temperature": "36",
+    "voltage": "3.360",
+    "ts": 1783888617907
+  },
+  "0/1/1/2": {
+    "rxPower": "-21.55",
+    "txPower": "2.08",
+    "laserBias": "15",
+    "temperature": "50",
+    "voltage": "3.340",
+    "ts": 1783888619989
+  },
+  "0/1/1/3": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888621907
+  },
+  "0/1/1/4": {
+    "rxPower": "-19.66",
+    "txPower": "2.29",
+    "laserBias": "10",
+    "temperature": "53",
+    "voltage": "3.320",
+    "ts": 1783888623547
+  },
+  "0/1/1/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888625489
+  },
+  "0/1/1/6": {
+    "rxPower": "-19.28",
+    "txPower": "2.22",
+    "laserBias": "15",
+    "temperature": "57",
+    "voltage": "3.340",
+    "ts": 1783888627357
+  },
+  "0/1/1/7": {
+    "rxPower": "-20.70",
+    "txPower": "1.99",
+    "laserBias": "12",
+    "temperature": "29",
+    "voltage": "3.280",
+    "ts": 1783888629907
+  },
+  "0/1/1/8": {
+    "rxPower": "-30.96",
+    "txPower": "2.21",
+    "laserBias": "16",
+    "temperature": "58",
+    "voltage": "3.320",
+    "ts": 1783888631857
+  },
+  "0/1/2/0": {
+    "rxPower": "-21.80",
+    "txPower": "2.19",
+    "laserBias": "10",
+    "temperature": "38",
+    "voltage": "3.300",
+    "ts": 1783888634535
+  },
+  "0/1/2/1": {
+    "rxPower": "-22.22",
+    "txPower": "2.22",
+    "laserBias": "12",
+    "temperature": "47",
+    "voltage": "3.320",
+    "ts": 1783888636364
+  },
+  "0/1/2/2": {
+    "rxPower": "-24.68",
+    "txPower": "2.46",
+    "laserBias": "10",
+    "temperature": "46",
+    "voltage": "3.240",
+    "ts": 1783888638434
+  },
+  "0/1/2/3": {
+    "rxPower": "-22.59",
+    "txPower": "2.34",
+    "laserBias": "11",
+    "temperature": "43",
+    "voltage": "3.220",
+    "ts": 1783888640385
+  },
+  "0/1/2/4": {
+    "rxPower": "-21.36",
+    "txPower": "2.18",
+    "laserBias": "12",
+    "temperature": "38",
+    "voltage": "3.280",
+    "ts": 1783888644154
+  },
+  "0/1/2/5": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888645973
+  },
+  "0/1/3/11": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888648994
+  },
+  "0/1/4/0": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888651887
+  },
+  "0/1/4/1": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888653504
+  },
+  "0/1/4/2": {
+    "rxPower": "-28.86",
+    "txPower": "1.35",
+    "laserBias": "15",
+    "temperature": "47",
+    "voltage": "3.300",
+    "ts": 1783888655413
+  },
+  "0/1/5/1": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888659758
+  },
+  "0/1/5/2": {
+    "rxPower": null,
+    "txPower": null,
+    "laserBias": null,
+    "temperature": null,
+    "voltage": null,
+    "ts": 1783888661418
+  }
+}

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>OLT Dashboard — BARCELONA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0c0f15;color:#b8bfc7;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#252a35;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#353c4a}
+a{color:#6ca0dc;text-decoration:none}a:hover{text-decoration:underline}
+
+/* ═══ HEADER ═══ */
+header{background:linear-gradient(180deg,#13171f 0%,#10141b 100%);border-bottom:1px solid rgba(255,255,255,.05);padding:12px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50}
+header h1{font-size:15px;font-weight:700;color:#d4dae2;letter-spacing:-.2px;white-space:nowrap}
+header h1 span{color:#5a9e6f;margin-right:6px}
+.h-sub{color:#3e4555;font-size:11px;font-weight:500}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ═══ SYNC BAR ═══ */
+#syncBar{background:#0f1319;border-bottom:1px solid rgba(255,255,255,.04);padding:6px 24px;display:flex;align-items:center;gap:10px;font-size:11px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#2a2f3a;flex-shrink:0;transition:background .3s}
+.sync-dot.running{background:#c8a840;animation:pulse 1s ease-in-out infinite}
+.sync-dot.ok{background:#5a9e6f}
+.sync-dot.err{background:#c05050}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+#syncText{color:#4a5268;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#progressBar{height:2px;background:transparent;transition:background .3s}
+#progressBar.active{background:linear-gradient(90deg,#5a9e6f,#6ca0dc);animation:progAnim 1.5s ease infinite}
+@keyframes progAnim{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+
+/* ═══ BOTONES ═══ */
+.btn{padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn-primary{background:#2a7a4b;color:#dff0e6}.btn-primary:hover{background:#328e58;transform:translateY(-1px);box-shadow:0 3px 10px rgba(42,122,75,.2)}
+.btn-primary:disabled{background:#161b24;color:#2a2f3a;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:transparent;color:#4a5268;border:1px solid rgba(255,255,255,.06);padding:5px 12px}
+.btn-ghost:hover{background:rgba(255,255,255,.04);color:#8a92a4;border-color:rgba(255,255,255,.1)}
+.btn-ghost:disabled{opacity:.4;cursor:not-allowed}
+.btn-danger{background:#7a2028;color:#f0d0d0}.btn-danger:hover{background:#942a32}
+.btn-danger:disabled{background:#161b24;color:#2a2f3a;cursor:not-allowed}
+.btn-sm{padding:3px 10px;font-size:11px;border-radius:5px}
+.btn-fill{padding:4px 12px;border-radius:6px;border:1px solid rgba(42,122,75,.25);background:transparent;color:#6dc090;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:all .15s}
+.btn-fill:hover{background:rgba(42,122,75,.12);border-color:rgba(42,122,75,.45)}
+.btn-del{padding:4px 10px;border-radius:6px;border:1px solid rgba(192,60,60,.2);background:transparent;color:#a05050;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:all .15s}
+.btn-del:hover{background:rgba(160,40,40,.1);border-color:rgba(192,60,60,.35);color:#c06060}
+
+/* ═══ MAIN LAYOUT ═══ */
+.main{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+
+/* ═══ SECCIONES ═══ */
+.section{background:#12161e;border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:16px;overflow:hidden;transition:border-color .2s}
+.section:hover{border-color:rgba(255,255,255,.08)}
+.section-head{padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.04);cursor:default}
+.section-head.clickable{cursor:pointer;user-select:none}
+.section-head.clickable:hover{background:rgba(255,255,255,.015)}
+.section-title{font-size:11px;font-weight:700;color:#5a6378;text-transform:uppercase;letter-spacing:.9px;flex:1}
+.section-badge{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1px 10px;font-size:10px;font-weight:700;color:#4a5268}
+.section-body{padding:20px}
+.chevron{transition:transform .3s;color:#3a4250;font-size:10px}
+.chevron.up{transform:rotate(180deg)}
+.collapsed-body{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+.collapsed-body.open{max-height:3000px}
+
+/* ═══ STAT CARDS ═══ */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#181d27;border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s}
+.stat-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-1px)}
+.stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.stat-card.c-total::before{background:#4a5268}
+.stat-card.c-on::before{background:#5a9e6f}
+.stat-card.c-off::before{background:#c05050}
+.stat-card.c-crit::before{background:#c8a840}
+.stat-num{font-size:28px;font-weight:800;font-family:'Consolas','SF Mono',monospace;line-height:1.1;letter-spacing:-.5px}
+.stat-card.c-total .stat-num{color:#cdd4de}
+.stat-card.c-on .stat-num{color:#6dc090}
+.stat-card.c-off .stat-num{color:#e07070}
+.stat-card.c-crit .stat-num{color:#d4b040}
+.stat-lbl{font-size:9px;color:#3e4555;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-top:4px}
+.stat-sub{font-size:10px;color:#3a4250;margin-top:6px}
+
+/* ═══ CHARTS ═══ */
+.charts-row{display:grid;grid-template-columns:180px 1fr 1fr;gap:16px;margin-bottom:20px;align-items:start}
+@media(max-width:800px){.charts-row{grid-template-columns:1fr}}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.donut-legend{display:flex;flex-direction:column;gap:5px}
+.donut-legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:#4a5268}
+.donut-legend-item b{color:#8a92a4;font-weight:700}
+.legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.bar-chart-group{display:flex;flex-direction:column;gap:4px}
+.bar-chart-title{font-size:10px;color:#4a5268;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.bar-track{height:24px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:6px;display:flex;overflow:hidden;position:relative}
+.bar-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9);overflow:hidden;transition:width .6s cubic-bezier(.4,0,.2,1);text-shadow:0 1px 3px rgba(0,0,0,.5);white-space:nowrap;min-width:0}
+.bar-seg:hover{filter:brightness(1.15)}
+.bar-seg.s-on{background:linear-gradient(90deg,#2a6e45,#3da866)}
+.bar-seg.s-off{background:linear-gradient(90deg,#8a2828,#c05050)}
+.bar-seg.s-oth{background:linear-gradient(90deg,#8a6e18,#c8a840)}
+.bar-seg.s-rxg{background:linear-gradient(90deg,#2a6e45,#3da866)}
+.bar-seg.s-rxw{background:linear-gradient(90deg,#8a6e18,#c8a840)}
+.bar-seg.s-rxb{background:linear-gradient(90deg,#8a2828,#c05050)}
+.bar-seg.s-rxn{background:#1a1f28;color:#3a4250}
+.bar-seg.s-match{background:linear-gradient(90deg,#2a6e45,#3da866)}
+.bar-seg.s-mm{background:linear-gradient(90deg,#8a2828,#c05050)}
+.bar-seg.s-mn{background:#1a1f28;color:#3a4250}
+.bar-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px}
+.bar-legend span{font-size:9px;color:#3e4555;display:flex;align-items:center;gap:4px}
+.bar-legend i{display:inline-block;width:6px;height:6px;border-radius:2px;flex-shrink:0}
+
+/* Slot bars */
+.slot-bars{display:flex;flex-direction:column;gap:6px}
+.slot-row{display:grid;grid-template-columns:70px 1fr 100px;gap:10px;align-items:center}
+.slot-label{font-size:10px;color:#4a5268;font-weight:600;font-family:'Consolas',monospace}
+.slot-info{font-size:9px;color:#3a4250;text-align:right}
+
+/* ═══ AUTH SECTION ═══ */
+.auth-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-bottom:16px}
+@media(max-width:600px){.auth-form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;color:#3e4555;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select{padding:7px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.25);color:blue;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.field input::placeholder{color:blue}
+.field input:focus,.field select:focus{border-color:rgba(108,160,220,.4);box-shadow:0 0 0 3px rgba(108,160,220,.06)}
+.field.full{grid-column:1/-1}
+.field.mono input{font-family:'Consolas','SF Mono',monospace;letter-spacing:.3px}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:8px;font-weight:700;background:rgba(108,160,220,.1);border:1px solid rgba(108,160,220,.18);color:#6ca0dc;margin-left:5px;letter-spacing:.3px;text-transform:uppercase}
+
+.vlan-section{margin-bottom:16px}
+.vlan-header{font-size:10px;color:#3e4555;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.vlan-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:3px 10px;border-radius:14px;font-size:10px;font-weight:600;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);color:#4a5268;cursor:pointer;transition:all .15s;font-family:inherit}
+.chip:hover{background:rgba(255,255,255,.05);color:#8a92a4}
+.chip.sel{background:rgba(108,160,220,.12);border-color:rgba(108,160,220,.3);color:#8abce0}
+
+.alert{padding:9px 14px;border-radius:7px;margin-top:10px;font-size:12px;line-height:1.5}
+.alert.err{background:rgba(160,35,35,.1);border:1px solid rgba(192,50,50,.2);color:#d06060}
+.alert.ok{background:rgba(42,100,60,.1);border:1px solid rgba(60,140,80,.2);color:#6dc090}
+.alert.warn{background:rgba(140,110,15,.1);border:1px solid rgba(180,140,30,.2);color:#c8a840}
+.raw{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.04);border-radius:7px;padding:10px 12px;font-family:'Consolas','SF Mono',monospace;font-size:10px;max-height:120px;overflow:auto;white-space:pre-wrap;margin-top:8px;color:#3a4250;line-height:1.6}
+
+/* ═══ TABLE SECTION ═══ */
+.search-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search-box{position:relative;flex:1;min-width:220px}
+.search-box svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#2a2f3a;pointer-events:none}
+.search-box input{width:100%;padding:7px 12px 7px 34px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2);color:#b8bfc7;font-size:12px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+.search-box input::placeholder{color:#2a2f3a}
+.search-box input:focus{border-color:rgba(108,160,220,.35);box-shadow:0 0 0 3px rgba(108,160,220,.05)}
+.filter-sel{padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.2);color:#8a92a4;font-size:11px;font-family:inherit;outline:none;cursor:pointer}
+.filter-sel:focus{border-color:rgba(108,160,220,.35)}
+.count-info{margin-left:auto;font-size:11px;color:#3e4555;white-space:nowrap}
+.count-info b{color:#6a7385;font-weight:700}
+
+.tbl-wrap{overflow:auto;max-height:calc(100vh - 180px)}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+thead th{background:#10141b;padding:8px 10px;text-align:left;font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:2;white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
+thead th:hover{color:#6a7385}
+thead th.sorted{color:#6ca0dc}
+thead th .arr{margin-left:3px;opacity:.3;font-size:8px}
+thead th.sorted .arr{opacity:1}
+thead th.nosort{cursor:default}thead th.nosort:hover{color:#3e4555}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .1s}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+td{padding:6px 10px;font-size:11px;vertical-align:middle}
+.fsp{font-family:'Consolas','SF Mono',monospace;font-size:10px;color:#4a5268;letter-spacing:.2px}
+.ont-id{font-family:'Consolas','SF Mono',monospace;font-size:10px;text-align:center;color:#6ca0dc;font-weight:700}
+.sn{font-family:'Consolas','SF Mono',monospace;font-size:10px;color:#7ab0d8;letter-spacing:.2px;cursor:pointer}
+.sn:hover{color:#a0ccf0}
+.desc-cell{font-size:11px;color:#8a92a4;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desc-cell.has-desc{color:#cdd4de}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.badge-online{background:rgba(42,100,60,.12);border:1px solid rgba(60,140,80,.18);color:#6dc090}
+.badge-offline{background:rgba(160,35,35,.1);border:1px solid rgba(192,50,50,.18);color:#d06060}
+.badge-other{background:rgba(140,110,15,.1);border:1px solid rgba(180,140,30,.18);color:#c8a840}
+.dot{width:4px;height:4px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-on{background:#6dc090}.dot-off{background:#d06060}.dot-oth{background:#c8a840}
+.badge-match{display:inline-block;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.badge-match.match{background:rgba(42,100,60,.12);border:1px solid rgba(60,140,80,.18);color:#6dc090}
+.badge-match.mismatch{background:rgba(160,35,35,.1);border:1px solid rgba(192,50,50,.18);color:#d06060}
+.badge-match.unknown{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);color:#3a4250}
+
+/* Signal */
+.sig{font-family:'Consolas','SF Mono',monospace;font-size:11px;font-weight:600}
+.sig.good{color:#6dc090}.sig.warn{color:#c8a840}.sig.bad{color:#d06060}.sig.na{color:#2a2f3a}
+.stale{opacity:.45}
+.dist{font-family:'Consolas','SF Mono',monospace;font-size:10px;color:#4a5268}
+.temp{font-family:'Consolas','SF Mono',monospace;font-size:10px}
+.temp.ok{color:#6dc090}.temp.warn{color:#c8a840}.temp.hot{color:#d06060}.temp.na{color:#2a2f3a}
+tr.offline-row{border-left:2px solid rgba(192,50,50,.15)}
+tr.online-row{border-left:2px solid rgba(60,140,80,.1)}
+
+/* ═══ MODALS ═══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#151a23;border:1px solid rgba(255,255,255,.07);border-radius:14px;width:min(760px,96vw);max-height:88vh;overflow-y:auto;padding:24px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal h2{font-size:14px;font-weight:700;color:#8abce0;margin-bottom:4px}
+.modal .sub{font-size:11px;color:#4a5268;margin-bottom:16px}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#3a4250;cursor:pointer;font-size:18px;line-height:1;padding:4px;transition:color .15s}
+.modal-close:hover{color:#c06060}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-bottom:16px}
+.opt-card{background:#0f1319;border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px;text-align:center}
+.opt-card .v{font-size:18px;font-weight:800;margin-bottom:2px;font-family:'Consolas',monospace}
+.opt-card .l{font-size:8px;color:#3e4555;text-transform:uppercase;letter-spacing:.5px}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(255,255,255,.04);border-radius:6px;overflow:hidden}
+.kv-k{background:#0f1319;padding:4px 10px;font-size:10px;color:#3e4555;border-bottom:1px solid rgba(255,255,255,.03)}
+.kv-v{background:#13171f;padding:4px 10px;font-size:10px;color:#8a92a4;border-bottom:1px solid rgba(255,255,255,.03);font-family:'Consolas',monospace;word-break:break-all}
+.sec-label{font-size:10px;font-weight:700;color:#5a6378;text-transform:uppercase;letter-spacing:.7px;margin:14px 0 8px}
+
+/* Delete modal */
+.del-modal{background:#151a23;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;min-width:340px;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.del-modal h3{font-size:14px;margin-bottom:6px;color:#d06060;font-weight:700}
+.del-modal p{font-size:12px;color:#4a5268;margin-bottom:18px;line-height:1.6}
+.del-btns{display:flex;gap:8px;justify-content:flex-end}
+
+/* ═══ EMPTY / SPINNER ═══ */
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.06);border-top-color:#6ca0dc;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 20px;color:#2a2f3a;font-size:13px}
+.empty a{color:#6ca0dc}
+
+/* ═══ CTA (no data) ═══ */
+.cta-box{text-align:center;padding:50px 20px}
+.cta-box .cta-icon{font-size:40px;margin-bottom:12px;opacity:.3}
+.cta-box .cta-text{color:#3e4555;font-size:14px;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <h1><span>◆</span> OLT Dashboard</h1>
+  <span class="h-sub">BARCELONA · 45.162.79.228:2333</span>
+  <div class="h-right">
+    <button class="btn btn-primary btn-sm" id="syncBtn" onclick="triggerSync()">Sincronizar Todo</button>
+  </div>
+</header>
+
+<!-- ═══ SYNC BAR ═══ -->
+<div id="syncBar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncText">Cargando estado...</span>
+</div>
+<div id="progressBar"></div>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     0. AUTORIZAR ONTs — es la vista principal, va primero y visible/abierta
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="authSection">
+  <div class="section-head clickable" onclick="toggleAuth()">
+    <span class="section-title">★ Autorizar ONTs</span>
+    <span class="section-badge" id="afBadge">—</span>
+    <span class="chevron up" id="authChevron">▼</span>
+  </div>
+  <div class="collapsed-body open" id="authBody">
+    <div class="section-body">
+
+      <!-- Autofind -->
+      <div style="margin-bottom:20px">
+        <div class="bar-chart-title" style="margin-bottom:8px">ONTs detectadas sin autorizar</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+          <button class="btn btn-ghost btn-sm" id="afBtn" onclick="loadAutofind(true)">Buscar ONTs no autorizadas</button>
+          <span class="spinner" id="afSpin" style="display:none"></span>
+          <span style="color:#3a4250;font-size:11px" id="afStatus">Iniciando búsqueda automática...</span>
+        </div>
+        <div id="afEmpty" class="empty" style="display:none;padding:20px">Sin ONTs esperando autorización</div>
+        <div id="afWrap" style="display:none;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;min-width:650px">
+            <thead><tr>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)">#</th>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)">F/S/P</th>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)">ID Sug.</th>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)">Serial</th>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)">Vendor</th>
+              <th style="font-size:9px;color:#3e4555;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)"></th>
+            </tr></thead>
+            <tbody id="afBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <div class="bar-chart-title" style="margin-bottom:10px">Formulario de autorización</div>
+      <div class="auth-form-grid">
+        <div class="field"><label>Frame</label><input id="aFrame" type="text" value="0"/></div>
+        <div class="field"><label>Slot *</label><input id="aSlot" type="text" placeholder="ej: 1"/></div>
+        <div class="field"><label>PON *</label><input id="aPon" type="text" placeholder="ej: 0"/></div>
+        <div class="field"><label>ONT-ID * <span class="tag" id="nextTag" style="display:none"></span></label><input id="aOntId" type="text" placeholder="ej: 1"/></div>
+        <div class="field full mono"><label>Serial Number *</label><input id="aSn" type="text" placeholder="ej: 48575443..."/></div>
+        <div class="field"><label>Auth Type</label><select id="aAuth"><option value="sn-auth">SN-Auth</option><option value="password-auth">Password-Auth</option></select></div>
+        <div class="field">
+          <label>Line Profile <span class="tag" id="lineProfSpin" style="display:none">...</span></label>
+          <select id="aLine"><option value="101">101 (cargando perfiles reales...)</option></select>
+        </div>
+        <div class="field">
+          <label>Service Profile <span class="tag" id="srvProfSpin" style="display:none">...</span></label>
+          <select id="aSrv"><option value="1">1 (cargando perfiles reales...)</option></select>
+        </div>
+        <div class="field"><label>VLAN</label><select id="aVlan"><option value="101">101</option></select></div>
+        <div class="field full"><label>Descripción (cliente)</label><input id="aDesc" type="text" placeholder="Nombre del cliente..."/></div>
+      </div>
+      <div class="vlan-section">
+        <div class="vlan-header">VLANs disponibles <button class="btn btn-ghost btn-sm" onclick="loadVlans()" style="padding:2px 7px;font-size:10px">⟳</button><span class="spinner" id="vlanSpin" style="display:none"></span></div>
+        <div class="vlan-chips" id="vlanChips"><span style="color:#2a2f3a;font-size:11px">Cargando...</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="authBtn" onclick="autorizar()">Autorizar ONT</button>
+        <button class="btn btn-ghost" onclick="clearAuthForm()">Limpiar</button>
+        <button class="btn btn-ghost" onclick="loadProfiles(true)" title="Volver a consultar perfiles en la OLT">⟳ Recargar perfiles</button>
+      </div>
+      <div id="authResult"></div>
+      <div id="rawBox" class="raw" style="display:none"></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     1. ESTADÍSTICAS
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section" id="statsSection">
+  <div class="section-head">
+    <span class="section-title">Estadísticas de red</span>
+    <span class="section-badge" id="statsAge">—</span>
+    <button class="btn btn-ghost btn-sm" onclick="loadFromCache()" style="margin-left:auto">Refrescar</button>
+  </div>
+  <div class="section-body" id="statsBody">
+    <div class="empty" id="statsEmpty"><span class="spinner"></span> Cargando estadísticas...</div>
+    <div id="statsContent" style="display:none">
+      <!-- Fila de tarjetas -->
+      <div class="stat-row">
+        <div class="stat-card c-total"><div class="stat-num" id="sTotal">—</div><div class="stat-lbl">Total ONTs</div></div>
+        <div class="stat-card c-on"><div class="stat-num" id="sOn">—</div><div class="stat-lbl">Online</div><div class="stat-sub" id="sOnPct"></div></div>
+        <div class="stat-card c-off"><div class="stat-num" id="sOff">—</div><div class="stat-lbl">Offline</div><div class="stat-sub" id="sOffPct"></div></div>
+        <div class="stat-card c-crit"><div class="stat-num" id="sCrit">—</div><div class="stat-lbl">RX Crítica</div><div class="stat-sub" id="sCritPct"></div></div>
+      </div>
+      <!-- Gráficas -->
+      <div class="charts-row">
+        <!-- Donut -->
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
+            <circle cx="60" cy="60" r="44" fill="none" stroke="rgba(255,255,255,.03)" stroke-width="12"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="rgba(60,160,90,.5)" stroke-width="12"
+                    stroke-dasharray="0 276.5" stroke-dashoffset="69.1"
+                    stroke-linecap="round" id="donutOn"
+                    style="transform-origin:center;transform:rotate(-90deg);transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="rgba(192,50,50,.4)" stroke-width="12"
+                    stroke-dasharray="0 276.5" stroke-dashoffset="69.1" id="donutOff"
+                    style="transform-origin:center;transform:rotate(-90deg);transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)"/>
+            <text x="60" y="56" text-anchor="middle" fill="#cdd4de" font-size="20" font-weight="800" font-family="Consolas,monospace" id="donutPct">—</text>
+            <text x="60" y="70" text-anchor="middle" fill="#3a4250" font-size="8" font-weight="600">EN LÍNEA</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-legend-item"><span class="legend-dot" style="background:#6dc090"></span>Online <b id="lgOn">—</b></div>
+            <div class="donut-legend-item"><span class="legend-dot" style="background:#c05050"></span>Offline <b id="lgOff">—</b></div>
+            <div class="donut-legend-item"><span class="legend-dot" style="background:#c8a840"></span>Otros <b id="lgOth">—</b></div>
+          </div>
+        </div>
+        <!-- Barra RX -->
+        <div>
+          <div class="bar-chart-title">Distribución de potencia RX</div>
+          <div class="bar-track" id="barRx"></div>
+          <div class="bar-legend">
+            <span><i style="background:#6dc090"></i>Buena (≥-27)</span>
+            <span><i style="background:#c8a840"></i>Alerta (-30 a -27)</span>
+            <span><i style="background:#c05050"></i>Crítica (<-30)</span>
+            <span><i style="background:#1a1f28"></i>S/D</span>
+          </div>
+        </div>
+        <!-- Barra Match -->
+        <div>
+          <div class="bar-chart-title">Estado de coincidencia</div>
+          <div class="bar-track" id="barMatch"></div>
+          <div class="bar-legend">
+            <span><i style="background:#6dc090"></i>Match</span>
+            <span><i style="background:#c05050"></i>Mismatch</span>
+            <span><i style="background:#1a1f28"></i>S/D</span>
+          </div>
+        </div>
+      </div>
+      <!-- Barras por slot -->
+      <div class="bar-chart-title" style="margin-top:8px">Distribución por slot</div>
+      <div class="slot-bars" id="slotBars"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     2. TABLA DE ONTs
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="section-head">
+    <span class="section-title">Tabla de ONTs registradas</span>
+    <span class="section-badge" id="tblCount">—</span>
+  </div>
+  <div class="section-body" style="padding:14px 16px">
+    <!-- Buscador -->
+    <div class="search-row">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="Buscar por serial, descripción, F/S/P, RX..." oninput="filterTable()"/>
+      </div>
+      <select class="filter-sel" id="fState" onchange="filterTable()"><option value="">Todos estados</option><option value="online">Online</option><option value="offline">Offline</option></select>
+      <select class="filter-sel" id="fMatch" onchange="filterTable()"><option value="">Match / Mismatch</option><option value="match">Match</option><option value="mismatch">Mismatch</option></select>
+      <select class="filter-sel" id="fRx" onchange="filterTable()"><option value="">Todo RX</option><option value="good">Buena</option><option value="warn">Alerta</option><option value="bad">Crítica</option></select>
+      <span class="count-info" id="countInfo">—</span>
+    </div>
+    <!-- Tabla -->
+    <div class="tbl-wrap" id="tblWrap">
+      <table id="ontTable">
+        <thead><tr>
+          <th onclick="sortBy('fsp')" id="th-fsp">F/S/P <span class="arr">↕</span></th>
+          <th onclick="sortBy('ontId')" id="th-ontId">ID <span class="arr">↕</span></th>
+          <th onclick="sortBy('sn')" id="th-sn">Serial <span class="arr">↕</span></th>
+          <th onclick="sortBy('description')" id="th-desc">Descripción <span class="arr">↕</span></th>
+          <th onclick="sortBy('runState')" id="th-run">Estado <span class="arr">↕</span></th>
+          <th onclick="sortBy('matchState')" id="th-match">Match <span class="arr">↕</span></th>
+          <th onclick="sortBy('rxPower')" id="th-rx">RX <span class="arr">↕</span></th>
+          <th onclick="sortBy('txPower')" id="th-tx">TX <span class="arr">↕</span></th>
+          <th onclick="sortBy('temperature')" id="th-temp">Temp <span class="arr">↕</span></th>
+          <th onclick="sortBy('distance')" id="th-dist">Dist <span class="arr">↕</span></th>
+          <th class="nosort">Acc</th>
+        </tr></thead>
+        <tbody id="ontBody"><tr><td colspan="11" class="empty"><span class="spinner"></span> Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ MODAL DETALLE ═══ -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <h2 id="mTitle">Detalle ONT</h2>
+  <div class="sub" id="mSub"></div>
+  <div id="mOptSec" style="display:none">
+    <div class="sec-label">Potencia óptica (tiempo real)</div>
+    <div class="opt-grid" id="mOptCards"></div>
+  </div>
+  <div class="sec-label">Información general</div>
+  <div class="kv-grid" id="mKv"></div>
+  <div id="mAlert"></div>
+  <button class="btn btn-primary" id="mSyncBtn" onclick="syncOnt()" style="width:100%;margin-top:14px;padding:8px">Actualizar potencia óptica en tiempo real</button>
+</div>
+</div>
+
+<!-- ═══ MODAL ELIMINAR ═══ -->
+<div class="overlay" id="delOverlay" onclick="closeDel(event)">
+<div class="del-modal" id="delModal">
+  <h3>Eliminar ONT</h3>
+  <p id="delMsg"></p>
+  <div id="delResult"></div>
+  <div class="del-btns">
+    <button class="btn btn-ghost" onclick="closeDel()">Cancelar</button>
+    <button class="btn btn-danger" id="delBtn" onclick="confirmDel()">Eliminar</button>
+  </div>
+</div>
+</div>
+
+<script>
+/* ═══ STATE ═══════════════════════════════════════════════════════════════════ */
+let allOnts=[], currentOnt=null, suggestedIds={}, _sortDir={};
+let lineProfiles=[], srvProfiles=[];
+
+/* ═══ UTILS ══════════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const ontKey=o=>`${o.frame}/${o.slot}/${o.pon}/${o.ontId}`;
+
+function cleanSn(r){if(!r)return'—';const m=r.match(/^([0-9A-Fa-f]{12,16})/);return m?m[1]:r.split(' ')[0]}
+function rxClass(v){const n=parseFloat(v);if(isNaN(n))return'na';if(n>=-27)return'good';if(n>=-30)return'warn';return'bad'}
+function tempClass(v){const n=parseFloat(v);if(isNaN(n))return'na';if(n<=60)return'ok';if(n<=75)return'warn';return'hot'}
+function stateCls(s){return s==='online'?'online':s==='offline'?'offline':'other'}
+function matchCls(s){return s==='match'?'match':s==='mismatch'?'mismatch':'unknown'}
+function fmt(v){if(v===null||v===undefined||v==='null'||v==='N/A'||v==='-')return null;return v}
+function ageMin(ts){return ts?Math.round((Date.now()-ts)/60000):null}
+function pctStr(v,t){if(!t)return'0%';const p=Math.round(v/t*100);return v>0&&p<5?v+'':p+'%'}
+
+function animNum(el,target,dur=600){
+  const start=performance.now();
+  const from=parseInt(el.textContent)||0;
+  (function step(now){
+    const p=Math.min((now-start)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(target-from)*ease);
+    if(p<1)requestAnimationFrame(step);
+  })(start);
+}
+
+/* ═══ STATS ══════════════════════════════════════════════════════════════════ */
+function updateStats(onts){
+  const total=onts.length;
+  let on=0,off=0,oth=0,rxG=0,rxW=0,rxB=0,rxN=0,mtC=0,mmC=0,mnC=0;
+  for(const o of onts){
+    const rs=(o.runState||'').toLowerCase();
+    if(rs==='online')on++;else if(rs==='offline')off++;else oth++;
+    const ms=(o.matchState||'').toLowerCase();
+    if(ms==='match')mtC++;else if(ms==='mismatch')mmC++;else mnC++;
+    const rx=parseFloat(o.rxPower);
+    if(isNaN(rx))rxN++;else if(rx>=-27)rxG++;else if(rx>=-30)rxW++;else rxB++;
+  }
+  const crit=rxB;
+
+  animNum($('sTotal'),total);
+  animNum($('sOn'),on);
+  animNum($('sOff'),off);
+  animNum($('sCrit'),crit);
+  $('sOnPct').textContent=total?Math.round(on/total*100)+'% del total':'';
+  $('sOffPct').textContent=total?Math.round(off/total*100)+'% del total':'';
+  $('sCritPct').textContent=total?Math.round(crit/total*100)+'% del total':'';
+
+  $('lgOn').textContent=on;
+  $('lgOff').textContent=off;
+  $('lgOth').textContent=oth;
+
+  // Donut
+  const C=276.5;
+  const onP=total?on/total:0, offP=total?off/total:0;
+  const onArc=onP*C, offArc=offP*C;
+  $('donutPct').textContent=Math.round(onP*100)+'%';
+  $('donutOn').setAttribute('stroke-dasharray',onArc+' '+(C-onArc));
+  $('donutOn').setAttribute('stroke-dashoffset','69.1');
+  $('donutOff').setAttribute('stroke-dasharray',offArc+' '+(C-offArc));
+  $('donutOff').setAttribute('stroke-dashoffset',String(69.1-onArc));
+
+  // Bar RX
+  renderBar('barRx',[
+    {cls:'s-rxg',val:rxG,lbl:pctStr(rxG,total)},
+    {cls:'s-rxw',val:rxW,lbl:pctStr(rxW,total)},
+    {cls:'s-rxb',val:rxB,lbl:pctStr(rxB,total)},
+    {cls:'s-rxn',val:rxN,lbl:pctStr(rxN,total)},
+  ]);
+  // Bar Match
+  renderBar('barMatch',[
+    {cls:'s-match',val:mtC,lbl:pctStr(mtC,total)},
+    {cls:'s-mm',val:mmC,lbl:pctStr(mmC,total)},
+    {cls:'s-mn',val:mnC,lbl:''},
+  ]);
+
+  // Slot bars
+  const bySlot={};
+  for(const o of onts){
+    const k='Slot '+o.slot;
+    if(!bySlot[k])bySlot[k]={on:0,off:0,oth:0,rxG:0,rxW:0,rxB:0};
+    const rs=(o.runState||'').toLowerCase();
+    if(rs==='online')bySlot[k].on++;else if(rs==='offline')bySlot[k].off++;else bySlot[k].oth++;
+    const rx=parseFloat(o.rxPower);
+    if(!isNaN(rx)){if(rx>=-27)bySlot[k].rxG++;else if(rx>=-30)bySlot[k].rxW++;else bySlot[k].rxB++;}
+  }
+  const sortedSlots=Object.keys(bySlot).sort((a,b)=>parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,'')));
+  $('slotBars').innerHTML=sortedSlots.map(label=>{
+    const c=bySlot[label];const tot=c.on+c.off+c.oth;
+    const wOn=Math.round(c.on/tot*100),wOff=Math.round(c.off/tot*100),wOth=100-wOn-wOff;
+    return `<div class="slot-row">
+      <span class="slot-label">${label}</span>
+      <div class="bar-track" style="height:16px">
+        <div class="bar-seg s-on" style="width:${wOn}%" title="Online: ${c.on}"></div>
+        <div class="bar-seg s-off" style="width:${wOff}%" title="Offline: ${c.off}"></div>
+        <div class="bar-seg s-oth" style="width:${wOth}%" title="Otros: ${c.oth}"></div>
+      </div>
+      <span class="slot-info">${tot} ONTs · ${c.on}<span style="color:#6dc090">▲</span> ${c.off}<span style="color:#c05050">▼</span></span>
+    </div>`;
+  }).join('');
+}
+
+function renderBar(id,segs){
+  const el=$(id);
+  const total=segs.reduce((s,g)=>s+g.val,0);
+  if(!total){el.innerHTML='<div style="width:100%;text-align:center;color:#2a2f3a;font-size:9px;line-height:24px">Sin datos</div>';return}
+  el.innerHTML=segs.map(g=>{
+    const w=g.val/total*100;
+    if(w<.5)return'';
+    return `<div class="bar-seg ${g.cls}" style="width:${w}%" title="${g.val} ONTs">${g.lbl}</div>`;
+  }).join('');
+}
+
+/* ═══ SYNC ════════════════════════════════════════════════════════════════════ */
+async function pollStatus(){
+  try{
+    const s=await(await fetch('/api/status')).json();
+    const dot=$('syncDot'),text=$('syncText'),btn=$('syncBtn'),bar=$('progressBar');
+    if(s.running){
+      dot.className='sync-dot running';
+      text.textContent=s.step+(s.total?` (${s.progress}/${s.total})`:'');
+      btn.disabled=true;bar.className='active';
+    }else{
+      dot.className=s.lastError?'sync-dot err':(s.lastSync?'sync-dot ok':'sync-dot');
+      text.textContent=s.lastError?'Error: '+s.lastError:(s.lastSync?'Última sync: '+new Date(s.lastSync).toLocaleString():'Sin sincronizar');
+      btn.disabled=false;bar.className='';
+      if(s.lastSync&&!allOnts.length)loadFromCache();
+    }
+  }catch{}
+}
+async function triggerSync(){
+  const d=await(await fetch('/api/sync',{method:'POST'})).json();
+  if(!d.ok)alert(d.message);
+  $('syncBtn').disabled=true;
+}
+
+/* ═══ LOAD / TABLE ═══════════════════════════════════════════════════════════ */
+async function loadFromCache(){
+  try{
+    const d=await(await fetch('/api/onts')).json();
+    if(!d.onts){showNoData(d.message);return}
+    allOnts=d.onts;
+    $('searchInput').value='';$('fState').value='';$('fMatch').value='';$('fRx').value='';
+    $('statsEmpty').style.display='none';$('statsContent').style.display='block';
+    if(d.ts)$('statsAge').textContent='Hace '+Math.round((Date.now()-d.ts)/60000)+'min';
+    updateStats(allOnts);
+    renderTable(allOnts);
+  }catch(e){showNoData('Error: '+e.message)}
+}
+
+function showNoData(msg){
+  $('statsEmpty').innerHTML=`<div class="cta-box"><div class="cta-icon">🔌</div><div class="cta-text">${msg||'Sin datos — ejecuta la sincronización'}</div><button class="btn btn-primary" onclick="triggerSync()">Sincronizar Ahora</button></div>`;
+  $('statsContent').style.display='none';
+  $('ontBody').innerHTML=`<tr><td colspan="11" class="empty">${msg||'Sin datos'}</td></tr>`;
+  $('tblCount').textContent='—';
+}
+
+function renderTable(onts){
+  if(!onts.length){$('ontBody').innerHTML=`<tr><td colspan="11" class="empty">Sin ONTs que coincidan</td></tr>`;$('tblCount').textContent='—';return}
+  const onC=onts.filter(o=>o.runState==='online').length;
+  const offC=onts.filter(o=>o.runState==='offline').length;
+  $('tblCount').textContent=onts.length;
+  $('countInfo').innerHTML=`<b style="color:#6dc090">${onC}</b> on · <b style="color:#d06060">${offC}</b> off · <b>${onts.length}</b> total`;
+
+  $('ontBody').innerHTML=onts.map(o=>{
+    const age=ageMin(o.optTs),stale=age!==null&&age>60;
+    const isOff=o.runState==='offline',isOn=o.runState==='online';
+    const rx=fmt(o.rxPower),tx=fmt(o.txPower),temp=fmt(o.temperature),dist=fmt(o.distance);
+    const desc=o.description||'—';
+    const hasDesc=desc!=='—';
+    const rxC=rxClass(rx);
+    return `<tr class="${isOff?'offline-row':isOn?'online-row':''}">
+      <td class="fsp">${o.frame}/${o.slot}/${o.pon}</td>
+      <td class="ont-id">${o.ontId}</td>
+      <td class="sn" title="${o.sn||''}" onclick="navigator.clipboard.writeText('${cleanSn(o.sn)}')">${cleanSn(o.sn)}</td>
+      <td class="desc-cell${hasDesc?' has-desc':''}" title="${desc}">${desc}</td>
+      <td>${stateBadge(o.runState)}</td>
+      <td><span class="badge-match ${matchCls(o.matchState)}">${o.matchState||'—'}</span></td>
+      <td><span class="sig ${rxC} ${stale?'stale':''}" title="${stale?'>1h sin actualizar':''}">${rx||'—'}</span></td>
+      <td><span class="sig na">${tx||'—'}</span></td>
+      <td><span class="temp ${tempClass(temp)}">${temp!==null?temp+'°':'—'}</span></td>
+      <td class="dist">${dist!==null?Number(dist).toLocaleString()+'m':'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-fill btn-sm" onclick='openModal(${JSON.stringify(o).replace(/'/g,"&#39;")})'>Detalle</button>
+        <button class="btn-del btn-sm" onclick='openDel("${o.frame}","${o.slot}","${o.pon}","${o.ontId}","${cleanSn(o.sn)}")'>✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function stateBadge(s){
+  if(!s)return'<span class="badge badge-other">—</span>';
+  const l=s.toLowerCase();
+  if(l==='online')return'<span class="badge badge-online"><span class="dot dot-on"></span>Online</span>';
+  if(l==='offline')return'<span class="badge badge-offline"><span class="dot dot-off"></span>Offline</span>';
+  return'<span class="badge badge-other"><span class="dot dot-oth"></span>'+s+'</span>';
+}
+
+function filterTable(){
+  const q=$('searchInput').value.toLowerCase();
+  const st=$('fState').value,mt=$('fMatch').value,rx=$('fRx').value;
+  const r=allOnts.filter(o=>{
+    const desc=o.description||'';
+    const mq=!q||(o.sn||'').toLowerCase().includes(q)||cleanSn(o.sn).toLowerCase().includes(q)||`${o.frame}/${o.slot}/${o.pon}`.includes(q)||o.ontId.toString().includes(q)||(o.runState||'').includes(q)||(o.rxPower||'').toString().includes(q)||desc.toLowerCase().includes(q);
+    const ms=!st||o.runState===st;
+    const mm=!mt||o.matchState===mt;
+    const mr=!rx||rxClass(o.rxPower)===rx;
+    return mq&&ms&&mm&&mr;
+  });
+  updateStats(r);
+  renderTable(r);
+}
+
+function sortBy(key){
+  _sortDir[key]=_sortDir[key]==='asc'?'desc':'asc';
+  document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sorted'));
+  const th=$('th-'+key);if(th)th.classList.add('sorted');
+  const d=_sortDir[key]==='asc'?1:-1;
+  allOnts.sort((a,b)=>{
+    if(key==='fsp'){return(`${a.frame}/${a.slot}/${a.pon}`).localeCompare(`${b.frame}/${b.slot}/${b.pon}`,undefined,{numeric:true})*d}
+    if(key==='desc'){return((a.description||'').toLowerCase()).localeCompare((b.description||'').toLowerCase())*d}
+    let av=a[key]||'',bv=b[key]||'';
+    if(key==='ontId'){av=parseInt(av)||0;bv=parseInt(bv)||0;return(av-bv)*d}
+    const an=parseFloat(av),bn=parseFloat(bv);
+    if(!isNaN(an)&&!isNaN(bn))return(an-bn)*d;
+    if(key==='runState'){const o={online:0,offline:1};return((o[av.toLowerCase()]??2)-(o[bv.toLowerCase()]??2))*d}
+    if(key==='matchState'){const o={match:0,mismatch:1};return((o[av.toLowerCase()]??2)-(o[bv.toLowerCase()]??2))*d}
+    return av.toString().localeCompare(bv.toString())*d;
+  });
+  filterTable();
+}
+
+/* ═══ MODAL DETALLE ══════════════════════════════════════════════════════════ */
+function openModal(o){
+  currentOnt=o;
+  const desc=o.description||'—';
+  $('mTitle').textContent=cleanSn(o.sn)+' — '+desc;
+  $('mSub').textContent=`F/S/P: ${o.frame}/${o.slot}/${o.pon} · ID: ${o.ontId} · ${o.runState||'—'}${o.matchState?' · Match: '+o.matchState:''}`;
+  $('mOptSec').style.display='none';$('mOptCards').innerHTML='';$('mAlert').innerHTML='';$('mSyncBtn').disabled=false;
+  if(o.rxPower||o.txPower||o.temperature)renderOpt({["Rx optical power(dBm)"]:o.rxPower,["Tx optical power(dBm)"]:o.txPower,["Temperature(C)"]:o.temperature,["Laser bias current(mA)"]:o.laserBias,["Voltage(V)"]:o.voltage});
+  const skip=new Set(['rxPower','txPower','temperature','laserBias','voltage','optTs']);
+  const kv={};for(const[k,v]of Object.entries(o))if(!skip.has(k)&&v!==null&&v!==undefined&&v!=='null')kv[k]=v;
+  renderKv(kv);
+  $('overlay').classList.add('open');
+}
+function closeModal(e){if(e&&e.target!==$('overlay'))return;$('overlay').classList.remove('open');currentOnt=null}
+
+function renderOpt(opt){
+  const lbl={"Rx optical power(dBm)":["RX Power","dBm"],"Tx optical power(dBm)":["TX Power","dBm"],"Temperature(C)":["Temp","°C"],"Laser bias current(mA)":["Láser","mA"],"Voltage(V)":["Voltaje","V"]};
+  const cards=Object.entries(opt).filter(([,v])=>v&&v!=='null'&&v!==null&&v!=='-').map(([k,v])=>{
+    const l=lbl[k]||[k,''];
+    const c=k.toLowerCase().includes('rx')?rxClass(v):k.toLowerCase().includes('temp')?tempClass(v):'na';
+    return `<div class="opt-card"><div class="v sig ${c}">${v}</div><div class="l">${l[0]} ${l[1]}</div></div>`;
+  }).join('');
+  if(!cards)return;
+  $('mOptSec').style.display='block';$('mOptCards').innerHTML=cards;
+}
+function renderKv(kv){$('mKv').innerHTML=Object.entries(kv).map(([k,v])=>`<div class="kv-k">${k}</div><div class="kv-v">${v??'—'}</div>`).join('')}
+
+async function syncOnt(){
+  if(!currentOnt)return;
+  const btn=$('mSyncBtn');btn.disabled=true;btn.textContent='Obteniendo...';$('mAlert').innerHTML='';
+  try{
+    const{frame:f,slot:s,pon:p,ontId:id}=currentOnt;
+    const d=await(await fetch(`/api/ont/${f}/${s}/${p}/${id}`)).json();
+    if(!d.ok&&d.error)throw new Error(d.error);
+    if(d.optical&&Object.keys(d.optical).length)renderOpt(d.optical);
+    if(d.kv)renderKv(d.kv);
+    $('mAlert').innerHTML='<div class="alert ok">Potencia óptica actualizada</div>';
+    const key=ontKey(currentOnt),idx=allOnts.findIndex(o=>ontKey(o)===key);
+    if(idx>=0){
+      const opt=d.optical||{};
+      allOnts[idx].rxPower=opt["Rx optical power(dBm)"]||opt["RX optical power(dBm)"]||allOnts[idx].rxPower;
+      allOnts[idx].txPower=opt["Tx optical power(dBm)"]||opt["TX optical power(dBm)"]||allOnts[idx].txPower;
+      allOnts[idx].temperature=opt["Temperature(C)"]||allOnts[idx].temperature;
+      allOnts[idx].laserBias=opt["Laser bias current(mA)"]||allOnts[idx].laserBias;
+      allOnts[idx].voltage=opt["Voltage(V)"]||allOnts[idx].voltage;
+      allOnts[idx].optTs=Date.now();
+      if(d.kv){
+        if(d.kv["Description"])allOnts[idx].description=d.kv["Description"];
+        if(d.kv["Run state"])allOnts[idx].runState=d.kv["Run state"];
+        if(d.kv["Match state"])allOnts[idx].matchState=d.kv["Match state"];
+        if(d.kv["ONT distance(m)"])allOnts[idx].distance=d.kv["ONT distance(m)"];
+      }
+      filterTable();
+    }
+  }catch(e){$('mAlert').innerHTML=`<div class="alert err">${e.message}</div>`}
+  finally{btn.disabled=false;btn.textContent='Actualizar potencia óptica en tiempo real'}
+}
+
+/* ═══ ELIMINAR ONT ═══════════════════════════════════════════════════════════ */
+let pendingDel=null;
+function openDel(f,s,p,id,sn){
+  pendingDel={f,s,p,id,sn};
+  $('delMsg').innerHTML=`¿Eliminar <b style="color:#d06060">${f}/${s}/${p} ID:${id}</b> (${sn})?<br><span style="font-size:10px;color:#3a4250">Acción irreversible, desconectará al cliente.</span>`;
+  $('delResult').innerHTML='';$('delBtn').disabled=false;$('delBtn').textContent='Eliminar';
+  $('delOverlay').classList.add('open');
+}
+function closeDel(e){if(e&&e.target!==$('delOverlay'))return;$('delOverlay').classList.remove('open');pendingDel=null}
+async function confirmDel(){
+  if(!pendingDel)return;
+  const btn=$('delBtn');btn.disabled=true;btn.textContent='Eliminando...';$('delResult').innerHTML='';
+  const{f,s,p,id}=pendingDel;
+  try{
+    const d=await(await fetch(`/api/ont/${f}/${s}/${p}/${id}`,{method:'DELETE'})).json();
+    if(d.ok){$('delResult').innerHTML='<div class="alert ok">'+d.message+'</div>';setTimeout(()=>{closeDel();loadFromCache()},1200)}
+    else{$('delResult').innerHTML='<div class="alert err">'+(d.error||d.message)+'</div>';btn.disabled=false;btn.textContent='Eliminar'}
+  }catch(e){$('delResult').innerHTML='<div class="alert err">'+e.message+'</div>';btn.disabled=false;btn.textContent='Eliminar'}
+}
+
+/* ═══ AUTH TOGGLE ════════════════════════════════════════════════════════════ */
+function toggleAuth(){
+  const body=$('authBody'),chev=$('authChevron');
+  body.classList.toggle('open');chev.classList.toggle('up');
+}
+
+/* ═══ VLANs ═════════════════════════════════════════════════════════════════ */
+async function loadVlans(){
+  $('vlanSpin').style.display='inline-block';
+  try{
+    const d=await(await fetch('/api/vlans')).json();
+    const vlans=d.vlans||[];
+    $('vlanChips').innerHTML=vlans.map(v=>`<span class="chip" onclick="selVlan(${v})" id="vc-${v}">${v}</span>`).join('')||'<span style="color:#2a2f3a;font-size:11px">Sin VLANs</span>';
+    const sel=$('aVlan');sel.innerHTML=vlans.map(v=>`<option value="${v}">${v}</option>`).join('');
+    const opt=sel.querySelector('option[value="101"]');if(opt)opt.selected=true;
+    selVlan(101);
+  }catch{}finally{$('vlanSpin').style.display='none'}
+}
+function selVlan(v){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));const c=$('vc-'+v);if(c)c.classList.add('sel');$('aVlan').value=v}
+
+/* ═══ PERFILES (line/service) ════════════════════════════════════════════════ */
+async function loadProfiles(force){
+  $('lineProfSpin').style.display='inline-block';$('srvProfSpin').style.display='inline-block';
+  try{
+    const d=await(await fetch('/api/profiles'+(force?'?force=1':''))).json();
+    lineProfiles=d.lineProfiles||[];
+    srvProfiles=d.srvProfiles||[];
+    fillProfileSelect('aLine',lineProfiles);
+    fillProfileSelect('aSrv',srvProfiles);
+  }catch(e){
+    console.error('No se pudieron cargar perfiles:',e.message);
+  }finally{
+    $('lineProfSpin').style.display='none';$('srvProfSpin').style.display='none';
+  }
+}
+function fillProfileSelect(selId,list){
+  const sel=$(selId);
+  if(!list||!list.length){
+    sel.innerHTML='<option value="">Sin perfiles detectados</option>';
+    return;
+  }
+  const prev=sel.value;
+  sel.innerHTML=list.map(p=>`<option value="${p.id}">${p.id} — ${p.name}</option>`).join('');
+  // Si el valor previo sigue siendo válido, lo mantenemos; si no, tomamos el primero de la lista
+  if(prev&&list.some(p=>String(p.id)===String(prev))){sel.value=prev}
+  else{sel.value=list[0].id}
+}
+
+/* ═══ AUTOFIND ═══════════════════════════════════════════════════════════════
+   El escaneo real en la OLT tarda ~15-30s. Para que un refresh de página no
+   obligue a esperar ese tiempo de nuevo (y para que el usuario no "pierda" lo
+   que ya había encontrado), el último resultado se guarda un rato en
+   sessionStorage. Al cargar la página se pinta ese resultado de una al toque,
+   y por detrás se dispara igual una búsqueda fresca en la OLT que actualiza
+   todo cuando termina. */
+const AF_CACHE_KEY='olt_af_cache_v1';
+const AF_CACHE_TTL=10*60*1000; // se considera "reciente" hasta 10 min
+
+function readAfCache(){
+  try{
+    const raw=sessionStorage.getItem(AF_CACHE_KEY);
+    if(!raw)return null;
+    return JSON.parse(raw);
+  }catch{return null}
+}
+function writeAfCache(data){
+  try{sessionStorage.setItem(AF_CACHE_KEY,JSON.stringify({...data,ts:Date.now()}))}catch{}
+}
+
+async function paintAutofind(onts){
+  $('afEmpty').style.display='none';
+  if(!onts||!onts.length){
+    $('afWrap').style.display='none';$('afEmpty').style.display='block';
+    $('afBadge').textContent='0';
+    return;
+  }
+  const keys=[...new Set(onts.map(o=>o.frame+'/'+o.slot+'/'+o.pon))];
+  await Promise.all(keys.map(async k=>{const p=k.split('/');suggestedIds[k]=await(await fetch('/api/ont/nextid/'+p[0]+'/'+p[1]+'/'+p[2])).json().then(r=>r.nextId).catch(()=>'?')}));
+  $('afBody').innerHTML=onts.map(o=>{
+    const nid=suggestedIds[o.frame+'/'+o.slot+'/'+o.pon]||'?';
+    return `<tr style="border-bottom:1px solid rgba(255,255,255,.03)">
+      <td style="padding:6px 8px;color:#3a4250;font-size:10px">${o.index}</td>
+      <td style="padding:6px 8px;font-family:Consolas,monospace;font-size:10px;color:#4a5268">${o.frame||'—'}/${o.slot||'—'}/${o.pon||'—'}</td>
+      <td style="padding:6px 8px;font-family:Consolas,monospace;font-size:10px;color:#6ca0dc;font-weight:700">${nid}</td>
+      <td style="padding:6px 8px;font-family:Consolas,monospace;font-size:10px;color:#7ab0d8">${o.sn}</td>
+      <td style="padding:6px 8px;font-size:10px;color:#4a5268">${o.vendorId||'—'}</td>
+      <td style="padding:6px 8px;text-align:right"><button class="btn-fill" onclick='fillAuth(${JSON.stringify(o).replace(/'/g,"&#39;")},${JSON.stringify(nid)})'>Autocompletar</button></td>
+    </tr>`;
+  }).join('');
+  $('afWrap').style.display='block';
+  $('afBadge').textContent=onts.length;
+}
+
+// force=true: fuerza consulta a la OLT aunque haya caché reciente (clic manual del botón).
+// silent=true: no toca el texto de estado si falla (usado en el auto-arranque de la página).
+async function loadAutofind(force, silent){
+  const btn=$('afBtn'),spin=$('afSpin'),status=$('afStatus');
+  const cached=!force?readAfCache():null;
+
+  // 1) Si hay algo en caché, lo mostramos de inmediato para no dejar la vista
+  //    vacía mientras se hace la consulta real a la OLT.
+  if(cached){
+    if(cached.lineProfiles&&cached.lineProfiles.length){lineProfiles=cached.lineProfiles;fillProfileSelect('aLine',lineProfiles)}
+    if(cached.srvProfiles&&cached.srvProfiles.length){srvProfiles=cached.srvProfiles;fillProfileSelect('aSrv',srvProfiles)}
+    await paintAutofind(cached.onts);
+    const ageS=Math.round((Date.now()-cached.ts)/1000);
+    status.textContent=(cached.onts&&cached.onts.length?cached.onts.length+' encontrada(s)':'Sin ONTs pendientes')+' · última búsqueda hace '+ageS+'s — actualizando...';
+  }else{
+    $('afWrap').style.display='none';$('afEmpty').style.display='none';
+    status.textContent='Consultando OLT (~15-30s)...';
+  }
+
+  // 2) Siempre disparamos la consulta real por detrás para refrescar/confirmar.
+  btn.disabled=true;spin.style.display='inline-block';
+  try{
+    const d=await(await fetch('/api/autofind')).json();
+    if(d.lineProfiles&&d.lineProfiles.length){lineProfiles=d.lineProfiles;fillProfileSelect('aLine',lineProfiles)}
+    if(d.srvProfiles&&d.srvProfiles.length){srvProfiles=d.srvProfiles;fillProfileSelect('aSrv',srvProfiles)}
+    const onts=d.onts||[];
+    writeAfCache({onts, lineProfiles:d.lineProfiles||[], srvProfiles:d.srvProfiles||[]});
+    await paintAutofind(onts);
+    status.textContent=onts.length?onts.length+' encontrada(s)':'Sin ONTs pendientes';
+  }catch(e){
+    if(!silent||!cached) status.textContent='Error: '+e.message;
+  }finally{
+    btn.disabled=false;spin.style.display='none';
+  }
+}
+
+function fillAuth(o,nid){
+  if(o.frame!==undefined)$('aFrame').value=o.frame;
+  if(o.slot!==undefined)$('aSlot').value=o.slot;
+  if(o.pon!==undefined)$('aPon').value=o.pon;
+  if(o.sn)$('aSn').value=o.sn;
+  $('aOntId').value=(nid!==undefined&&nid!=='?')?nid:'';
+  $('aDesc').value=o.vendorId?o.vendorId+' - '+o.sn:o.sn;
+  $('aAuth').value='sn-auth';$('authResult').innerHTML='';$('rawBox').style.display='none';
+  const tag=$('nextTag');
+  if(nid!=='?'&&nid!==undefined){tag.textContent='Sug: '+nid;tag.style.display='inline-block'}else{tag.style.display='none'}
+  // Abrir auth si está cerrado
+  if(!$('authBody').classList.contains('open'))toggleAuth();
+  $('aOntId').focus();
+  $('aOntId').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+async function autorizar(){
+  const btn=$('authBtn'),res=$('authResult'),raw=$('rawBox');
+  const body={frame:$('aFrame').value.trim(),slot:$('aSlot').value.trim(),pon:$('aPon').value.trim(),ontId:$('aOntId').value.trim(),sn:$('aSn').value.trim(),authType:$('aAuth').value,lineProfile:$('aLine').value.trim(),serviceProfile:$('aSrv').value.trim(),vlan:$('aVlan').value,desc:$('aDesc').value.trim()};
+  if(!body.slot||!body.pon||!body.ontId||!body.sn){res.innerHTML='<div class="alert err">Completa los campos obligatorios (*)</div>';return}
+  if(!body.lineProfile){res.innerHTML='<div class="alert err">No hay un Line Profile seleccionado — clic en "Recargar perfiles"</div>';return}
+  btn.disabled=true;btn.textContent='Autorizando...';res.innerHTML='';raw.style.display='none';
+  try{
+    const d=await(await fetch('/api/ont/autorizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();
+    if(d.ok){res.innerHTML='<div class="alert ok">'+d.message+'</div>';delete suggestedIds[body.frame+'/'+body.slot+'/'+body.pon];setTimeout(loadFromCache,500)}
+    else if(d.error)res.innerHTML='<div class="alert err">'+d.error+'</div>';
+    else res.innerHTML='<div class="alert warn">'+d.message+'</div>';
+    if(d.raw){raw.style.display='block';raw.textContent=d.raw}
+  }catch(e){res.innerHTML='<div class="alert err">Error: '+e.message+'</div>'}
+  finally{btn.disabled=false;btn.textContent='Autorizar ONT'}
+}
+function clearAuthForm(){['aSlot','aPon','aOntId','aSn','aDesc'].forEach(id=>{$(id).value=''});$('aFrame').value='0';$('aAuth').value='sn-auth';$('nextTag').style.display='none';$('authResult').innerHTML='';$('rawBox').style.display='none'}
+
+/* ═══ KEYBOARD SHORTCUTS ═════════════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeDel()}
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('searchInput').focus()}
+  if(e.key==='/'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)){e.preventDefault();$('searchInput').focus()}
+});
+
+/* ═══ INIT ═══════════════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded',()=>{
+  loadFromCache();
+  loadVlans();
+  loadProfiles();
+  loadAutofind(false, true); // arranca solo, usa caché reciente si existe, no marca error fuerte si falla
+  pollStatus();
+  setInterval(pollStatus,3000);
+});
+</script>
+</body>
+</html>
