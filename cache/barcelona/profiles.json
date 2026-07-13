@@ -1,0 +1,223 @@
+{
+  "ts": 1783977246249,
+  "lineProfiles": [
+    {
+      "id": "0",
+      "name": "line-profile_default_0"
+    },
+    {
+      "id": "1",
+      "name": "Wispro-VLAN100"
+    },
+    {
+      "id": "2",
+      "name": "SMARTOLT_FLEXIBLE_GPON"
+    },
+    {
+      "id": "4",
+      "name": "Generic_1_V101"
+    },
+    {
+      "id": "5",
+      "name": "Generic_1_V110"
+    },
+    {
+      "id": "6",
+      "name": "Generic_1_V150"
+    },
+    {
+      "id": "7",
+      "name": "Generic_2_V110"
+    },
+    {
+      "id": "8",
+      "name": "Generic_3_V110"
+    },
+    {
+      "id": "9",
+      "name": "Generic_4_V110"
+    },
+    {
+      "id": "10",
+      "name": "Generic_5_V110"
+    },
+    {
+      "id": "11",
+      "name": "Generic_6_V110"
+    },
+    {
+      "id": "12",
+      "name": "SmartOLT_G"
+    }
+  ],
+  "srvProfiles": [
+    {
+      "id": "0",
+      "name": "srv-profile_default_0"
+    },
+    {
+      "id": "1",
+      "name": "HS8545M5"
+    },
+    {
+      "id": "2",
+      "name": "srvprofile_nplay"
+    },
+    {
+      "id": "3",
+      "name": "ONU2404K"
+    },
+    {
+      "id": "4",
+      "name": "ZTE-F668"
+    },
+    {
+      "id": "5",
+      "name": "EG8141A5"
+    },
+    {
+      "id": "6",
+      "name": "HG8546M"
+    },
+    {
+      "id": "7",
+      "name": "ONU-type-eth-4-pots-2-catv-1"
+    },
+    {
+      "id": "8",
+      "name": "FD512XW-X-R330"
+    },
+    {
+      "id": "9",
+      "name": "Generic_1_V101"
+    },
+    {
+      "id": "10",
+      "name": "HS8145V"
+    },
+    {
+      "id": "11",
+      "name": "ONT1GEW"
+    },
+    {
+      "id": "12",
+      "name": "FD511GW-X-R310"
+    },
+    {
+      "id": "13",
+      "name": "HG643-W"
+    },
+    {
+      "id": "14",
+      "name": "FD511GW-X-R330"
+    },
+    {
+      "id": "15",
+      "name": "ZG121"
+    },
+    {
+      "id": "16",
+      "name": "RG2802W"
+    },
+    {
+      "id": "17",
+      "name": "GPN"
+    },
+    {
+      "id": "18",
+      "name": "FD512XW-X-R"
+    },
+    {
+      "id": "19",
+      "name": "FD512XW-X-R410"
+    },
+    {
+      "id": "20",
+      "name": "HG865"
+    },
+    {
+      "id": "21",
+      "name": "Generic_1_V110"
+    },
+    {
+      "id": "22",
+      "name": "ZTE-F660V5.2"
+    },
+    {
+      "id": "23",
+      "name": "HG8545M"
+    },
+    {
+      "id": "24",
+      "name": "F660V5.2"
+    },
+    {
+      "id": "25",
+      "name": "F660V6.0"
+    },
+    {
+      "id": "26",
+      "name": "Generic_1_V150"
+    },
+    {
+      "id": "27",
+      "name": "Generic_2_V110"
+    },
+    {
+      "id": "28",
+      "name": "ZTE-F660"
+    },
+    {
+      "id": "29",
+      "name": "Generic_3_V110"
+    },
+    {
+      "id": "30",
+      "name": "Generic_4_V110"
+    },
+    {
+      "id": "31",
+      "name": "Generic_5_V110"
+    },
+    {
+      "id": "32",
+      "name": "Generic_6_V110"
+    },
+    {
+      "id": "33",
+      "name": "ZTE-F660V6.0"
+    },
+    {
+      "id": "34",
+      "name": "ZXHN-F680"
+    },
+    {
+      "id": "35",
+      "name": "HG8245"
+    },
+    {
+      "id": "36",
+      "name": "ONU-type-eth-4-pots-1-catv-1"
+    },
+    {
+      "id": "37",
+      "name": "ONU-type-eth-1-pots-2-catv-0"
+    },
+    {
+      "id": "38",
+      "name": "HG8247H5"
+    },
+    {
+      "id": "39",
+      "name": "EG8143A5"
+    },
+    {
+      "id": "40",
+      "name": "VSOLV452"
+    },
+    {
+      "id": "41",
+      "name": "EG8021V5"
+    }
+  ]
+}

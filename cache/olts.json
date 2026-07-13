@@ -1,0 +1,22 @@
+{
+  "olts": [
+    {
+      "id": "barcelona",
+      "name": "BARCELONA",
+      "host": "45.162.79.228",
+      "port": 2333,
+      "user": "smartolt",
+      "pass": "smart2021",
+      "prompt": "BARCELONA"
+    },
+       {
+      "id": "cordoba",
+      "name": "CORDOBA",
+      "host": "45.162.79.226",
+      "port": 2333,
+      "user": "wispro",
+      "pass": "wispro2020",
+      "prompt": "CORDOBA"
+    }
+  ]
+}

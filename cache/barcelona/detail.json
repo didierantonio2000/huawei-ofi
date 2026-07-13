@@ -6,9 +6,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 18 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888251060
+    "onlineDuration": "10 day(s), 12 hour(s), 24 minute(s), 47 second(s)",
+    "numericTemp": "64",
+    "ts": 1783977378627
   },
   "0/0/0/1": {
     "description": "LEIDY_JULIANA_MARULANDA_PINZON_z",
@@ -19,7 +19,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888252750
+    "ts": 1783977380486
   },
   "0/0/0/2": {
     "description": "YAN_DANIEL_RAYO_CASTANO_zone_CEN",
@@ -28,9 +28,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 29 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 24 minute(s), 59 second(s)",
     "numericTemp": "-",
-    "ts": 1783888256888
+    "ts": 1783977382555
   },
   "0/0/0/3": {
     "description": "MACRODESK_COMUNICACIONES_SAS_(",
@@ -39,9 +39,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "-",
-    "onlineDuration": "11 day(s), 7 hour(s), 7 minute(s), 18 second(s)",
-    "numericTemp": "66",
-    "ts": 1783888258839
+    "onlineDuration": "12 day(s), 7 hour(s), 52 minute(s), 45 second(s)",
+    "numericTemp": "65",
+    "ts": 1783977384639
   },
   "0/0/0/4": {
     "description": "MARTIN_EMILIO_TORRES_zone_GAITAN",
@@ -50,9 +50,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "8 day(s), 5 hour(s), 28 minute(s), 43 second(s)",
-    "numericTemp": "63",
-    "ts": 1783888260969
+    "onlineDuration": "9 day(s), 6 hour(s), 14 minute(s), 10 second(s)",
+    "numericTemp": "65",
+    "ts": 1783977386707
   },
   "0/0/0/5": {
     "description": "FRANCYS_NUBIA_ARBELAEZ_BENAVIDES",
@@ -61,9 +61,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 30 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888263058
+    "onlineDuration": "0 day(s), 16 hour(s), 19 minute(s), 30 second(s)",
+    "numericTemp": "66",
+    "ts": 1783977388865
   },
   "0/0/0/6": {
     "description": "NANCY_JARAMILLO_CAMPUZANO_zone_C",
@@ -72,9 +72,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 32 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 24 minute(s), 59 second(s)",
     "numericTemp": "-",
-    "ts": 1783888265020
+    "ts": 1783977391126
   },
   "0/0/0/7": {
     "description": "ANA_YISELA_PAEZ_HERRERA_zone_14_",
@@ -83,9 +83,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 34 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 1 second(s)",
     "numericTemp": "-",
-    "ts": 1783888267109
+    "ts": 1783977393144
   },
   "0/0/0/8": {
     "description": "LEIDY TATIANA LOAIZA",
@@ -94,9 +94,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "0 day(s), 0 hour(s), 43 minute(s), 53 second(s)",
+    "onlineDuration": "1 day(s), 1 hour(s), 29 minute(s), 21 second(s)",
     "numericTemp": "-",
-    "ts": 1783888269439
+    "ts": 1783977395428
   },
   "0/0/0/9": {
     "description": "CORREGIDURIA BARCELONA_zone_14",
@@ -105,9 +105,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 43 second(s)",
-    "numericTemp": "68",
-    "ts": 1783888273709
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 11 second(s)",
+    "numericTemp": "69",
+    "ts": 1783977397168
   },
   "0/0/0/10": {
     "description": "CRUZ_ELENA_DEL_SOCORRO_SEPULVEDA",
@@ -116,9 +116,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 38 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 3 second(s)",
     "numericTemp": "-",
-    "ts": 1783888275870
+    "ts": 1783977399515
   },
   "0/0/1/0": {
     "description": "JUAN_FELIPE_GIRALDO_RODRIGUEZ_zo",
@@ -129,7 +129,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888278989
+    "ts": 1783977402825
   },
   "0/0/1/1": {
     "description": "JHON_JAIRO_ORTIZ_CASTANO_zone_PA",
@@ -138,9 +138,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 53 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 18 second(s)",
     "numericTemp": "-",
-    "ts": 1783888281070
+    "ts": 1783977404566
   },
   "0/0/1/2": {
     "description": "MARCELA_CASTANEDA_RAMIREZ_zone_C",
@@ -149,9 +149,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 54 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 19 second(s)",
     "numericTemp": "-",
-    "ts": 1783888283139
+    "ts": 1783977406650
   },
   "0/0/1/3": {
     "description": "VECINA",
@@ -160,9 +160,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 39 minute(s), 49 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 14 second(s)",
     "numericTemp": "-",
-    "ts": 1783888285229
+    "ts": 1783977408785
   },
   "0/0/1/4": {
     "description": "DANIEL_FERNANDO_TAVERA_zone_14_D",
@@ -171,9 +171,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 4 hour(s), 45 minute(s), 22 second(s)",
+    "onlineDuration": "4 day(s), 5 hour(s), 30 minute(s), 46 second(s)",
     "numericTemp": "-",
-    "ts": 1783888288618
+    "ts": 1783977410815
   },
   "0/0/1/5": {
     "description": "BEATRIZ_ORTEGA_OSPINA_zone_16_AM",
@@ -184,7 +184,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888290359
+    "ts": 1783977412666
   },
   "0/0/1/6": {
     "description": "JOSE_ALDAIR_CASTANEDA_GOMEZ_zone",
@@ -193,9 +193,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "4 day(s), 23 hour(s), 15 minute(s), 38 second(s)",
-    "numericTemp": "63",
-    "ts": 1783888293409
+    "onlineDuration": "6 day(s), 0 hour(s), 1 minute(s), 2 second(s)",
+    "numericTemp": "64",
+    "ts": 1783977414745
   },
   "0/0/1/7": {
     "description": "JUAN_CARLOS_VELASCO_CELIS__zone_",
@@ -204,9 +204,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 2 hour(s), 19 minute(s), 21 second(s)",
+    "onlineDuration": "3 day(s), 3 hour(s), 4 minute(s), 44 second(s)",
     "numericTemp": "-",
-    "ts": 1783888295729
+    "ts": 1783977416940
   },
   "0/0/1/8": {
     "description": "MARIANA FORERO",
@@ -215,9 +215,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 5 hour(s), 36 minute(s), 45 second(s)",
+    "onlineDuration": "4 day(s), 6 hour(s), 22 minute(s), 8 second(s)",
     "numericTemp": "-",
-    "ts": 1783888297798
+    "ts": 1783977419004
   },
   "0/0/1/9": {
     "description": "JHON_CAMILO_ESPINOSA_ESPINOSA_zo",
@@ -228,7 +228,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888299759
+    "ts": 1783977420965
   },
   "0/0/1/10": {
     "description": "LUCRECIA_GUTIERREZ_GONZALEZ_2_zo",
@@ -237,9 +237,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 1 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 22 second(s)",
     "numericTemp": "-",
-    "ts": 1783888303529
+    "ts": 1783977423179
   },
   "0/0/1/11": {
     "description": "ANGELA_MARIA_MARTINEZ_MORALES_zo",
@@ -250,7 +250,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888305229
+    "ts": 1783977425035
   },
   "0/0/1/12": {
     "description": "MARIA_TEREZA_LEON_zone_ZULETA_BA",
@@ -259,9 +259,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 8 second(s)",
-    "numericTemp": "67",
-    "ts": 1783888307439
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 30 second(s)",
+    "numericTemp": "70",
+    "ts": 1783977427355
   },
   "0/0/1/13": {
     "description": "LUZ MARINA HERRERA",
@@ -270,9 +270,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 27 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 49 second(s)",
     "numericTemp": "-",
-    "ts": 1783888309510
+    "ts": 1783977429425
   },
   "0/0/1/14": {
     "description": "BEATRIZ_ELENA_GRACIA_zone_PANORA",
@@ -283,7 +283,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888311491
+    "ts": 1783977431386
   },
   "0/0/1/15": {
     "description": "YOLIMA_CRISTINA_RUIZ_DIAZ_zone_P",
@@ -292,9 +292,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 20 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 42 second(s)",
     "numericTemp": "72",
-    "ts": 1783888313561
+    "ts": 1783977433722
   },
   "0/0/1/16": {
     "description": "OSCAR_SABOGAL_CARMONA2_zone_ZULE",
@@ -303,9 +303,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "8 day(s), 15 hour(s), 50 minute(s), 41 second(s)",
+    "onlineDuration": "9 day(s), 16 hour(s), 36 minute(s), 3 second(s)",
     "numericTemp": "-",
-    "ts": 1783888315631
+    "ts": 1783977435807
   },
   "0/0/1/17": {
     "description": "KATHERIN_TATIANA_LOPEZ_PANTOJA_z",
@@ -314,9 +314,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 6 hour(s), 28 minute(s), 16 second(s)",
+    "onlineDuration": "10 day(s), 7 hour(s), 13 minute(s), 38 second(s)",
     "numericTemp": "82",
-    "ts": 1783888317700
+    "ts": 1783977437997
   },
   "0/0/1/18": {
     "description": "DULCE_YESICA_REBOLLEDO_OROPEREZA",
@@ -325,9 +325,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 45 second(s)",
-    "numericTemp": "64",
-    "ts": 1783888319901
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 6 second(s)",
+    "numericTemp": "66",
+    "ts": 1783977439955
   },
   "0/0/1/19": {
     "description": "JENNY PATRICIA MAECHA",
@@ -336,9 +336,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 3 hour(s), 38 minute(s), 59 second(s)",
+    "onlineDuration": "6 day(s), 4 hour(s), 24 minute(s), 20 second(s)",
     "numericTemp": "-",
-    "ts": 1783888322006
+    "ts": 1783977441794
   },
   "0/0/1/20": {
     "description": "MARIA ELCY LONDONO",
@@ -347,9 +347,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 45 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 6 second(s)",
     "numericTemp": "-",
-    "ts": 1783888324071
+    "ts": 1783977443654
   },
   "0/0/1/21": {
     "description": "MARIA ELCY LONDONO TORO",
@@ -358,9 +358,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 32 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 25 minute(s), 53 second(s)",
     "numericTemp": "-",
-    "ts": 1783888326190
+    "ts": 1783977445724
   },
   "0/0/1/22": {
     "description": "Diana milena calderon",
@@ -369,9 +369,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 40 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 1 second(s)",
     "numericTemp": "-",
-    "ts": 1783888328030
+    "ts": 1783977447804
   },
   "0/0/1/23": {
     "description": "KAROL VANESA ISAZA",
@@ -380,9 +380,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "4 day(s), 6 hour(s), 30 minute(s), 26 second(s)",
+    "onlineDuration": "5 day(s), 7 hour(s), 15 minute(s), 47 second(s)",
     "numericTemp": "-",
-    "ts": 1783888330232
+    "ts": 1783977450015
   },
   "0/0/2/0": {
     "description": "JUAN_BERNARDO_ARENAS_zone_CACIQU",
@@ -393,7 +393,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888333251
+    "ts": 1783977455542
   },
   "0/0/2/1": {
     "description": "JHON FREDY HENAO",
@@ -402,9 +402,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 51 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 15 second(s)",
     "numericTemp": "-",
-    "ts": 1783888335352
+    "ts": 1783977457480
   },
   "0/0/2/2": {
     "description": "MARISOL_FERNANDEZ_ZAPATA_zone_BA",
@@ -413,9 +413,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 17 hour(s), 30 minute(s), 26 second(s)",
+    "onlineDuration": "2 day(s), 20 hour(s), 1 minute(s), 32 second(s)",
     "numericTemp": "-",
-    "ts": 1783968394804
+    "ts": 1783977459680
   },
   "0/0/2/3": {
     "description": "JOHN_EDISON_MONTOYA_CARDONA_zone",
@@ -426,7 +426,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888339612
+    "ts": 1783977461390
   },
   "0/0/2/4": {
     "description": "GENTIL_ADRIAN_POLO_PATINO_zone_B",
@@ -435,9 +435,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "8 day(s), 4 hour(s), 12 minute(s), 20 second(s)",
+    "onlineDuration": "9 day(s), 4 hour(s), 57 minute(s), 43 second(s)",
     "numericTemp": "-",
-    "ts": 1783888341801
+    "ts": 1783977463741
   },
   "0/0/2/5": {
     "description": "MARIA_ISABEL_HENAO_zone_BARRIO_L",
@@ -446,9 +446,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 40 minute(s), 57 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888343891
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 20 second(s)",
+    "numericTemp": "64",
+    "ts": 1783977465679
   },
   "0/0/2/6": {
     "description": "CATALINA_MARCILLO_ALBEAR_zone_CA",
@@ -457,9 +457,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 19 hour(s), 26 minute(s), 28 second(s)",
+    "onlineDuration": "1 day(s), 20 hour(s), 11 minute(s), 51 second(s)",
     "numericTemp": "-",
-    "ts": 1783888346152
+    "ts": 1783977467550
   },
   "0/0/2/7": {
     "description": "MATEO_ALEXIS_CORTES_PEREZ_zone_B",
@@ -468,20 +468,20 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "8 day(s), 23 hour(s), 57 minute(s), 37 second(s)",
-    "numericTemp": "56",
-    "ts": 1783888348280
+    "onlineDuration": "10 day(s), 0 hour(s), 43 minute(s), 0 second(s)",
+    "numericTemp": "57",
+    "ts": 1783977469600
   },
   "0/0/2/8": {
     "description": "EDIL_DE_JESUS_BEDOYA_ZAPATA_zone",
-    "distance": "1209",
+    "distance": "1210",
     "matchState": "mismatch",
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 20 hour(s), 43 minute(s), 18 second(s)",
+    "onlineDuration": "0 day(s), 3 hour(s), 42 minute(s), 22 second(s)",
     "numericTemp": "-",
-    "ts": 1783888350351
+    "ts": 1783977471559
   },
   "0/0/2/9": {
     "description": "LEIDY_MARCELA_VELASQUEZ_zone_BAR",
@@ -492,7 +492,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888352191
+    "ts": 1783977473770
   },
   "0/0/2/10": {
     "description": "JHON_EDUAR_GARCIA_SANCHEZ_zone_C",
@@ -501,9 +501,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 0 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 23 second(s)",
     "numericTemp": "-",
-    "ts": 1783888354161
+    "ts": 1783977475719
   },
   "0/0/2/11": {
     "description": "MARIA_CAMILA_GUTIERREZ_SIERRA_zo",
@@ -512,9 +512,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 0 second(s)",
-    "numericTemp": "68",
-    "ts": 1783888356350
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 23 second(s)",
+    "numericTemp": "70",
+    "ts": 1783977477919
   },
   "0/0/2/12": {
     "description": "Juan bernado arenas_zone_14 DE",
@@ -523,9 +523,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "1 day(s), 2 hour(s), 42 minute(s), 33 second(s)",
+    "onlineDuration": "2 day(s), 3 hour(s), 27 minute(s), 56 second(s)",
     "numericTemp": "-",
-    "ts": 1783888359211
+    "ts": 1783977479699
   },
   "0/0/2/13": {
     "description": "JENNY_JOVANNA_SUAREZ_CASTANO_zon",
@@ -536,18 +536,18 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888361233
+    "ts": 1783977481620
   },
   "0/0/2/14": {
     "description": "MARTHA LILIANA ESTUPINAN",
-    "distance": "-",
-    "matchState": "initial",
-    "runState": "offline",
-    "configState": "initial",
+    "distance": "1414",
+    "matchState": "mismatch",
+    "runState": "online",
+    "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "-",
+    "onlineDuration": "0 day(s), 4 hour(s), 57 minute(s), 34 second(s)",
     "numericTemp": "-",
-    "ts": 1783888363210
+    "ts": 1783977483579
   },
   "0/0/2/15": {
     "description": "MELVA JANETH SOTO",
@@ -556,9 +556,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 3 hour(s), 34 minute(s), 19 second(s)",
+    "onlineDuration": "1 day(s), 4 hour(s), 19 minute(s), 41 second(s)",
     "numericTemp": "-",
-    "ts": 1783888365160
+    "ts": 1783977485909
   },
   "0/0/2/16": {
     "description": "DIEGO MAURICIO CARDENAS",
@@ -567,9 +567,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 2 hour(s), 5 minute(s), 24 second(s)",
+    "onlineDuration": "6 day(s), 2 hour(s), 50 minute(s), 46 second(s)",
     "numericTemp": "-",
-    "ts": 1783888367240
+    "ts": 1783977487870
   },
   "0/0/2/17": {
     "description": "LUIS FERNANDO LINARES",
@@ -578,9 +578,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 8 hour(s), 14 minute(s), 59 second(s)",
+    "onlineDuration": "0 day(s), 17 hour(s), 6 minute(s), 19 second(s)",
     "numericTemp": "-",
-    "ts": 1783888369359
+    "ts": 1783977489992
   },
   "0/0/2/19": {
     "description": "JOSE_REINEL_OSORIO_TORRES_zone_B",
@@ -589,9 +589,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 21 hour(s), 34 minute(s), 44 second(s)",
-    "numericTemp": "59",
-    "ts": 1783888371520
+    "onlineDuration": "3 day(s), 22 hour(s), 20 minute(s), 6 second(s)",
+    "numericTemp": "62",
+    "ts": 1783977492140
   },
   "0/0/2/21": {
     "description": "JHON ALEXANDER SOTO",
@@ -600,9 +600,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "8 day(s), 4 hour(s), 19 minute(s), 11 second(s)",
+    "onlineDuration": "9 day(s), 5 hour(s), 4 minute(s), 33 second(s)",
     "numericTemp": "-",
-    "ts": 1783888373608
+    "ts": 1783977493870
   },
   "0/0/2/24": {
     "description": "LUZ_ESTELLA_MARIN_MORALES_zone_C",
@@ -611,9 +611,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 21 second(s)",
-    "numericTemp": "61",
-    "ts": 1783888375688
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 43 second(s)",
+    "numericTemp": "62",
+    "ts": 1783977495710
   },
   "0/0/3/0": {
     "description": "BEATRIZ_ELENA_SUCERQUIA_ROJAS_zo",
@@ -622,9 +622,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 11 second(s)",
-    "numericTemp": "68",
-    "ts": 1783888379048
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 32 second(s)",
+    "numericTemp": "70",
+    "ts": 1783977498876
   },
   "0/0/3/1": {
     "description": "MARIA_TERESA_DE_LEON_zone_CONGAL",
@@ -633,9 +633,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 37 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 58 second(s)",
     "numericTemp": "-",
-    "ts": 1783888381128
+    "ts": 1783977500953
   },
   "0/0/3/3": {
     "description": "MARIU ARISTIZABAL",
@@ -644,9 +644,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 36 second(s)",
-    "numericTemp": "55",
-    "ts": 1783888383028
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 57 second(s)",
+    "numericTemp": "56",
+    "ts": 1783977502845
   },
   "0/0/3/4": {
     "description": "JUAN_DAVID_PEREZ_MORENO_zone_14_",
@@ -655,9 +655,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 27 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888385658
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 49 second(s)",
+    "numericTemp": "64",
+    "ts": 1783977505353
   },
   "0/0/3/5": {
     "description": "CONGAL_2_MZ_A_10_-7_zone_CONGAL_",
@@ -666,9 +666,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 34 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888387748
+    "onlineDuration": "10 day(s), 12 hour(s), 26 minute(s), 56 second(s)",
+    "numericTemp": "63",
+    "ts": 1783977507433
   },
   "0/0/3/6": {
     "description": "CARMEN_ELENA_ESCALONA_AZULAJE_zo",
@@ -679,7 +679,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888389710
+    "ts": 1783977509354
   },
   "0/0/3/7": {
     "description": "LAURA_JULIANA_MORALES_RAMIREZ_zo",
@@ -690,7 +690,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888391538
+    "ts": 1783977511280
   },
   "0/0/3/8": {
     "description": "HECTOR DE JESUS",
@@ -699,9 +699,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 51 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 13 second(s)",
     "numericTemp": "-",
-    "ts": 1783888393518
+    "ts": 1783977513134
   },
   "0/0/3/9": {
     "description": "OLGA_NEIRY_REINOSO_SALCEDO_zone_",
@@ -712,7 +712,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888395478
+    "ts": 1783977515108
   },
   "0/0/3/10": {
     "description": "LUIS ERNESTO SARRIAS",
@@ -721,20 +721,20 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 19 hour(s), 47 minute(s), 28 second(s)",
-    "numericTemp": "55",
-    "ts": 1783888397688
+    "onlineDuration": "3 day(s), 20 hour(s), 32 minute(s), 49 second(s)",
+    "numericTemp": "58",
+    "ts": 1783977517308
   },
   "0/0/3/11": {
     "description": "OMAIRA RUIZ GALLON_zone_URIBE",
-    "distance": "-",
-    "matchState": "initial",
-    "runState": "offline",
-    "configState": "initial",
+    "distance": "1352",
+    "matchState": "mismatch",
+    "runState": "online",
+    "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "-",
+    "onlineDuration": "0 day(s), 20 hour(s), 19 minute(s), 3 second(s)",
     "numericTemp": "-",
-    "ts": 1783888399388
+    "ts": 1783977519158
   },
   "0/0/3/12": {
     "description": "LUZ STELLA RENDON_zone_CONGAL",
@@ -742,10 +742,10 @@
     "matchState": "mismatch",
     "runState": "online",
     "configState": "normal",
-    "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "0 day(s), 5 hour(s), 25 minute(s), 49 second(s)",
+    "lastDownCause": "dying-gasp",
+    "onlineDuration": "0 day(s), 21 hour(s), 25 minute(s), 14 second(s)",
     "numericTemp": "-",
-    "ts": 1783888401591
+    "ts": 1783977521397
   },
   "0/0/3/13": {
     "description": "DEIMER_PAUL_CHAVES_CHAVES_zone_C",
@@ -756,7 +756,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888403308
+    "ts": 1783977523287
   },
   "0/0/3/14": {
     "description": "HOVER_YUSETH_MUNOZ_RODRIGUEZ_zon",
@@ -767,18 +767,18 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888405282
+    "ts": 1783977525180
   },
   "0/0/3/15": {
     "description": "GIOVANNY_BUITRAGO_OLIVARES_zone_",
-    "distance": "1570",
+    "distance": "1571",
     "matchState": "mismatch",
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 17 hour(s), 23 minute(s), 56 second(s)",
-    "numericTemp": "64",
-    "ts": 1783888407468
+    "onlineDuration": "0 day(s), 5 hour(s), 59 minute(s), 21 second(s)",
+    "numericTemp": "67",
+    "ts": 1783977527387
   },
   "0/0/3/16": {
     "description": "MARICELA_GERENA_TORRAL_zone_URIB",
@@ -787,9 +787,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 5 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 27 second(s)",
     "numericTemp": "-",
-    "ts": 1783888409538
+    "ts": 1783977529457
   },
   "0/0/3/17": {
     "description": "JUAN ALEJANDRO QUINTERO",
@@ -798,9 +798,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 14 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 36 second(s)",
     "numericTemp": "-",
-    "ts": 1783888411758
+    "ts": 1783977531908
   },
   "0/0/3/18": {
     "description": "RUBEN DARIO ORTIS_zone_14 DE",
@@ -809,9 +809,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "1 day(s), 19 hour(s), 29 minute(s), 6 second(s)",
+    "onlineDuration": "2 day(s), 20 hour(s), 14 minute(s), 28 second(s)",
     "numericTemp": "-",
-    "ts": 1783888413398
+    "ts": 1783977533539
   },
   "0/0/3/19": {
     "description": "ARACELY_ROJAS_zone_URIBE_BARCELO",
@@ -820,9 +820,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 0 hour(s), 13 minute(s), 5 second(s)",
+    "onlineDuration": "1 day(s), 0 hour(s), 58 minute(s), 27 second(s)",
     "numericTemp": "-",
-    "ts": 1783888415538
+    "ts": 1783977535587
   },
   "0/0/3/20": {
     "description": "JENIFER TATIANA TIBAQUIRA",
@@ -831,9 +831,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 4 hour(s), 15 minute(s), 31 second(s)",
+    "onlineDuration": "6 day(s), 5 hour(s), 0 minute(s), 53 second(s)",
     "numericTemp": "-",
-    "ts": 1783888417379
+    "ts": 1783977537397
   },
   "0/0/3/21": {
     "description": "JEFFERSON FERNANDO",
@@ -844,7 +844,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888419339
+    "ts": 1783977539248
   },
   "0/0/3/22": {
     "description": "CRISTIAN FERNEY BELTRAN",
@@ -853,9 +853,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 59 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 20 second(s)",
     "numericTemp": "-",
-    "ts": 1783888421428
+    "ts": 1783977541197
   },
   "0/0/3/23": {
     "description": "LUIS FERNANDO CARDONA",
@@ -864,9 +864,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 5 hour(s), 52 minute(s), 56 second(s)",
+    "onlineDuration": "0 day(s), 8 hour(s), 52 minute(s), 44 second(s)",
     "numericTemp": "-",
-    "ts": 1783888423398
+    "ts": 1783977543268
   },
   "0/0/4/0": {
     "description": "CARLOS_ARTURO_VANEGAS_CASTANO_zo",
@@ -875,9 +875,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 17 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 39 second(s)",
     "numericTemp": "-",
-    "ts": 1783888426294
+    "ts": 1783977546397
   },
   "0/0/4/1": {
     "description": "LEIDY_GONSALEZ_GIRALDO_zone_ALTA",
@@ -886,9 +886,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 6 hour(s), 17 minute(s), 52 second(s)",
+    "onlineDuration": "1 day(s), 7 hour(s), 3 minute(s), 14 second(s)",
     "numericTemp": "-",
-    "ts": 1783888428014
+    "ts": 1783977548467
   },
   "0/0/4/2": {
     "description": "JOHN_FREDY_CRUZ_VILLAMIL_zone_CO",
@@ -897,9 +897,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 15 second(s)",
-    "numericTemp": "69",
-    "ts": 1783888430093
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 37 second(s)",
+    "numericTemp": "71",
+    "ts": 1783977550667
   },
   "0/0/4/3": {
     "description": "JORGE_IVAN_CALDERON_DUQUE_zone_A",
@@ -908,9 +908,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 22 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 44 second(s)",
     "numericTemp": "-",
-    "ts": 1783888432178
+    "ts": 1783977552638
   },
   "0/0/4/4": {
     "description": "AMPARO RAMIREZ PRIETO_zone_14 DE",
@@ -919,9 +919,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 28 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 50 second(s)",
     "numericTemp": "-",
-    "ts": 1783888434003
+    "ts": 1783977554457
   },
   "0/0/4/5": {
     "description": "JOSE_DAVID_BARRERA_SALGADO_zone_",
@@ -930,9 +930,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 18 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 40 second(s)",
     "numericTemp": "-",
-    "ts": 1783888436084
+    "ts": 1783977556787
   },
   "0/0/4/6": {
     "description": "JAVIER_PRADO_ZULETA_zone_ALTA_VI",
@@ -941,9 +941,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 6 hour(s), 30 minute(s), 17 second(s)",
-    "numericTemp": "67",
-    "ts": 1783888438033
+    "onlineDuration": "10 day(s), 7 hour(s), 15 minute(s), 39 second(s)",
+    "numericTemp": "70",
+    "ts": 1783977558857
   },
   "0/0/4/7": {
     "description": "DIEGO FERNANDO ROBLES_zone_ALTA",
@@ -952,9 +952,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 27 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 49 second(s)",
     "numericTemp": "-",
-    "ts": 1783888439874
+    "ts": 1783977560937
   },
   "0/0/4/8": {
     "description": "MARIA_DEYANIRA_MORALES_zone_ALTA",
@@ -965,7 +965,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888441714
+    "ts": 1783977562654
   },
   "0/0/4/9": {
     "description": "JULIANA_ANDREA_JARAMILLO_JARAMIL",
@@ -976,7 +976,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888443424
+    "ts": 1783977564629
   },
   "0/0/4/10": {
     "description": "VEN_SANTA_BORDONEZ_BORDONEZ_zone",
@@ -985,9 +985,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 16 hour(s), 22 minute(s), 36 second(s)",
-    "numericTemp": "70",
-    "ts": 1783888445393
+    "onlineDuration": "4 day(s), 17 hour(s), 7 minute(s), 59 second(s)",
+    "numericTemp": "78",
+    "ts": 1783977566819
   },
   "0/0/4/11": {
     "description": "EGLENIS CAROLINA FERRER",
@@ -996,9 +996,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 17 hour(s), 37 minute(s), 21 second(s)",
+    "onlineDuration": "6 day(s), 18 hour(s), 22 minute(s), 44 second(s)",
     "numericTemp": "-",
-    "ts": 1783888447513
+    "ts": 1783977568697
   },
   "0/0/4/12": {
     "description": "WILMAR YARA BONILLA_zone_14 DE",
@@ -1009,7 +1009,7 @@
     "lastDownCause": "dying-gasp",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888449093
+    "ts": 1783977570387
   },
   "0/0/4/13": {
     "description": "CAROLINA_RIVERA_FERRER_zone_ALTA",
@@ -1018,9 +1018,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 2 hour(s), 38 minute(s), 15 second(s)",
+    "onlineDuration": "10 day(s), 3 hour(s), 23 minute(s), 38 second(s)",
     "numericTemp": "-",
-    "ts": 1783888450934
+    "ts": 1783977572457
   },
   "0/0/4/14": {
     "description": "MARTHA_LUCIA_ARIAS_MUNOZ_zone_AL",
@@ -1029,9 +1029,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "1 day(s), 2 hour(s), 26 minute(s), 8 second(s)",
-    "numericTemp": "57",
-    "ts": 1783888453142
+    "onlineDuration": "2 day(s), 3 hour(s), 11 minute(s), 31 second(s)",
+    "numericTemp": "60",
+    "ts": 1783977575007
   },
   "0/0/4/15": {
     "description": "RAMIRO_ANTONIO_SILCA_GARCIA_zone",
@@ -1040,9 +1040,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 41 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 4 second(s)",
     "numericTemp": "-",
-    "ts": 1783888455104
+    "ts": 1783977576828
   },
   "0/0/4/16": {
     "description": "JULIETH CONSUELO VALENCIA",
@@ -1050,10 +1050,10 @@
     "matchState": "mismatch",
     "runState": "online",
     "configState": "failed",
-    "lastDownCause": "LOSi/LOBi",
-    "onlineDuration": "4 day(s), 0 hour(s), 3 minute(s), 58 second(s)",
+    "lastDownCause": "dying-gasp",
+    "onlineDuration": "0 day(s), 20 hour(s), 28 minute(s), 45 second(s)",
     "numericTemp": "-",
-    "ts": 1783888458514
+    "ts": 1783977578789
   },
   "0/0/4/17": {
     "description": "SERGIO ALEJANDRO VALENCIA",
@@ -1062,9 +1062,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 54 second(s)",
+    "onlineDuration": "0 day(s), 3 hour(s), 34 minute(s), 51 second(s)",
     "numericTemp": "-",
-    "ts": 1783888460452
+    "ts": 1783977580619
   },
   "0/0/4/19": {
     "description": "EDGAR JOSE ARENAS",
@@ -1073,9 +1073,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 24 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 46 second(s)",
     "numericTemp": "-",
-    "ts": 1783888462424
+    "ts": 1783977582819
   },
   "0/0/4/20": {
     "description": "WENDY_NAYELI_UPEGUI_MONTES_zone_",
@@ -1084,9 +1084,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 3 hour(s), 56 minute(s), 56 second(s)",
+    "onlineDuration": "6 day(s), 4 hour(s), 42 minute(s), 18 second(s)",
     "numericTemp": "-",
-    "ts": 1783888464264
+    "ts": 1783977584907
   },
   "0/0/4/21": {
     "description": "OSCAR PUERTA CARDONA_zone_14 DE",
@@ -1097,7 +1097,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888465983
+    "ts": 1783977586629
   },
   "0/0/4/22": {
     "description": "LUIS FERNANDO CARDENAS",
@@ -1106,9 +1106,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 50 second(s)",
-    "numericTemp": "56",
-    "ts": 1783888467703
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 12 second(s)",
+    "numericTemp": "59",
+    "ts": 1783977588948
   },
   "0/0/4/23": {
     "description": "ANA MARIA MAYA DE",
@@ -1117,9 +1117,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "1 day(s), 19 hour(s), 16 minute(s), 6 second(s)",
+    "onlineDuration": "2 day(s), 20 hour(s), 1 minute(s), 29 second(s)",
     "numericTemp": "-",
-    "ts": 1783888469532
+    "ts": 1783977590907
   },
   "0/0/4/24": {
     "description": "LUZ ENTIH ALMECIGAN",
@@ -1128,9 +1128,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 5 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 28 second(s)",
     "numericTemp": "-",
-    "ts": 1783888471366
+    "ts": 1783977592988
   },
   "0/0/4/25": {
     "description": "INGESAS_zone_14 DE",
@@ -1139,9 +1139,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 35 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 58 second(s)",
     "numericTemp": "-",
-    "ts": 1783888475853
+    "ts": 1783977594918
   },
   "0/0/4/26": {
     "description": "JORGE PERILLA GONSALEZ_zone_14",
@@ -1150,9 +1150,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 13 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 33 second(s)",
     "numericTemp": "-",
-    "ts": 1783888477813
+    "ts": 1783977596868
   },
   "0/0/4/27": {
     "description": "CARLOS HUMBERTO MAECHA",
@@ -1161,9 +1161,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 10 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 30 second(s)",
     "numericTemp": "-",
-    "ts": 1783888479644
+    "ts": 1783977598822
   },
   "0/0/4/28": {
     "description": "ANDREA MAYORGA MARROQUIN_zone_14",
@@ -1172,9 +1172,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 17 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 39 second(s)",
     "numericTemp": "-",
-    "ts": 1783888481615
+    "ts": 1783977601618
   },
   "0/0/4/29": {
     "description": "LAURA PARRA_zone_14 DE",
@@ -1183,9 +1183,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 42 minute(s), 56 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 18 second(s)",
     "numericTemp": "-",
-    "ts": 1783888483564
+    "ts": 1783977603688
   },
   "0/0/4/30": {
     "description": "LAURA VALENTINA RIVERA_zone_ALTA",
@@ -1194,9 +1194,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 41 minute(s), 57 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 27 minute(s), 19 second(s)",
     "numericTemp": "-",
-    "ts": 1783888485633
+    "ts": 1783977605899
   },
   "0/0/4/31": {
     "description": "VICTOR ALFONSO VARGAS",
@@ -1205,9 +1205,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 17 hour(s), 9 minute(s), 44 second(s)",
+    "onlineDuration": "6 day(s), 17 hour(s), 55 minute(s), 6 second(s)",
     "numericTemp": "-",
-    "ts": 1783888487293
+    "ts": 1783977607758
   },
   "0/0/5/0": {
     "description": "DEYSI_LORENA_RENGIFO_GARCIA_zone",
@@ -1216,9 +1216,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "4 day(s), 21 hour(s), 23 minute(s), 26 second(s)",
-    "numericTemp": "72",
-    "ts": 1783888490616
+    "onlineDuration": "5 day(s), 22 hour(s), 8 minute(s), 49 second(s)",
+    "numericTemp": "75",
+    "ts": 1783977611319
   },
   "0/0/5/1": {
     "description": "LUZ_BEICY_ECHEVERRY_zone_SAN_FEL",
@@ -1229,7 +1229,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888492727
+    "ts": 1783977613438
   },
   "0/0/5/2": {
     "description": "JHON_EDUAR_DIAZ_BOHORQUEZ_zone_S",
@@ -1238,9 +1238,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 22 hour(s), 42 minute(s), 11 second(s)",
+    "onlineDuration": "4 day(s), 23 hour(s), 27 minute(s), 33 second(s)",
     "numericTemp": "-",
-    "ts": 1783888494912
+    "ts": 1783977615668
   },
   "0/0/5/3": {
     "description": "YADI LORENA BALLESTEROS_zone_SAN",
@@ -1249,9 +1249,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 27 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 49 second(s)",
     "numericTemp": "-",
-    "ts": 1783888496987
+    "ts": 1783977617668
   },
   "0/0/5/4": {
     "description": "RUBELLY_HERMOSA_BERNAL_zone_SAN_",
@@ -1260,9 +1260,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 23 second(s)",
-    "numericTemp": "66",
-    "ts": 1783888499177
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 45 second(s)",
+    "numericTemp": "70",
+    "ts": 1783977619730
   },
   "0/0/5/5": {
     "description": "ERIKA messa franco_zone_CENTRO",
@@ -1273,7 +1273,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888501157
+    "ts": 1783977621698
   },
   "0/0/5/6": {
     "description": "KELY_CAROLINA_VILLAMIL_AGUIRRE_z",
@@ -1282,9 +1282,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 30 second(s)",
-    "numericTemp": "70",
-    "ts": 1783888503228
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 52 second(s)",
+    "numericTemp": "71",
+    "ts": 1783977623899
   },
   "0/0/5/7": {
     "description": "YALIMAR_ANAHIS_VARGAS_CORTEZ_zon",
@@ -1293,9 +1293,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 15 hour(s), 44 minute(s), 39 second(s)",
-    "numericTemp": "69",
-    "ts": 1783888505417
+    "onlineDuration": "1 day(s), 16 hour(s), 30 minute(s), 1 second(s)",
+    "numericTemp": "68",
+    "ts": 1783977625968
   },
   "0/0/5/8": {
     "description": "ERIKA messa franco_zone_CENTRO",
@@ -1306,7 +1306,7 @@
     "lastDownCause": "dying-gasp",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888506957
+    "ts": 1783977627760
   },
   "0/0/6/0": {
     "description": "ABRAHAM_CARMONA_QUINTERO_zone_CO",
@@ -1315,9 +1315,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 34 second(s)",
-    "numericTemp": "72",
-    "ts": 1783888510054
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 56 second(s)",
+    "numericTemp": "74",
+    "ts": 1783977631184
   },
   "0/0/6/1": {
     "description": "HECTOR_JULIAN_SAAVEDRA_AGUDELO_z",
@@ -1326,9 +1326,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 3 hour(s), 31 minute(s), 2 second(s)",
-    "numericTemp": "55",
-    "ts": 1783888511894
+    "onlineDuration": "6 day(s), 4 hour(s), 16 minute(s), 24 second(s)",
+    "numericTemp": "57",
+    "ts": 1783977633194
   },
   "0/0/6/2": {
     "description": "MARIA MERCEDES",
@@ -1337,9 +1337,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 22 hour(s), 8 minute(s), 46 second(s)",
+    "onlineDuration": "1 day(s), 22 hour(s), 54 minute(s), 9 second(s)",
     "numericTemp": "-",
-    "ts": 1783888515643
+    "ts": 1783977635470
   },
   "0/0/6/3": {
     "description": "PAULA ANDREA TORO",
@@ -1348,9 +1348,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 52 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 29 minute(s), 14 second(s)",
     "numericTemp": "-",
-    "ts": 1783888517475
+    "ts": 1783977637459
   },
   "0/0/6/4": {
     "description": "EUGENIA_TORO_AVENDANO_zone_COVIC",
@@ -1359,9 +1359,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 2 hour(s), 11 minute(s), 50 second(s)",
+    "onlineDuration": "6 day(s), 2 hour(s), 57 minute(s), 12 second(s)",
     "numericTemp": "-",
-    "ts": 1783888519675
+    "ts": 1783977639805
   },
   "0/0/6/5": {
     "description": "Maria herminia",
@@ -1372,7 +1372,7 @@
     "lastDownCause": "dying-gasp",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888521385
+    "ts": 1783977641646
   },
   "0/0/6/7": {
     "description": "MARIA_MERCEDES_ZABALA_zone_COVIC",
@@ -1383,7 +1383,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888523213
+    "ts": 1783977643476
   },
   "0/0/6/8": {
     "description": "MARCELA_MARIA_VALENCIA_SANCHEZ_z",
@@ -1394,7 +1394,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888525194
+    "ts": 1783977645369
   },
   "0/0/6/10": {
     "description": "JOSE VICENTE",
@@ -1405,7 +1405,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888527169
+    "ts": 1783977647336
   },
   "0/0/7/0": {
     "description": "DUBAN ALARCON DIAZ_zone_LAS",
@@ -1414,9 +1414,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 7 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 29 minute(s), 29 second(s)",
     "numericTemp": "-",
-    "ts": 1783888530637
+    "ts": 1783977650650
   },
   "0/0/7/1": {
     "description": "ALEXANDRA_CALENO_VILLAMIL_SUAREZ",
@@ -1427,7 +1427,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888532599
+    "ts": 1783977652662
   },
   "0/0/7/2": {
     "description": "ALBERTO MEDIA",
@@ -1436,9 +1436,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 43 minute(s), 36 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 28 minute(s), 58 second(s)",
     "numericTemp": "-",
-    "ts": 1783888534930
+    "ts": 1783977654819
   },
   "0/0/7/3": {
     "description": "LUISA_FERNANDA_RODRIGUEZ_HENAO_z",
@@ -1449,7 +1449,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888536878
+    "ts": 1783977658230
   },
   "0/0/7/4": {
     "description": "YORKLEY_CAROLINA_ESCALONA_AZUAJE",
@@ -1458,9 +1458,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 2 second(s)",
+    "onlineDuration": "10 day(s), 12 hour(s), 29 minute(s), 25 second(s)",
     "numericTemp": "-",
-    "ts": 1783888539087
+    "ts": 1783977660553
   },
   "0/0/7/5": {
     "description": "GIOVANNA YUSIBEL",
@@ -1471,7 +1471,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888540916
+    "ts": 1783977662511
   },
   "0/0/7/6": {
     "description": "JHONATAN_GERARDO_ALVARADO_CALANC",
@@ -1480,9 +1480,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 3 hour(s), 27 minute(s), 44 second(s)",
+    "onlineDuration": "3 day(s), 4 hour(s), 13 minute(s), 7 second(s)",
     "numericTemp": "-",
-    "ts": 1783888542997
+    "ts": 1783977664460
   },
   "0/0/7/7": {
     "description": "LUISA_FERNANDA_CARO_zone_CONGAL_",
@@ -1493,7 +1493,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888544947
+    "ts": 1783977666429
   },
   "0/0/7/8": {
     "description": "BRAYAN_RUIZ_LEITON_zone_LAS_COLI",
@@ -1502,9 +1502,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "0 day(s), 5 hour(s), 4 minute(s), 30 second(s)",
+    "onlineDuration": "1 day(s), 5 hour(s), 49 minute(s), 53 second(s)",
     "numericTemp": "-",
-    "ts": 1783888546794
+    "ts": 1783977668510
   },
   "0/0/7/9": {
     "description": "CYNTHIA_AVILA_ROJAS_zone_CENTRO_",
@@ -1513,9 +1513,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 23 second(s)",
-    "numericTemp": "61",
-    "ts": 1783888548979
+    "onlineDuration": "10 day(s), 12 hour(s), 29 minute(s), 46 second(s)",
+    "numericTemp": "64",
+    "ts": 1783977670593
   },
   "0/0/7/10": {
     "description": "ALEXANDRA_CALENO_VILLAMIL_zone_F",
@@ -1526,7 +1526,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888550940
+    "ts": 1783977672420
   },
   "0/0/7/11": {
     "description": "DIGNORA_ORTEGON_CASTANEDA_zone_1",
@@ -1537,29 +1537,29 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888554091
+    "ts": 1783977674411
   },
   "0/0/7/12": {
     "description": "MONICA ADRIANA LADINO",
-    "distance": "1658",
+    "distance": "1659",
     "matchState": "mismatch",
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "2 day(s), 8 hour(s), 18 minute(s), 37 second(s)",
+    "onlineDuration": "0 day(s), 6 hour(s), 31 minute(s), 13 second(s)",
     "numericTemp": "-",
-    "ts": 1783888556191
+    "ts": 1783977676482
   },
   "0/0/7/13": {
     "description": "DIANA_LUCIA_CAMACHO_PINZON_zone_",
-    "distance": "-",
-    "matchState": "initial",
-    "runState": "offline",
-    "configState": "initial",
+    "distance": "1669",
+    "matchState": "mismatch",
+    "runState": "online",
+    "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "-",
+    "onlineDuration": "0 day(s), 0 hour(s), 8 minute(s), 37 second(s)",
     "numericTemp": "-",
-    "ts": 1783888558030
+    "ts": 1783977678670
   },
   "0/0/7/14": {
     "description": "KARIMAR NATHALIS GARRIDO",
@@ -1570,7 +1570,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888560602
+    "ts": 1783977680660
   },
   "0/0/7/15": {
     "description": "JORGE ELIECER GARCIA",
@@ -1581,7 +1581,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888562320
+    "ts": 1783977682700
   },
   "0/0/7/16": {
     "description": "NATALIA ALEJANDRA CEPEDA_zone_14",
@@ -1592,7 +1592,7 @@
     "lastDownCause": "dying-gasp",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888564159
+    "ts": 1783977684590
   },
   "0/0/7/17": {
     "description": "MILENA GARCIA",
@@ -1603,18 +1603,18 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888566021
+    "ts": 1783977686930
   },
   "0/0/7/18": {
     "description": "LENY GINETH PACHECO",
-    "distance": "-",
-    "matchState": "initial",
-    "runState": "offline",
-    "configState": "initial",
+    "distance": "1850",
+    "matchState": "mismatch",
+    "runState": "online",
+    "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "-",
+    "onlineDuration": "0 day(s), 5 hour(s), 51 minute(s), 18 second(s)",
     "numericTemp": "-",
-    "ts": 1783888567990
+    "ts": 1783977689044
   },
   "0/0/7/19": {
     "description": "CASA DE LA CULTURA",
@@ -1623,9 +1623,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 44 second(s)",
-    "numericTemp": "72",
-    "ts": 1783888570190
+    "onlineDuration": "10 day(s), 12 hour(s), 30 minute(s), 6 second(s)",
+    "numericTemp": "75",
+    "ts": 1783977691191
   },
   "0/1/0/0": {
     "description": "IE_MARIA_AUXILIADORA_zone_CAJA_S",
@@ -1636,7 +1636,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888573216
+    "ts": 1783971916071
   },
   "0/1/0/1": {
     "description": "YEIMI_LORENA_MONTOYA_BERNAL_zone",
@@ -1645,9 +1645,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 36 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 53 minute(s), 40 second(s)",
     "numericTemp": "-",
-    "ts": 1783888575067
+    "ts": 1783971918136
   },
   "0/1/0/2": {
     "description": "JORGE_HERNAN_ARANGON_LEON_zone_1",
@@ -1656,9 +1656,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 50 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 53 minute(s), 54 second(s)",
     "numericTemp": "-",
-    "ts": 1783888576896
+    "ts": 1783971920326
   },
   "0/1/0/3": {
     "description": "ALEJANDRO_ORTEGON_zone_14_DE_AGO",
@@ -1667,9 +1667,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 43 second(s)",
-    "numericTemp": "61",
-    "ts": 1783888578986
+    "onlineDuration": "10 day(s), 10 hour(s), 53 minute(s), 48 second(s)",
+    "numericTemp": "62",
+    "ts": 1783971922305
   },
   "0/1/0/4": {
     "description": "ADONIS RIVEROS",
@@ -1680,7 +1680,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888580946
+    "ts": 1783971924146
   },
   "0/1/0/5": {
     "description": "KEYMILIN YULIETH GARCIA",
@@ -1691,7 +1691,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888582667
+    "ts": 1783971925867
   },
   "0/1/0/6": {
     "description": "ZONA WIFI BARCELONA_zone_14 DE",
@@ -1700,9 +1700,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 53 second(s)",
-    "numericTemp": "76",
-    "ts": 1783888584516
+    "onlineDuration": "10 day(s), 12 hour(s), 24 minute(s), 28 second(s)",
+    "numericTemp": "82",
+    "ts": 1783977360056
   },
   "0/1/0/7": {
     "description": "HENRY_EDISON_RAVE_DAZA_zone_POPU",
@@ -1711,9 +1711,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 3 hour(s), 58 minute(s), 17 second(s)",
+    "onlineDuration": "4 day(s), 3 hour(s), 7 minute(s), 22 second(s)",
     "numericTemp": "-",
-    "ts": 1783888586706
+    "ts": 1783971930256
   },
   "0/1/0/9": {
     "description": "NATALIA_GUERRA_OCAMPO_zone_PORVE",
@@ -1722,9 +1722,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 59 second(s)",
-    "numericTemp": "68",
-    "ts": 1783888588783
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 4 second(s)",
+    "numericTemp": "69",
+    "ts": 1783971932338
   },
   "0/1/0/10": {
     "description": "ROSA_ELENA_CHICANGANA_BURBANO_zo",
@@ -1735,7 +1735,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888590616
+    "ts": 1783971934306
   },
   "0/1/0/11": {
     "description": "JHON ALEXANDER ARIZA URIBE",
@@ -1746,7 +1746,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888592336
+    "ts": 1783971936027
   },
   "0/1/0/12": {
     "description": "CRISTIAN_CAMILO_LOPEZ_OCAMPO_zon",
@@ -1755,9 +1755,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 17 second(s)",
-    "numericTemp": "56",
-    "ts": 1783888594178
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 22 second(s)",
+    "numericTemp": "58",
+    "ts": 1783971938216
   },
   "0/1/0/13": {
     "description": "Juan Carlos Saenz Brinez_zone_14",
@@ -1766,9 +1766,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 44 minute(s), 55 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 0 second(s)",
     "numericTemp": "-",
-    "ts": 1783888595846
+    "ts": 1783971939866
   },
   "0/1/0/14": {
     "description": "ALBEIRO_SUAREZ_CLAVIJO_zone_CONG",
@@ -1777,9 +1777,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 23 second(s)",
-    "numericTemp": "68",
-    "ts": 1783888597746
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 28 second(s)",
+    "numericTemp": "69",
+    "ts": 1783971941796
   },
   "0/1/0/15": {
     "description": "MARIA_EMILIA_DIAZ_DIAZ_zone_14_D",
@@ -1788,9 +1788,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "6 day(s), 0 hour(s), 17 minute(s), 35 second(s)",
+    "onlineDuration": "6 day(s), 23 hour(s), 26 minute(s), 41 second(s)",
     "numericTemp": "-",
-    "ts": 1783888599468
+    "ts": 1783971943616
   },
   "0/1/0/16": {
     "description": "RULBER_LAZO_CORTES_zone_PORVENIR",
@@ -1799,9 +1799,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 10 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 16 second(s)",
     "numericTemp": "-",
-    "ts": 1783888601296
+    "ts": 1783971945576
   },
   "0/1/0/17": {
     "description": "JOSE ANIBAL VALENCIA",
@@ -1810,9 +1810,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "5 day(s), 0 hour(s), 35 minute(s), 4 second(s)",
+    "onlineDuration": "5 day(s), 23 hour(s), 44 minute(s), 10 second(s)",
     "numericTemp": "-",
-    "ts": 1783888603027
+    "ts": 1783971947315
   },
   "0/1/0/18": {
     "description": "MARIA_DE_LOS_ANGELES_MONTANO_CAM",
@@ -1821,9 +1821,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 16 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 21 second(s)",
     "numericTemp": "-",
-    "ts": 1783888604967
+    "ts": 1783971949146
   },
   "0/1/0/19": {
     "description": "LINA MARCELA ORDONED",
@@ -1832,9 +1832,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 26 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 31 second(s)",
     "numericTemp": "-",
-    "ts": 1783888606916
+    "ts": 1783971950975
   },
   "0/1/0/20": {
     "description": "HORACIO_ANTONIO_ARBELAEZ_OSORIO_",
@@ -1843,9 +1843,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "1 day(s), 19 hour(s), 25 minute(s), 27 second(s)",
+    "onlineDuration": "2 day(s), 18 hour(s), 34 minute(s), 32 second(s)",
     "numericTemp": "-",
-    "ts": 1783888608757
+    "ts": 1783971953048
   },
   "0/1/0/21": {
     "description": "ANTONIO_MARIA_ORTIZ_RIOS_zone_14",
@@ -1854,9 +1854,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 23 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 29 second(s)",
     "numericTemp": "-",
-    "ts": 1783888610594
+    "ts": 1783971954867
   },
   "0/1/0/22": {
     "description": "JESSICA VIVIANA DIAZ",
@@ -1865,9 +1865,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 9 hour(s), 30 minute(s), 49 second(s)",
+    "onlineDuration": "4 day(s), 8 hour(s), 39 minute(s), 55 second(s)",
     "numericTemp": "-",
-    "ts": 1783888612554
+    "ts": 1783971957087
   },
   "0/1/0/23": {
     "description": "MARIA GLADIS GARCIA",
@@ -1876,9 +1876,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "4 day(s), 19 hour(s), 39 minute(s), 16 second(s)",
+    "onlineDuration": "5 day(s), 18 hour(s), 48 minute(s), 22 second(s)",
     "numericTemp": "-",
-    "ts": 1783888614214
+    "ts": 1783971958958
   },
   "0/1/0/24": {
     "description": "YULIANA VALENTINA VANEGAS",
@@ -1889,7 +1889,7 @@
     "lastDownCause": "dying-gasp",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888615893
+    "ts": 1783971960765
   },
   "0/1/1/0": {
     "description": "GERALDIN_HENAO_ANGEL_zone_CAJA_0",
@@ -1898,9 +1898,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 18 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 24 second(s)",
     "numericTemp": "-",
-    "ts": 1783888619408
+    "ts": 1783971964146
   },
   "0/1/1/2": {
     "description": "YEISON_ADRIAN_HENAO_HENAO_zone_C",
@@ -1909,9 +1909,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "4 day(s), 4 hour(s), 41 minute(s), 50 second(s)",
-    "numericTemp": "64",
-    "ts": 1783888621478
+    "onlineDuration": "5 day(s), 3 hour(s), 50 minute(s), 57 second(s)",
+    "numericTemp": "68",
+    "ts": 1783971966685
   },
   "0/1/1/3": {
     "description": "MONICA_LIZETH_LONDONO_RIANO_zone",
@@ -1922,7 +1922,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888623007
+    "ts": 1783971968326
   },
   "0/1/1/4": {
     "description": "EL_GURU_NUTRICIONAL_zone_14_DE_A",
@@ -1931,9 +1931,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 41 second(s)",
-    "numericTemp": "63",
-    "ts": 1783888625058
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 48 second(s)",
+    "numericTemp": "65",
+    "ts": 1783971970355
   },
   "0/1/1/5": {
     "description": "JONATHAN CHARLY MOLANO",
@@ -1944,7 +1944,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888626767
+    "ts": 1783971972328
   },
   "0/1/1/6": {
     "description": "IE_SAN_BERNARDO_OFICINAS_zone_14",
@@ -1953,9 +1953,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "ONT is reset by ONT software",
-    "onlineDuration": "5 day(s), 4 hour(s), 8 minute(s), 5 second(s)",
+    "onlineDuration": "6 day(s), 3 hour(s), 17 minute(s), 12 second(s)",
     "numericTemp": "72",
-    "ts": 1783888629317
+    "ts": 1783971974409
   },
   "0/1/1/7": {
     "description": "HECTOR FABIO LOPEZ",
@@ -1964,9 +1964,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 35 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 42 second(s)",
     "numericTemp": "-",
-    "ts": 1783888631280
+    "ts": 1783971976385
   },
   "0/1/1/8": {
     "description": "IE SAN BERNARDO PPAL_zone_14 DE",
@@ -1975,9 +1975,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "10 day(s), 9 hour(s), 49 minute(s), 35 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 57 second(s)",
     "numericTemp": "81",
-    "ts": 1783968057399
+    "ts": 1783971978136
   },
   "0/1/2/0": {
     "description": "YURY TATIANA MEJIA",
@@ -1986,9 +1986,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "3 day(s), 21 hour(s), 9 minute(s), 41 second(s)",
-    "numericTemp": "54",
-    "ts": 1783888635790
+    "onlineDuration": "4 day(s), 20 hour(s), 18 minute(s), 47 second(s)",
+    "numericTemp": "56",
+    "ts": 1783971981364
   },
   "0/1/2/1": {
     "description": "JESUS_ALBERTO_ORRREGO_POSADA_zon",
@@ -1996,10 +1996,10 @@
     "matchState": "mismatch",
     "runState": "online",
     "configState": "normal",
-    "lastDownCause": "ONT is reset by ONT command",
-    "onlineDuration": "2 day(s), 21 hour(s), 41 minute(s), 8 second(s)",
-    "numericTemp": "62",
-    "ts": 1783888637854
+    "lastDownCause": "dying-gasp",
+    "onlineDuration": "0 day(s), 17 hour(s), 11 minute(s), 53 second(s)",
+    "numericTemp": "63",
+    "ts": 1783971983441
   },
   "0/1/2/2": {
     "description": "JAVIER ALBERTO VERGARA",
@@ -2008,9 +2008,9 @@
     "runState": "online",
     "configState": "failed",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 27 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 34 second(s)",
     "numericTemp": "-",
-    "ts": 1783888639814
+    "ts": 1783971985509
   },
   "0/1/2/3": {
     "description": "NILSON",
@@ -2019,9 +2019,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 28 second(s)",
+    "onlineDuration": "10 day(s), 10 hour(s), 54 minute(s), 35 second(s)",
     "numericTemp": "-",
-    "ts": 1783888641464
+    "ts": 1783971987340
   },
   "0/1/2/4": {
     "description": "ROMELIA DUQUE_zone_14 DE",
@@ -2030,9 +2030,9 @@
     "runState": "online",
     "configState": "normal",
     "lastDownCause": "dying-gasp",
-    "onlineDuration": "9 day(s), 11 hour(s), 45 minute(s), 59 second(s)",
-    "numericTemp": "56",
-    "ts": 1783888645524
+    "onlineDuration": "10 day(s), 10 hour(s), 55 minute(s), 5 second(s)",
+    "numericTemp": "58",
+    "ts": 1783971989240
   },
   "0/1/2/5": {
     "description": "JESUS_ALBERTO_ORRREGO_POSADA_zon",
@@ -2043,7 +2043,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888647363
+    "ts": 1783971991019
   },
   "0/1/3/11": {
     "description": "MARTHA_ISABEL_VASQUEZ_MEJIA_zone",
@@ -2054,7 +2054,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888650394
+    "ts": 1783971994031
   },
   "0/1/4/0": {
     "description": "DUBERLEY HERNAN LOPEZ",
@@ -2065,7 +2065,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888653117
+    "ts": 1783971996618
   },
   "0/1/4/1": {
     "description": "c_zone_14 DE",
@@ -2076,18 +2076,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888654594
-  },
-  "0/1/4/2": {
-    "description": "CDT - 44433930E6824B5E",
-    "distance": "75",
-    "matchState": "mismatch",
-    "runState": "online",
-    "configState": "normal",
-    "lastDownCause": "-",
-    "onlineDuration": "0 day(s), 20 hour(s), 33 minute(s), 15 second(s)",
-    "numericTemp": "-",
-    "ts": 1783888656734
+    "ts": 1783971998110
   },
   "0/1/5/1": {
     "description": "CC_7535429_JORGE_LUIS_CADAVID_RO",
@@ -2098,7 +2087,7 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888660978
+    "ts": 1783972001547
   },
   "0/1/5/2": {
     "description": "..",
@@ -2109,6 +2098,17 @@
     "lastDownCause": "-",
     "onlineDuration": "-",
     "numericTemp": "-",
-    "ts": 1783888662377
+    "ts": 1783972003050
+  },
+  "0/1/4/2": {
+    "description": "OFI",
+    "distance": "76",
+    "matchState": "match",
+    "runState": "online",
+    "configState": "normal",
+    "lastDownCause": "reset",
+    "onlineDuration": "0 day(s), 0 hour(s), 0 minute(s), 32 second(s)",
+    "numericTemp": "-",
+    "ts": 1783976461125
   }
 }

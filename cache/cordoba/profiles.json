@@ -1,0 +1,131 @@
+{
+  "ts": 1783976661208,
+  "lineProfiles": [
+    {
+      "id": "0",
+      "name": "line-profile_default_0"
+    },
+    {
+      "id": "1",
+      "name": "SMARTOLT_FLEXIBLE_GPON"
+    },
+    {
+      "id": "3",
+      "name": "Generic_1_V101"
+    },
+    {
+      "id": "4",
+      "name": "SmartOLT_G"
+    }
+  ],
+  "srvProfiles": [
+    {
+      "id": "0",
+      "name": "srv-profile_default_0"
+    },
+    {
+      "id": "1",
+      "name": "FD511GW-X-R310"
+    },
+    {
+      "id": "2",
+      "name": "HS8545M5"
+    },
+    {
+      "id": "3",
+      "name": "ONU2404K"
+    },
+    {
+      "id": "4",
+      "name": "EG8141A5"
+    },
+    {
+      "id": "5",
+      "name": "FD-HG8410A"
+    },
+    {
+      "id": "6",
+      "name": "HG8546M"
+    },
+    {
+      "id": "7",
+      "name": "HG8010H"
+    },
+    {
+      "id": "8",
+      "name": "ZTE-F668"
+    },
+    {
+      "id": "9",
+      "name": "FD512XW-X-R330"
+    },
+    {
+      "id": "10",
+      "name": "ONT1GEW"
+    },
+    {
+      "id": "11",
+      "name": "HS8145V"
+    },
+    {
+      "id": "12",
+      "name": "HG8245H"
+    },
+    {
+      "id": "13",
+      "name": "FD511GW-X-R330"
+    },
+    {
+      "id": "14",
+      "name": "ZG121"
+    },
+    {
+      "id": "15",
+      "name": "RG2802W"
+    },
+    {
+      "id": "16",
+      "name": "GPN"
+    },
+    {
+      "id": "17",
+      "name": "FD512XW-X-R410"
+    },
+    {
+      "id": "18",
+      "name": "HG865"
+    },
+    {
+      "id": "19",
+      "name": "Generic_1_V101"
+    },
+    {
+      "id": "20",
+      "name": "ZXHN-F680"
+    },
+    {
+      "id": "21",
+      "name": "HG8245"
+    },
+    {
+      "id": "22",
+      "name": "FD512XW-X-R"
+    },
+    {
+      "id": "23",
+      "name": "VSOLV711"
+    },
+    {
+      "id": "24",
+      "name": "ONU-type-eth-4-pots-2-catv-1"
+    },
+    {
+      "id": "25",
+      "name": "VSOLV452"
+    },
+    {
+      "id": "26",
+      "name": "EG8021V5"
+    }
+  ]
+}
