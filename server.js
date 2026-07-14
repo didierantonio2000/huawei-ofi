@@ -14,16 +14,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // ─── Servidor HTTP + Websocket ────────────────────────────────────────────────
+// socket.io sirve su propio cliente en /socket.io/socket.io.js automaticamente,
+// no hace falta instalar nada aparte en el frontend.
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
 io.on("connection", (socket) => {
+  // Al conectarse un cliente nuevo (o al recargar la pagina), le mandamos el
+  // estado actual de una vez, para que no tenga que esperar al proximo cambio.
   socket.emit("sync:status", syncStatus);
 });
 
 // ─── Config OLT ──────────────────────────────────────────────────────────────
 const OLT = { host: "45.162.79.228", port: 2333, user: "smartolt", pass: "smart2021" };
 const AUTO_SYNC_MINUTES = parseInt(process.env.AUTO_SYNC_MINUTES) || 5;
+// Por defecto NO se sincroniza sola: ni al arrancar ni cada X minutos.
+// Solo corre cuando el usuario presiona el botón "Sincronizar" / "Sincronizar Todo".
+// Si en algún momento se quiere volver a la sync automática, arrancar con
+// AUTO_SYNC_ENABLED=1 en el entorno.
 const AUTO_SYNC_ENABLED = process.env.AUTO_SYNC_ENABLED === "1";
 
 // ─── Cache en disco ───────────────────────────────────────────────────────────
@@ -45,6 +53,9 @@ function writeCache(file, data) {
 let syncStatus = { running: false, step: "idle", progress: 0, total: 0, lastSync: null, lastError: null, mode: null, changes: null };
 let syncRunning = false;
 
+// Reemplaza/mezcla syncStatus y de una vez lo empuja a todos los clientes
+// conectados por websocket — así el frontend deja de tener que hacer polling
+// para saber el progreso del sync.
 function setStatus(next) {
   syncStatus = next;
   io.emit("sync:status", syncStatus);
@@ -63,7 +74,7 @@ class OltSession {
     this.buffer = "";
     this.waiter = null;
     this.connectTimeout = timeout;
-    this.closed = false;
+    this.closed = false; // NEW: bandera para sesiones muertas
   }
 
   connect() {
@@ -149,7 +160,7 @@ class OltSession {
       
       const timer = setTimeout(() => { 
         this.waiter = null;
-        this._cleanup();
+        this._cleanup(); // NEW: limpiar sesión en timeout
         reject(new Error("Timeout esperando: " + marker)); 
       }, timeout);
       
@@ -176,6 +187,8 @@ class OltSession {
     return this.waitFor(marker, timeout);
   }
 
+  // Igual que waitFor, pero acepta varios markers posibles (ej: el prompt normal
+  // O una pregunta de confirmación tipo "are you sure"). Devuelve cuál hizo match.
   waitForAny(markers, timeout = 22000) {
     return new Promise((resolve, reject) => {
       if (this.closed) return reject(new Error("Session closed"));
@@ -189,7 +202,7 @@ class OltSession {
       
       const timer = setTimeout(() => { 
         this.waiter = null;
-        this._cleanup();
+        this._cleanup(); // NEW: limpiar sesión en timeout
         reject(new Error("Timeout esperando: " + markers.join(" | "))); 
       }, timeout);
       
@@ -234,7 +247,10 @@ async function withOltRaw(fn, timeout) {
   try { return await fn(s); } finally { await s.destroy(); }
 }
 
-// ─── Connection Pool para Telnet ──────────────────────────────────────────────
+// ─── Connection Pool para Telnet (MEJORA #2) ──────────────────────────────────
+// En lugar de una cola serializada (una conexión a la vez), ahora usamos un pool
+// que permite N conexiones simultáneas. Esto acelera sync, autorizaciones, etc.
+// sin saturar la OLT. Por defecto: 3 conexiones máximo.
 const TELNET_POOL_SIZE = parseInt(process.env.TELNET_POOL_SIZE) || 3;
 
 class TelnetPool {
@@ -245,6 +261,7 @@ class TelnetPool {
   }
 
   async run(fn, timeout) {
+    // Si ya hay N conexiones activas, esperar a que se libere una
     while (this.running >= this.maxConcurrent) {
       await new Promise(resolve => this.queue.push(resolve));
     }
@@ -267,6 +284,14 @@ function withOlt(fn, timeout) {
 }
 
 // ─── Parsers ──────────────────────────────────────────────────────────────────
+
+// El serial real de una ONT (columna "SN/LOID") siempre es un identificador
+// hexadecimal (ej: 4857544304CEEA9E). Cuando la OLT corta una descripción
+// larga por falta de ancho de terminal, la línea de continuación queda
+// pareciendo una fila nueva y el regex de abajo la matchea igual, pero mete
+// texto de la descripción/dirección en la columna de serial (ej: "VECINA",
+// "MARIA"). Validamos el formato acá y descartamos esas filas fantasma en
+// vez de guardar un serial mentiroso.
 const SN_RE = /^[0-9A-Fa-f]{8,20}$/;
 function looksLikeSn(s) { return !!s && SN_RE.test(s); }
 
@@ -277,9 +302,9 @@ function parseOntTable(raw) {
   for (const line of raw.split("\n")) {
     const m = line.match(re);
     if (m) {
-      if (!looksLikeSn(m[5])) continue;
+      if (!looksLikeSn(m[5])) continue; // fila corrupta (línea de continuación) — descartar
       const key = m[1] + "/" + m[2] + "/" + m[3] + "/" + m[4];
-      if (seen.has(key)) continue;
+      if (seen.has(key)) continue; // ya tenemos esta ONT, no duplicar
       seen.add(key);
       onts.push({
         frame:       m[1],
@@ -331,14 +356,23 @@ function parseAutofind(raw) {
   return onts;
 }
 
+// Parser genérico para "display ont-lineprofile gpon all" / "display ont-srvprofile gpon all"
+// Formato típico (Huawei):
+//  ------------------------------------------------------------
+//   Profile-ID  Profile-name         Bind-times
+//  ------------------------------------------------------------
+//   0           HW_LINE              0
+//   1           default-profile      3
+//  ------------------------------------------------------------
 function parseProfileList(raw) {
   const profiles = [];
   for (const line of raw.split("\n")) {
     const t = line.trim();
     if (!t || /^-+$/.test(t)) continue;
-    if (/profile-id/i.test(t)) continue;
+    if (/profile-id/i.test(t)) continue; // encabezado
     const m = t.match(/^(\d+)\s+(\S.*)$/);
     if (m) {
+      // Quitamos columnas extra (ej. bind-times) dejando solo el nombre del perfil
       const rest = m[2].trim().split(/\s{2,}/)[0].trim();
       profiles.push({ id: m[1], name: rest });
     }
@@ -356,6 +390,11 @@ async function getProfiles(session) {
 }
 
 async function getAllOntsFull(session) {
+  // FIX (cruce serial/descripcion): sin esto, la OLT corta las descripciones
+  // largas en la salida de "display ont info ... all" y la línea de
+  // continuación queda pareciendo una fila nueva al parser, mezclando
+  // serial/estado/descripcion entre ONTs distintas. Mismo fix que ya se
+  // aplicaba en autorizar/borrar, pero acá faltaba.
   await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
   await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
   const boardRaw = await session.cmd("display board 0", "BARCELONA(config)#", 30000);
@@ -382,9 +421,15 @@ async function getAllOntsFull(session) {
 
 const ontKey = (o) => o.frame + "/" + o.slot + "/" + o.pon + "/" + o.ontId;
 
+// Valores que la OLT pone cuando no hay descripción real configurada
 const FAKE_DESC = new Set(["no","—","-","n/a","none","null",""," ","\t"]);
 function isFakeDesc(d) { return !d || FAKE_DESC.has(d.trim().toLowerCase()); }
 
+// Blindaje extra: si el valor que se parseó como "Description" en realidad es
+// una palabra de estado (online/offline/etc.), es señal de que la respuesta de
+// la OLT vino mezclada/incompleta — se descarta en vez de guardar un campo
+// mentiroso. (La causa raíz era la falta de cola en withOlt, ya corregida arriba,
+// pero esto queda como segunda capa de seguridad).
 const STATE_WORDS = new Set(["online","offline","dying-gasp","los","losi","up","down"]);
 function safeDescription(desc) {
   if (!desc) return null;
@@ -406,15 +451,19 @@ async function runQuickSync() {
     const oldCache = readCache(ONT_CACHE);
     const hasCache = !!oldCache;
 
+    // Paso 1: Escaneo bulk (siempre necesario)
     const onts = await withOlt(getAllOntsFull, 60000);
     writeCache(ONT_CACHE, { ts: Date.now(), onts });
     console.log("[QUICK SYNC] " + onts.length + " ONTs en la OLT (escaneo: " + Math.round((Date.now()-t0)/1000) + "s)");
+    // La tabla base (sin óptica/detalle todavía) ya está lista — avisar a los
+    // clientes conectados para que puedan mostrar de una vez frame/slot/pon/sn.
     io.emit("onts:base", onts);
 
     const detCache = readCache(DETAIL_CACHE) || {};
     const optCache = readCache(OPT_CACHE) || {};
     const newKeySet = new Set(onts.map(ontKey));
 
+    // Paso 2: Comparar con caché anterior
     let toFetch = [];
     let removedCount = 0;
     let newCount = 0;
@@ -473,6 +522,7 @@ async function runQuickSync() {
       }
     }
 
+    // Paso 3: Fetch solo lo necesario
     patchStatus({ total: toFetch.length });
     const skipped = onts.length - toFetch.length;
 
@@ -536,6 +586,8 @@ async function runQuickSync() {
               }
 
               done++;
+              // Empujar esta ONT ya actualizada a todos los clientes conectados,
+              // así la fila se refresca en vivo sin esperar a que termine todo el sync.
               io.emit("ont:update", mergeOntView(o, optCache, detCache));
               patchStatus({ progress: done, step: "Actualizando: " + done + "/" + toFetch.length });
             }
@@ -675,18 +727,23 @@ async function runFullSync() {
 app.get("/api/healthz", (_, res) => res.json({ status: "ok", olt: OLT.host }));
 app.get("/api/status", (_, res) => res.json(syncStatus));
 
+// Quick sync (por defecto — botón verde "Sincronizar")
 app.post("/api/sync", (req, res) => {
   if (syncRunning) return res.json({ ok: false, message: "Sincronización en progreso" });
   runQuickSync().catch(e => console.error(e.message));
   res.json({ ok: true, message: "Sincronización rápida iniciada", mode: "quick" });
 });
 
+// Full sync (manual — botón amarillo "Sincronizar Todo")
 app.post("/api/sync/full", (req, res) => {
   if (syncRunning) return res.json({ ok: false, message: "Sincronización en progreso" });
   runFullSync().catch(e => console.error(e.message));
   res.json({ ok: true, message: "Sincronización completa iniciada", mode: "full" });
 });
 
+// Combina la fila cruda de la tabla con lo que haya en cache de óptica/detalle.
+// La usa tanto GET /api/onts como los emits de websocket "ont:update", para que
+// el objeto que ve el navegador sea siempre igual venga por donde venga.
 function mergeOntView(o, optCache, detCache) {
   const key = ontKey(o);
   const opt = optCache[key] || {};
@@ -721,13 +778,9 @@ app.get("/api/ont/nextid/:f/:s/:p", (req, res) => {
   const { f, s, p } = req.params;
   const profCache = readCache(PROFILE_CACHE);
   const profiles = { lineProfiles: profCache ? profCache.lineProfiles : null, srvProfiles: profCache ? profCache.srvProfiles : null };
-  
-  // Incluir VLANs disponibles para el formulario
-  const vlanCache = readCache(VLAN_CACHE);
-  const vlans = vlanCache ? vlanCache.vlans : [];
 
   const ontCache = readCache(ONT_CACHE);
-  if (!ontCache) return res.json({ nextId: 0, used: [], vlans, ...profiles });
+  if (!ontCache) return res.json({ nextId: 0, used: [], ...profiles });
 
   const used = new Set(
     ontCache.onts
@@ -736,7 +789,7 @@ app.get("/api/ont/nextid/:f/:s/:p", (req, res) => {
   );
   let next = 0;
   while (used.has(next) && next < 128) next++;
-  res.json({ nextId: next, used: [...used].sort((a, b) => a - b), vlans, ...profiles });
+  res.json({ nextId: next, used: [...used].sort((a, b) => a - b), ...profiles });
 });
 
 app.get("/api/ont/:f/:s/:p/:id", async (req, res) => {
@@ -784,6 +837,8 @@ app.get("/api/ont/:f/:s/:p/:id", async (req, res) => {
     });
     res.json(detail);
 
+    // Avisar por websocket a todas las pestañas abiertas (esta u otras) que
+    // esta ONT tiene datos nuevos, para que refresquen la fila sin recargar.
     try {
       const ontCache = readCache(ONT_CACHE);
       const row = ontCache && ontCache.onts.find(o => String(o.frame) === String(f) && String(o.slot) === String(s) && String(o.pon) === String(p) && String(o.ontId) === String(id));
@@ -800,10 +855,6 @@ app.get("/api/autofind", async (req, res) => {
   try {
     const cachedProfiles = readCache(PROFILE_CACHE);
     const profilesFresh = cachedProfiles && (Date.now() - cachedProfiles.ts) < 3600000;
-    
-    // También cargar VLANs cacheadas
-    const cachedVlans = readCache(VLAN_CACHE);
-    const vlansFresh = cachedVlans && (Date.now() - cachedVlans.ts) < 3600000;
 
     const result = await withOlt(async (session) => {
       const raw = await session.cmd("display ont autofind all", "BARCELONA(config)#", 35000);
@@ -817,28 +868,14 @@ app.get("/api/autofind", async (req, res) => {
         writeCache(PROFILE_CACHE, { ts: Date.now(), ...profiles });
       }
 
-      // Obtener VLANs si no están frescas
-      let vlans;
-      if (vlansFresh) {
-        vlans = cachedVlans.vlans;
-      } else {
-        const vlanRaw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
-        const found = new Set();
-        for (const line of vlanRaw.split("\n")) {
-          const ms = line.match(/\b(\d{2,4})\b/g);
-          if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.add(n); });
-        }
-        vlans = [...found].sort((a, b) => a - b);
-        writeCache(VLAN_CACHE, { ts: Date.now(), vlans: vlans });
-      }
-
-      return { onts, vlans, ...profiles };
+      return { onts, ...profiles };
     }, 60000);
 
     res.json(result);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Perfiles solos, por si el frontend los necesita sin correr autofind
 app.get("/api/profiles", async (req, res) => {
   const force = req.query.force === "1" || req.query.force === "true";
   const cached = !force ? readCache(PROFILE_CACHE) : null;
@@ -870,33 +907,38 @@ app.get("/api/vlans", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ENDPOINT DE AUTORIZACIÓN — CORREGIDO: AHORA CONFIGURA VLAN Y MODO ROUTER/BRIDGE
-// ═══════════════════════════════════════════════════════════════════════════════
 app.post("/api/ont/autorizar", async (req, res) => {
-  const { 
-    frame = "0", slot, pon, ontId, sn, 
-    lineProfile = "101", serviceProfile = "1", 
-    desc = "", 
-    vlan: reqVlan,           // VLAN opcional — si no viene, se obtiene de la OLT
-    mode = "router",         // Modo: "router" (por defecto) o "bridge"
-    authType = "sn-auth" 
+  const {
+    frame = "0", slot, pon, ontId, sn,
+    lineProfile = "101", serviceProfile = "1",
+    desc = "", vlan, authType = "sn-auth",
+    // NUEVO: modo de autorización. "router" (default) = la ONT enruta ella
+    // misma (WAN por OMCI). "bridge" = la ONT solo transporta el VLAN del
+    // cliente hacia el OLT (service-port), sin rutear.
+    mode = "router",
+    // NUEVO: solo aplica en modo router. "dhcp" (default) o "pppoe".
+    wanIpMode = "dhcp",
+    pppoeUser = "",
+    pppoePass = "",
   } = req.body;
-  
+
   if (!slot || !pon || !ontId || !sn) {
     return res.status(400).json({ error: "Faltan: slot, pon, ontId, sn" });
   }
+  // NUEVO: sin VLAN no hay forma de autorizar servicio real, ni en bridge
+  // ni en router — antes se aceptaba vacío y por eso nunca quedaba autorizada.
+  if (!vlan) {
+    return res.status(400).json({ error: "Falta la VLAN (se obtiene de /api/vlans o se tipea manual)" });
+  }
 
-  // Limpiar comillas internas por seguridad
+  const bridgeMode = mode === "bridge";
+
+  // 1. Limpiamos comillas internas por seguridad
   const cleanDesc = (desc || sn).replace(/["']/g, "");
 
   const authMethod = authType === "password-auth" ? "password-auth" : "sn-auth";
-  
-  // Normalizar modo: solo "bridge" o "router" (default)
-  const isBridge = mode && mode.toLowerCase() === "bridge";
-  const effectiveMode = isBridge ? "bridge" : "router";
 
-  // Comando 1: Alta de ONT
+  // 2. Alta de la ONT a nivel OMCI/línea (esto YA andaba bien, se deja igual)
   const ontCmd = [
     "ont", "add", pon,
     ontId,
@@ -909,150 +951,111 @@ app.post("/api/ont/autorizar", async (req, res) => {
 
   try {
     const result = await withOlt(async (session) => {
-      // Aumentar ancho del terminal para evitar cortes
+
       await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
       await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
 
-      // Entrar a la interfaz GPON
+      // Entrar a la interfaz
       await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
 
-      // ─── PASO 1: Alta de la ONT ─────────────────────────────────────────
-      const r1 = await session.cmd(ontCmd, "BARCELONA(config-if-gpon", 25000);
-      const addSuccess = r1.toLowerCase().includes("success") || r1.includes("ont-add");
-      
-      if (!addSuccess) {
-        await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
-        return { 
-          success: false, 
-          raw: r1, 
-          cmd: ontCmd,
-          step: "ont-add",
-          message: "Error al agregar ONT — revisar serial/profiles"
-        };
-      }
+      // Alta de la ONT
+      const addRaw = await session.cmd(ontCmd, "BARCELONA(config-if-gpon", 25000);
+      const addOk = !/failure|error|fail\b/i.test(addRaw);
 
-      let allRaw = r1;
-      let usedVlan = null;
-      let vlanSource = "none";
-      const commandsExecuted = [ontCmd];
+      // 3. NUEVO: paso que faltaba — sin esto la ONT queda "agregada" pero
+      // sin ningún servicio asociado, por eso no autorizaba ni por VLAN ni
+      // en modo router.
+      let serviceCmd = "";
+      let serviceRaw = "";
+      let serviceOk = true;
 
-      // ─── PASO 2: Obtener VLAN (automático si no se proporcionó) ─────────
-      if (reqVlan && parseInt(reqVlan) >= 100 && parseInt(reqVlan) <= 4094) {
-        // VLAN proporcionada manualmente
-        usedVlan = parseInt(reqVlan);
-        vlanSource = "manual";
-      } else {
-        // Obtener VLAN de la OLT automáticamente
-        try {
-          // Salir temporalmente para consultar VLANs
-          await session.cmd("quit", "BARCELONA(config)#", 5000);
-          const vlanRaw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
-          const found = [];
-          for (const line of vlanRaw.split("\n")) {
-            const ms = line.match(/\b(\d{2,4})\b/g);
-            if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.push(n); });
-          }
-          const uniqueVlans = [...new Set(found)].sort((a, b) => a - b);
-          
-          // Guardar en caché
-          writeCache(VLAN_CACHE, { ts: Date.now(), vlans: uniqueVlans });
-          
-          // Usar la primera VLAN disponible
-          if (uniqueVlans.length > 0) {
-            usedVlan = uniqueVlans[0];
-            vlanSource = "auto-olt";
-          }
-          
-          // Volver a entrar a la interfaz
-          await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
-        } catch (e) {
-          console.error("[AUTH] Error obteniendo VLAN automática:", e.message);
-          // Intentar volver a la interfaz
+      if (addOk) {
+        if (bridgeMode) {
+          // ── MODO BRIDGE ──────────────────────────────────────────────
+          // service-port se ejecuta a nivel (config)#, no dentro de
+          // "interface gpon", así que salimos de la interfaz primero.
+          await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
+          serviceCmd = [
+            "service-port", "vlan", vlan,
+            "gpon", frame + "/" + slot + "/" + pon,
+            "ont", ontId, "gemport", "0",
+            "multi-service", "user-vlan", vlan
+          ].join(" ");
           try {
-            await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
-          } catch {}
-        }
-      }
-
-      // ─── PASO 3: Configurar VLAN nativa en el puerto ETH de la ONT ──────
-      if (usedVlan) {
-        // Comando para asignar VLAN nativa al puerto 1 de la ONT
-        const vlanCmd = "ont port native-vlan " + pon + " " + ontId + " eth 1 vlan " + usedVlan;
-        const r2 = await session.cmd(vlanCmd, "BARCELONA(config-if-gpon", 15000);
-        allRaw += "\n\n[VLAN] " + vlanCmd + "\n" + r2;
-        commandsExecuted.push(vlanCmd);
-      }
-
-      // ─── PASO 4: Configurar modo ROUTER o BRIDGE ────────────────────────
-      if (effectiveMode === "router") {
-        // En modo ROUTER: configurar IP por DHCP en la ONT
-        // Esto hace que la ONT obtenga IP del servidor DHCP del ISP
-        const ipCmd = "ont ip config " + pon + " " + ontId + " dhcp";
-        const r3 = await session.cmd(ipCmd, "BARCELONA(config-if-gpon", 15000);
-        allRaw += "\n\n[ROUTER] " + ipCmd + "\n" + r3;
-        commandsExecuted.push(ipCmd);
-        
-        // También configurar la VLAN en el contexto IP si es necesario
-        if (usedVlan) {
-          const ipVlanCmd = "ont ip config " + pon + " " + ontId + " dhcp vlan " + usedVlan;
-          const r4 = await session.cmd(ipVlanCmd, "BARCELONA(config-if-gpon", 15000).catch(() => "");
-          if (r4) {
-            allRaw += "\n\n[ROUTER+VLAN] " + ipVlanCmd + "\n" + r4;
-            commandsExecuted.push(ipVlanCmd);
+            serviceRaw = await session.cmd(serviceCmd, "BARCELONA(config)#", 20000);
+          } catch (e) { serviceRaw = e.message; serviceOk = false; }
+          serviceOk = serviceOk && !/failure|error/i.test(serviceRaw);
+        } else {
+          // ── MODO ROUTER ──────────────────────────────────────────────
+          // wan-config configura la WAN de la propia ONT vía OMCI, dentro
+          // de la interfaz gpon. Con DHCP no hace falta usuario/clave; con
+          // PPPoE se manda user/pass (por defecto el propio serial si no
+          // se especifica).
+          const wanParts = [
+            "ont", "wan-config", ontId,
+            "wan-index", "1",
+            "mode", "internet-router",
+            "vlan", vlan,
+            "ip-mode", wanIpMode
+          ];
+          if (wanIpMode === "pppoe") {
+            wanParts.push("pppoe-user", pppoeUser || sn, "pppoe-password", pppoePass || sn);
           }
+          serviceCmd = wanParts.join(" ");
+          try {
+            serviceRaw = await session.cmd(serviceCmd, "BARCELONA(config-if-gpon", 20000);
+          } catch (e) { serviceRaw = e.message; serviceOk = false; }
+          serviceOk = serviceOk && !/failure|error/i.test(serviceRaw);
+          await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
         }
+      } else {
+        await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
       }
-      // En modo BRIDGE: no se necesita comando adicional de IP.
-      // La ONT actúa como switch transparente y el CPE/Router del cliente 
-      // se encarga de la capa 3 (PPPoE/DHCP). La VLAN nativa ya está configurada.
 
-      // Salir de la interfaz
-      await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
-
-      return { 
-        success: true, 
-        raw: allRaw, 
-        commands: commandsExecuted,
-        vlan: usedVlan,
-        vlanSource: vlanSource,
-        mode: effectiveMode,
-        message: "ONT autorizada en modo " + effectiveMode + (usedVlan ? " con VLAN " + usedVlan : "")
+      return {
+        addOk, serviceOk,
+        raw: addRaw + (serviceRaw ? "\n" + serviceRaw : ""),
+        cmd: ontCmd + (serviceCmd ? "  |  " + serviceCmd : ""),
       };
     }, 90000);
 
-    if (result.success) {
-      res.json({ 
-        ok: true, 
-        message: result.message,
-        raw: result.raw, 
-        commands: result.commands,
-        vlan: result.vlan,
-        vlanSource: result.vlanSource,
-        mode: result.mode
+    if (result.addOk && result.serviceOk) {
+      res.json({
+        ok: true,
+        message: "ONT autorizada correctamente en modo " + (bridgeMode ? "BRIDGE (VLAN)" : "ROUTER"),
+        raw: result.raw, cmd: result.cmd,
+      });
+    } else if (result.addOk && !result.serviceOk) {
+      // La ONT se dio de alta pero el paso de servicio (VLAN/WAN) falló.
+      // OJO: la sintaxis exacta de "service-port" / "ont wan-config" puede
+      // variar según la versión de firmware de esta OLT puntual. Si esto
+      // devuelve error de sintaxis, hay que ajustar serviceCmd con la
+      // respuesta cruda (result.raw) que se devuelve acá abajo.
+      res.status(207).json({
+        ok: false,
+        message: "ONT registrada pero falló la config de " + (bridgeMode ? "VLAN (service-port)" : "WAN (modo router)") + " — revisá 'raw' para ver el error exacto de la OLT",
+        raw: result.raw, cmd: result.cmd,
       });
     } else {
-      res.status(400).json({ 
-        ok: false, 
-        message: result.message || "Error al autorizar",
-        raw: result.raw, 
-        cmd: result.cmd,
-        step: result.step
-      });
+      res.status(400).json({ ok: false, message: "Posible error — revisa respuesta OLT", raw: result.raw, cmd: result.cmd });
     }
-  } catch (e) { 
-    res.status(500).json({ error: e.message }); 
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
-
 app.delete("/api/ont/:f/:s/:p/:id", async (req, res) => {
   const { f, s, p, id } = req.params;
   try {
     const result = await withOlt(async (session) => {
+      // Ajustar ancho de terminal para evitar que la OLT corte el comando
       await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
       await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
 
+      // Entrar a la interfaz de la ONT que vamos a borrar
       await session.cmd("interface gpon " + f + "/" + s, "BARCELONA(config-if-gpon", 12000);
 
+      // La OLT puede responder directo con el prompt normal, o pedir confirmación
+      // ("Are you sure to delete the ONT? (y/n)[n]:") antes de volver al prompt.
       const step1 = await session.cmdAny(
         "ont delete " + p + " " + id,
         ["BARCELONA(config-if-gpon", "are you sure", "Are you sure"],
@@ -1074,6 +1077,7 @@ app.delete("/api/ont/:f/:s/:p/:id", async (req, res) => {
       };
     }, 60000);
 
+    // Limpiar la ONT eliminada de los cachés locales
     const ontCache = readCache(ONT_CACHE);
     if (ontCache) {
       ontCache.onts = ontCache.onts.filter(o => !(String(o.frame) === String(f) && String(o.slot) === String(s) && String(o.pon) === String(p) && String(o.ontId) === String(id)));
@@ -1104,13 +1108,13 @@ app.delete("/api/cache", (_, res) => {
 // ─── Arranque ─────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log("╔══════════════════════════════════════════════════════════════╗");
-  console.log("║  OLT Manager corriendo en :" + PORT + "                          ║");
-  console.log("║  http://localhost:" + PORT + "                                    ║");
-  console.log("║  OLT: " + OLT.host + ":" + OLT.port + "                                  ║");
-  console.log("║  Websocket: activo (mismo puerto, /socket.io)             ║");
+  console.log("╔══════════════════════════════════════════════════╗");
+  console.log("║  OLT Manager corriendo en :" + PORT + "                     ║");
+  console.log("║  http://localhost:" + PORT + "                              ║");
+  console.log("║  OLT: " + OLT.host + ":" + OLT.port + "                        ║");
+  console.log("║  Websocket: activo (mismo puerto, /socket.io)     ║");
   console.log("║  Auto-sync: " + (AUTO_SYNC_ENABLED ? ("cada " + AUTO_SYNC_MINUTES + " min (incremental)") : "DESACTIVADO — solo manual (botón)") + "       ║");
-  console.log("╚══════════════════════════════════════════════════════════════╝");
+  console.log("╚══════════════════════════════════════════════════╝");
 
   if (AUTO_SYNC_ENABLED) {
     const c = readCache(ONT_CACHE);
