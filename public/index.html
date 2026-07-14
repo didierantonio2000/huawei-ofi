@@ -1,770 +1,944 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OLT Manager - GPON</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>OLT Dashboard — BARCELONA</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#c9d1d9;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
+a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:17px;font-weight:700;color:#58a6ff;white-space:nowrap}
+.hinfo{color:#8b949e;font-size:12px}
+.nav-link{margin-left:auto;font-size:13px}
 
-/* Header */
-.header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 16px 24px; border-bottom: 1px solid #475569; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-.header h1 { font-size: 1.4rem; color: #38bdf8; }
-.header-info { font-size: 0.85rem; color: #94a3b8; }
+#syncBar{background:#161b22;border-bottom:1px solid #30363d;padding:8px 20px;display:flex;align-items:center;gap:10px;font-size:12px;flex-wrap:wrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#8b949e;flex-shrink:0}
+.sync-dot.running{background:#d29922;animation:pulse 1s ease-in-out infinite}
+.sync-dot.ok{background:#3fb950}
+.sync-dot.err{background:#f85149}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#syncText{color:#8b949e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* Botones */
-.btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-primary { background: #22c55e; color: #fff; }
-.btn-primary:hover:not(:disabled) { background: #16a34a; }
-.btn-warning { background: #eab308; color: #000; }
-.btn-warning:hover:not(:disabled) { background: #ca8a04; }
-.btn-danger { background: #ef4444; color: #fff; }
-.btn-danger:hover:not(:disabled) { background: #dc2626; }
-.btn-secondary { background: #475569; color: #fff; }
-.btn-secondary:hover:not(:disabled) { background: #64748b; }
-.btn-info { background: #0ea5e9; color: #fff; }
-.btn-info:hover:not(:disabled) { background: #0284c7; }
-.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+.btn{padding:5px 12px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;transition:all .15s}
+.btn:hover{background:#30363d}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:#1f6feb;border-color:#1f6feb;color:#fff}.btn.primary:hover{background:#388bfd}
+.btn.danger{background:#21262d;border-color:#da3633;color:#f85149}.btn.danger:hover{background:#3d1a1a}
 
-/* Status bar */
-.status-bar { background: #1e293b; padding: 10px 24px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 16px; font-size: 0.85rem; flex-wrap: wrap; }
-.status-dot { width: 10px; height: 10px; border-radius: 50%; background: #64748b; }
-.status-dot.running { background: #22c55e; animation: pulse 1s infinite; }
-.status-dot.error { background: #ef4444; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.progress-bar { flex: 1; min-width: 150px; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background: #22c55e; transition: width 0.3s; width: 0%; }
+.toolbar{padding:10px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #21262d}
+.filter-input{padding:5px 10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:13px;width:240px;outline:none}
+.filter-input:focus{border-color:#58a6ff}
+#countBadge{margin-left:auto;font-size:12px;color:#8b949e}
 
-/* Tabs */
-.tabs { display: flex; gap: 0; background: #1e293b; border-bottom: 2px solid #334155; padding: 0 24px; overflow-x: auto; }
-.tab { padding: 12px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.9rem; color: #94a3b8; white-space: nowrap; transition: all 0.2s; }
-.tab:hover { color: #e2e8f0; }
-.tab.active { color: #38bdf8; border-bottom-color: #38bdf8; }
-
-/* Contenido */
-.content { padding: 20px 24px; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-/* Tabla */
-.table-container { overflow-x: auto; border-radius: 8px; border: 1px solid #334155; }
-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-th { background: #1e293b; padding: 10px 12px; text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; }
-td { padding: 8px 12px; border-top: 1px solid #1e293b; }
-tr:hover td { background: #1e293b; }
-.badge { padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
-.badge-online { background: #166534; color: #4ade80; }
-.badge-offline { background: #7f1d1d; color: #fca5a5; }
-.badge-los { background: #78350f; color: #fcd34d; }
-
-/* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-.modal-overlay.active { display: flex; }
-.modal { background: #1e293b; border-radius: 12px; border: 1px solid #475569; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
-.modal-header { padding: 16px 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-.modal-header h2 { font-size: 1.1rem; color: #38bdf8; }
-.modal-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0 4px; }
-.modal-close:hover { color: #fff; }
-.modal-body { padding: 20px; }
-.modal-footer { padding: 16px 20px; border-top: 1px solid #334155; display: flex; justify-content: flex-end; gap: 10px; }
-
-/* Form */
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #94a3b8; font-weight: 500; }
-.form-group label .required { color: #ef4444; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-input, select { width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; }
-input:focus, select:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,0.2); }
-select { cursor: pointer; }
-.input-hint { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
-
-/* Mode selector */
-.mode-selector { display: flex; gap: 0; border-radius: 6px; overflow: hidden; border: 1px solid #475569; }
-.mode-option { flex: 1; padding: 10px; text-align: center; cursor: pointer; background: #0f172a; color: #94a3b8; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; border: none; }
-.mode-option.active { background: #0ea5e9; color: #fff; }
-.mode-option:hover:not(.active) { background: #1e293b; color: #e2e8f0; }
-
-/* Autofind cards */
-.autofind-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px; }
-.autofind-card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
-.autofind-card h3 { font-size: 0.95rem; color: #38bdf8; margin-bottom: 12px; word-break: break-all; }
-.autofind-card .field { display: flex; justify-content: space-between; padding: 4px 0; font-size: 0.85rem; }
-.autofind-card .field-label { color: #94a3b8; }
-.autofind-card .field-value { color: #e2e8f0; font-weight: 500; }
-
-/* Toast */
-.toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
-.toast { padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s; max-width: 400px; }
-.toast-success { background: #166534; color: #4ade80; border: 1px solid #22c55e; }
-.toast-error { background: #7f1d1d; color: #fca5a5; border: 1px solid #ef4444; }
-.toast-info { background: #0c4a6e; color: #7dd3fc; border: 1px solid #0ea5e9; }
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-/* Log/Response */
-.log-box { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; color: #94a3b8; margin-top: 12px; display: none; }
-.log-box.visible { display: block; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .form-row, .form-row-3 { grid-template-columns: 1fr; }
-  .header { flex-direction: column; align-items: flex-start; }
-  .autofind-grid { grid-template-columns: 1fr; }
+/* ─── Stats Dashboard ──────────────────────────────────────────────────────── */
+#statsDashboard{
+  background:linear-gradient(135deg,#10151c 0%,#0d1117 100%);
+  border-bottom:1px solid #21262d;
+  padding:14px 20px;
+  display:grid;
+  grid-template-columns:auto 1fr 1fr 1fr;
+  gap:16px;
+  align-items:center;
+}
+@media(max-width:900px){
+  #statsDashboard{grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(max-width:560px){
+  #statsDashboard{grid-template-columns:1fr}
 }
 
-/* Loading spinner */
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff3; border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Tarjetas de números grandes */
+.stat-cards{display:flex;gap:10px;flex-wrap:wrap}
+.stat-card{
+  background:#0d1117;border:1px solid #30363d;border-radius:10px;
+  padding:8px 16px;min-width:80px;text-align:center;
+  transition:border-color .2s;
+}
+.stat-card:hover{border-color:#484f58}
+.stat-card .num{font-size:22px;font-weight:800;font-family:'Consolas',monospace;line-height:1.2}
+.stat-card .lbl{font-size:9px;color:#8b949e;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.stat-card.c-total .num{color:#c9d1d9}
+.stat-card.c-online .num{color:#3fb950}
+.stat-card.c-offline .num{color:#f85149}
+.stat-card.c-other .num{color:#d29922}
 
-.empty-state { text-align: center; padding: 40px; color: #64748b; }
-.empty-state p { margin-top: 8px; font-size: 0.9rem; }
+/* Grupos de barras */
+.bar-group{display:flex;flex-direction:column;gap:4px;min-width:0}
+.bar-group .bar-title{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.bar-track{
+  height:22px;background:#0d1117;border:1px solid #21262d;border-radius:6px;
+  display:flex;overflow:hidden;position:relative;
+}
+.bar-seg{
+  height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;color:#fff;overflow:hidden;
+  transition:width .6s ease;min-width:0;
+  text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap;
+}
+.bar-seg:hover{filter:brightness(1.2)}
+.bar-seg.seg-on{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-off{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-oth{background:linear-gradient(90deg,#9e6a03,#d29922)}
+.bar-seg.seg-rx-good{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-rx-warn{background:linear-gradient(90deg,#9e6a03,#d29922)}
+.bar-seg.seg-rx-bad{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-rx-na{background:#21262d;color:#484f58}
+.bar-seg.seg-match{background:linear-gradient(90deg,#238636,#3fb950)}
+.bar-seg.seg-mismatch{background:linear-gradient(90deg,#b62324,#f85149)}
+.bar-seg.seg-match-na{background:#21262d;color:#484f58}
+.bar-legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:1px}
+.bar-legend span{font-size:9px;color:#8b949e;display:flex;align-items:center;gap:3px}
+.bar-legend i{display:inline-block;width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.bar-legend i.lg-on{background:#3fb950}
+.bar-legend i.lg-off{background:#f85149}
+.bar-legend i.lg-oth{background:#d29922}
+.bar-legend i.lg-rg{background:#3fb950}
+.bar-legend i.lg-rw{background:#d29922}
+.bar-legend i.lg-rb{background:#f85149}
+.bar-legend i.lg-rn{background:#30363d}
+.bar-legend i.lg-m{background:#3fb950}
+.bar-legend i.lg-mm{background:#f85149}
+
+/* ─── Tabla ────────────────────────────────────────────────────────────────── */
+.tbl-wrap{overflow:auto;max-height:calc(100vh - 260px)}
+table{width:100%;border-collapse:collapse;min-width:1100px}
+thead th{background:#161b22;padding:9px 10px;text-align:left;font-size:11px;color:#8b949e;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #30363d;position:sticky;top:0;z-index:2;white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:#c9d1d9}
+thead th .sort-arrow{margin-left:4px;opacity:.4;font-size:10px}
+thead th.sorted .sort-arrow{opacity:1;color:#58a6ff}
+thead th.nosort{cursor:default}
+thead th.nosort:hover{color:#8b949e}
+
+tbody tr{border-bottom:1px solid #21262d;transition:background .1s}
+tbody tr:hover{background:#161b22}
+td{padding:7px 10px;font-size:12px;vertical-align:middle}
+
+.fsp{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#8b949e;letter-spacing:.3px}
+.ont-id{font-family:'Consolas','Courier New',monospace;font-size:11px;text-align:center;color:#c9d1d9}
+.sn{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#79c0ff;letter-spacing:.3px}
+.desc{font-size:11px;color:#e6edf3;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.badge.online{background:#0f2a14;color:#3fb950;border:1px solid #238636}
+.badge.offline{background:#2a0f0f;color:#f85149;border:1px solid #da3633}
+.badge.other{background:#2a1f0f;color:#d29922;border:1px solid #9e6a03}
+
+.badge-match{display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.badge-match.match{background:#0f2a14;color:#3fb950;border:1px solid #238636}
+.badge-match.mismatch{background:#2a0f0f;color:#f85149;border:1px solid #da3633}
+.badge-match.unknown{background:#1c1c1c;color:#484f58;border:1px solid #30363d}
+
+.rx{font-family:'Consolas','Courier New',monospace;font-size:12px;font-weight:600}
+.rx.good{color:#3fb950}.rx.warn{color:#d29922}.rx.bad{color:#f85149}.rx.na{color:#484f58}
+
+.dist{font-family:'Consolas','Courier New',monospace;font-size:11px;color:#8b949e}
+.temp-val{font-family:'Consolas','Courier New',monospace;font-size:11px}
+.temp-val.ok{color:#3fb950}.temp-val.warn{color:#d29922}.temp-val.hot{color:#f85149}.temp-val.na{color:#484f58}
+
+.btn-sm{padding:3px 9px;border-radius:5px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;cursor:pointer;font-size:11px;white-space:nowrap}
+.btn-sm:hover{background:#388bfd;border-color:#388bfd;color:#fff}
+
+.stale{opacity:.5}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#161b22;border:1px solid #30363d;border-radius:12px;width:min(780px,96vw);max-height:90vh;overflow-y:auto;padding:24px;position:relative}
+.modal h2{font-size:15px;font-weight:700;color:#58a6ff;margin-bottom:4px}
+.modal .subtitle{font-size:12px;color:#8b949e;margin-bottom:16px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#8b949e;cursor:pointer;font-size:20px;line-height:1;padding:4px}
+.modal-close:hover{color:#f85149}
+
+.optical-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:16px}
+.opt-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center}
+.opt-card .v{font-size:20px;font-weight:700;margin-bottom:3px;font-family:'Consolas',monospace}
+.opt-card .l{font-size:9px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px}
+
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #21262d;border-radius:6px;overflow:hidden}
+.kv-k{background:#0d1117;padding:5px 10px;font-size:11px;color:#8b949e;border-bottom:1px solid #21262d}
+.kv-v{background:#161b22;padding:5px 10px;font-size:11px;color:#c9d1d9;border-bottom:1px solid #21262d;font-family:'Consolas',monospace;word-break:break-all}
+
+.alert{padding:10px 14px;border-radius:6px;margin-top:10px;font-size:12px}
+.alert.err{background:#1c0a09;border:1px solid #da3633;color:#f85149}
+.alert.ok{background:#0a190d;border:1px solid #238636;color:#3fb950}
+
+.sec-title{font-size:11px;font-weight:700;color:#58a6ff;text-transform:uppercase;letter-spacing:.7px;margin:14px 0 8px}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:50px;color:#484f58}
+
+#progressBar{height:2px;background:#1f6feb;transition:width .4s;width:0}
+
+td .desc[title]{cursor:help}
+tbody tr.offline-row{background:rgba(248,81,73,.03)}
+tbody tr.offline-row:hover{background:rgba(248,81,73,.07)}
 </style>
 </head>
 <body>
+<header>
+  <h1>OLT Dashboard</h1>
+  <span class="hinfo">BARCELONA · 45.162.79.228:2333</span>
+  <button class="btn primary nav-link" onclick="openAuthModal()">+ Autorizar ONT</button>
+</header>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
+<div id="syncBar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncText">Cargando estado...</span>
+  <button class="btn primary" id="syncBtnQuick" onclick="triggerSync('quick')">Sincronizar</button>
+  <button class="btn" id="syncBtnFull" onclick="triggerSync('full')">Sincronizar Todo</button>
 
-<!-- Header -->
-<div class="header">
-  <div>
-    <h1>🔌 OLT Manager</h1>
-    <div class="header-info" id="oltInfo">Conectando...</div>
-  </div>
-  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-    <button class="btn btn-primary" id="btnSync" onclick="doSync()">
-      <span id="syncIcon">🔄</span> Sincronizar
-    </button>
-    <button class="btn btn-warning" id="btnFullSync" onclick="doFullSync()">
-      ⚡ Sincronizar Todo
-    </button>
-    <button class="btn btn-info" id="btnAutofind" onclick="loadAutofind()">
-      🔍 Autofind
-    </button>
-  </div>
+  <button class="btn" onclick="loadFromCache()">Refrescar Tabla</button>
 </div>
+<div id="progressBar"></div>
 
-<!-- Status bar -->
-<div class="status-bar">
-  <div class="status-dot" id="statusDot"></div>
-  <span id="statusText">Listo</span>
-  <div class="progress-bar" id="progressBar" style="display:none;">
-    <div class="progress-fill" id="progressFill"></div>
+<!-- ─── Mini gráficas de estadísticas ─────────────────────────────────────── -->
+<div id="statsDashboard">
+  <div class="stat-cards">
+    <div class="stat-card c-total"><div class="num" id="sTotal">--</div><div class="lbl">Total</div></div>
+    <div class="stat-card c-online"><div class="num" id="sOnline">--</div><div class="lbl">Online</div></div>
+    <div class="stat-card c-offline"><div class="num" id="sOffline">--</div><div class="lbl">Offline</div></div>
+    <div class="stat-card c-other"><div class="num" id="sOther">--</div><div class="lbl">Otros</div></div>
   </div>
-  <span id="statusDetail" style="color:#64748b;"></span>
-</div>
 
-<!-- Tabs -->
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('onts')">ONTs Registradas</div>
-  <div class="tab" onclick="switchTab('autofind')">Autofind</div>
-</div>
-
-<!-- Content -->
-<div class="content">
-  <!-- Tab: ONTs -->
-  <div class="tab-panel active" id="panel-onts">
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Ubicación</th>
-            <th>ID</th>
-            <th>Serial</th>
-            <th>Estado</th>
-            <th>Rx Power</th>
-            <th>Tx Power</th>
-            <th>Temp</th>
-            <th>Distancia</th>
-            <th>Descripción</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="ontsTable">
-          <tr><td colspan="10" class="empty-state">
-            <p>Sin datos — presiona "Sincronizar" para cargar las ONTs</p>
-          </td></tr>
-        </tbody>
-      </table>
+  <div class="bar-group">
+    <div class="bar-title">Estado ONT</div>
+    <div class="bar-track" id="barState"></div>
+    <div class="bar-legend">
+      <span><i class="lg-on"></i>Online</span>
+      <span><i class="lg-off"></i>Offline</span>
+      <span><i class="lg-oth"></i>Otros</span>
     </div>
   </div>
 
-  <!-- Tab: Autofind -->
-  <div class="tab-panel" id="panel-autofind">
-    <div id="autofindLoading" style="display:none; text-align:center; padding:40px;">
-      <div class="spinner" style="width:40px;height:40px;border-width:3px;"></div>
-      <p style="margin-top:12px;color:#94a3b8;">Consultando ONTs no autorizadas...</p>
+  <div class="bar-group">
+    <div class="bar-title">Potencia RX</div>
+    <div class="bar-track" id="barRx"></div>
+    <div class="bar-legend">
+      <span><i class="lg-rg"></i>Buena</span>
+      <span><i class="lg-rw"></i>Alerta</span>
+      <span><i class="lg-rb"></i>Critica</span>
+      <span><i class="lg-rn"></i>S/D</span>
     </div>
-    <div id="autofindContent">
-      <div class="empty-state">
-        <p>Presiona "🔍 Autofind" para buscar ONTs pendientes de autorización</p>
-      </div>
+  </div>
+
+  <div class="bar-group">
+    <div class="bar-title">Match State</div>
+    <div class="bar-track" id="barMatch"></div>
+    <div class="bar-legend">
+      <span><i class="lg-m"></i>Match</span>
+      <span><i class="lg-mm"></i>Mismatch</span>
     </div>
   </div>
 </div>
 
-<!-- Modal: Autorizar ONT -->
-<div class="modal-overlay" id="modalAuth">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>✅ Autorizar ONT</h2>
-      <button class="modal-close" onclick="closeModal('modalAuth')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="authFrame" value="0">
-      
-      <div class="form-row-3">
-        <div class="form-group">
-          <label>Slot <span class="required">*</span></label>
-          <input type="number" id="authSlot" min="0" max="15" required>
-        </div>
-        <div class="form-group">
-          <label>PON <span class="required">*</span></label>
-          <input type="number" id="authPon" min="0" max="15" required>
-        </div>
-        <div class="form-group">
-          <label>ONT ID <span class="required">*</span></label>
-          <input type="number" id="authOntId" min="0" max="127" required>
-          <div class="input-hint" id="nextIdHint"></div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Serial Number <span class="required">*</span></label>
-        <input type="text" id="authSn" placeholder="48575443XXXXXXXX" style="text-transform:uppercase;" required>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Line Profile</label>
-          <select id="authLineProfile"></select>
-        </div>
-        <div class="form-group">
-          <label>Service Profile</label>
-          <select id="authSrvProfile"></select>
-        </div>
-      </div>
-
-      <!-- ═══ MODO ROUTER/BRIDGE ═══ -->
-      <div class="form-group">
-        <label>Modo de conexión</label>
-        <div class="mode-selector">
-          <button type="button" class="mode-option active" data-mode="router" onclick="selectMode('router')">
-            🌐 Router
-          </button>
-          <button type="button" class="mode-option" data-mode="bridge" onclick="selectMode('bridge')">
-            🔗 Bridge
-          </button>
-        </div>
-        <input type="hidden" id="authMode" value="router">
-        <div class="input-hint">Router: la ONT obtiene IP por DHCP. Bridge: la ONT actúa como switch transparente.</div>
-      </div>
-
-      <!-- ═══ VLAN ═══ -->
-      <div class="form-group">
-        <label>VLAN</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="number" id="authVlan" placeholder="Automática" min="100" max="4094" style="flex:1;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="autoFillVlan()" title="Obtener primera VLAN disponible de la OLT">
-            🔄 Auto
-          </button>
-        </div>
-        <div class="input-hint">Dejar vacío para obtener automáticamente de la OLT, o escribir una VLAN manual (100-4094)</div>
-      </div>
-
-      <div class="form-group">
-        <label>Descripción</label>
-        <input type="text" id="authDesc" placeholder="Nombre del cliente o referencia">
-      </div>
-
-      <div class="log-box" id="authLog"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('modalAuth')">Cancelar</button>
-      <button class="btn btn-primary" id="btnAuthSubmit" onclick="doAuthorize()">
-        Autorizar ONT
-      </button>
-    </div>
-  </div>
+<div class="toolbar">
+  <input class="filter-input" id="filterInput" type="text" placeholder="Filtrar: serial, PON, descripcion, RX..." oninput="filterTable(this.value)"/>
+  <select class="filter-input" style="width:140px" id="stateFilter" onchange="filterTable(document.getElementById('filterInput').value)">
+    <option value="">Todos los estados</option>
+    <option value="online">Online</option>
+    <option value="offline">Offline</option>
+  </select>
+  <select class="filter-input" style="width:140px" id="matchFilter" onchange="filterTable(document.getElementById('filterInput').value)">
+    <option value="">Match / Mismatch</option>
+    <option value="match">Match</option>
+    <option value="mismatch">Mismatch</option>
+  </select>
+  <span id="countBadge">--</span>
 </div>
 
-<!-- Modal: Confirmar eliminación -->
-<div class="modal-overlay" id="modalDelete">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-header">
-      <h2>⚠️ Eliminar ONT</h2>
-      <button class="modal-close" onclick="closeModal('modalDelete')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p>¿Estás seguro de eliminar la ONT <strong id="deleteInfo"></strong>?</p>
-      <p style="color:#fca5a5; margin-top:8px; font-size:0.85rem;">Esta acción no se puede deshacer.</p>
-      <div class="log-box" id="deleteLog"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('modalDelete')">Cancelar</button>
-      <button class="btn btn-danger" id="btnDeleteSubmit" onclick="doDelete()">
-        Eliminar
-      </button>
+<div class="tbl-wrap">
+<table id="ontTable">
+  <thead>
+    <tr>
+      <th onclick="sortBy('fsp')" id="th-fsp">F/S/P <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('ontId')" id="th-ontId">ID <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('sn')" id="th-sn">Serial <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('description')" id="th-description">Descripcion <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('runState')" id="th-runState">Estado <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('matchState')" id="th-matchState">Match <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('rxPower')" id="th-rxPower">RX (dBm) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('txPower')" id="th-txPower">TX (dBm) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('temperature')" id="th-temperature">Temp (C) <span class="sort-arrow">&#8597;</span></th>
+      <th onclick="sortBy('distance')" id="th-distance">Dist (m) <span class="sort-arrow">&#8597;</span></th>
+      <th class="nosort">Acciones</th>
+    </tr>
+  </thead>
+  <tbody id="ontBody"><tr><td colspan="11" class="empty"><span class="spinner"></span> Cargando...</td></tr></tbody>
+</table>
+</div>
+
+<!-- Modal detalle -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+<div class="modal" id="modal">
+  <button class="modal-close" onclick="closeModal()">&#10005;</button>
+  <h2 id="modalTitle">Detalles ONT</h2>
+  <div class="subtitle" id="modalSub"></div>
+  <div id="opticalSection" style="display:none">
+    <div class="sec-title">Potencia Optica (tiempo real)</div>
+    <div class="optical-grid" id="opticalCards"></div>
+  </div>
+  <div class="sec-title">Informacion general</div>
+  <div class="kv-grid" id="kvGrid"></div>
+  <div id="modalAlert"></div>
+  <button class="btn primary" id="syncOntBtn" onclick="syncOnt()" style="width:100%;margin-top:14px;padding:9px">
+    Actualizar potencia optica en tiempo real
+  </button>
+</div>
+</div>
+
+<!-- Modal Autorizar ONT nueva -->
+<div class="overlay" id="authOverlay" onclick="closeAuthModal(event)">
+<div class="modal" id="authModal">
+  <button class="modal-close" onclick="closeAuthModal()">&#10005;</button>
+  <h2>Autorizar ONT nueva</h2>
+  <div class="subtitle">Alta + configuración de servicio (VLAN o modo router) en un solo paso</div>
+
+  <div class="sec-title">Ubicación / Identificación</div>
+  <div class="optical-grid" style="grid-template-columns:repeat(auto-fill,minmax(90px,1fr))">
+    <div><label style="font-size:10px;color:#8b949e">Frame</label>
+      <input class="filter-input" id="af_frame" value="0" style="width:100%"/></div>
+    <div><label style="font-size:10px;color:#8b949e">Slot</label>
+      <input class="filter-input" id="af_slot" style="width:100%" oninput="authLoadNextId()"/></div>
+    <div><label style="font-size:10px;color:#8b949e">PON</label>
+      <input class="filter-input" id="af_pon" style="width:100%" oninput="authLoadNextId()"/></div>
+    <div><label style="font-size:10px;color:#8b949e">ONT ID</label>
+      <input class="filter-input" id="af_ontId" style="width:100%"/></div>
+  </div>
+
+  <div class="sec-title">Datos de la ONT</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <input class="filter-input" id="af_sn" placeholder="Serial (SN)" style="width:100%"/>
+    <input class="filter-input" id="af_desc" placeholder="Descripción / Cliente" style="width:100%"/>
+    <div style="display:flex;gap:8px">
+      <select class="filter-input" id="af_lineProfile" style="flex:1"></select>
+      <select class="filter-input" id="af_serviceProfile" style="flex:1"></select>
     </div>
   </div>
+
+  <div class="sec-title">Modo de autorización</div>
+  <div style="display:flex;gap:16px;font-size:12px;margin-bottom:10px">
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+      <input type="radio" name="af_mode" value="router" checked onchange="authModeChanged()"/> Router (por defecto)
+    </label>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+      <input type="radio" name="af_mode" value="bridge" onchange="authModeChanged()"/> Bridge (VLAN)
+    </label>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+    <select class="filter-input" id="af_vlanSelect" style="flex:1" onchange="document.getElementById('af_vlan').value=this.value">
+      <option value="">-- VLAN de la OLT --</option>
+    </select>
+    <input class="filter-input" id="af_vlan" placeholder="o VLAN manual" style="width:130px"/>
+  </div>
+
+  <div id="af_routerOpts">
+    <div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="radio" name="af_wanIpMode" value="dhcp" checked onchange="authWanModeChanged()"/> DHCP
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="radio" name="af_wanIpMode" value="pppoe" onchange="authWanModeChanged()"/> PPPoE
+      </label>
+    </div>
+    <div id="af_pppoeFields" style="display:none;gap:8px;margin-bottom:8px">
+      <input class="filter-input" id="af_pppoeUser" placeholder="Usuario PPPoE" style="width:100%;margin-bottom:8px"/>
+      <input class="filter-input" id="af_pppoePass" placeholder="Clave PPPoE" style="width:100%"/>
+    </div>
+  </div>
+
+  <div id="authAlert"></div>
+  <button class="btn primary" id="authSubmitBtn" onclick="submitAuth()" style="width:100%;margin-top:10px;padding:9px">
+    Autorizar ONT
+  </button>
+</div>
 </div>
 
 <script>
-// ─── Estado global ────────────────────────────────────────────────────────────
-let currentOnts = [];
-let autofindData = null;
-let deleteTarget = null;
+let allOnts=[], currentOnt=null;
+let _sortDir={};
 
-// ─── WebSocket ────────────────────────────────────────────────────────────────
-const socket = io();
+/* ─── Helpers ──────────────────────────────────────────────────────────────── */
+function cleanSn(raw) {
+  if (!raw) return '--';
+  const m = raw.match(/^([0-9A-Fa-f]{12,16})/);
+  return m ? m[1] : raw.split(' ')[0];
+}
 
-socket.on("sync:status", (status) => {
-  updateStatusBar(status);
-});
+function rxClass(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return 'na';
+  if (n >= -27) return 'good';
+  if (n >= -30) return 'warn';
+  return 'bad';
+}
 
-socket.on("onts:base", (onts) => {
-  currentOnts = onts;
-  renderOntsTable(onts, null, null);
-});
+function tempClass(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return 'na';
+  if (n <= 60) return 'ok';
+  if (n <= 75) return 'warn';
+  return 'hot';
+}
 
-socket.on("ont:update", (ont) => {
-  // Actualizar fila específica sin re-renderizar toda la tabla
-  const idx = currentOnts.findIndex(o => 
-    o.frame === ont.frame && o.slot === ont.slot && 
-    o.pon === ont.pon && o.ontId === ont.ontId
-  );
-  if (idx >= 0) {
-    currentOnts[idx] = ont;
-  } else {
-    currentOnts.push(ont);
+function stateClass(s) {
+  return s === 'online' ? 'online' : s === 'offline' ? 'offline' : 'other';
+}
+
+function matchBadgeClass(s) {
+  if (s === 'match') return 'match';
+  if (s === 'mismatch') return 'mismatch';
+  return 'unknown';
+}
+
+function fmtOrDash(v) {
+  if (v === null || v === undefined || v === 'null' || v === 'N/A' || v === '-') return null;
+  return v;
+}
+
+function ageMins(ts) {
+  if (!ts) return null;
+  return Math.round((Date.now() - ts) / 60000);
+}
+
+const ontKey = o => `${o.frame}/${o.slot}/${o.pon}/${o.ontId}`;
+
+/* ─── Stats / Mini graficas ────────────────────────────────────────────────── */
+function updateStats(onts) {
+  const total = onts.length;
+  let online = 0, offline = 0, other = 0;
+  let rxGood = 0, rxWarn = 0, rxBad = 0, rxNa = 0;
+  let matchCnt = 0, mismatchCnt = 0, matchNa = 0;
+
+  for (const o of onts) {
+    const rs = (o.runState || '').toLowerCase();
+    if (rs === 'online') online++;
+    else if (rs === 'offline') offline++;
+    else other++;
+
+    const ms = (o.matchState || '').toLowerCase();
+    if (ms === 'match') matchCnt++;
+    else if (ms === 'mismatch') mismatchCnt++;
+    else matchNa++;
+
+    const rx = parseFloat(o.rxPower);
+    if (isNaN(rx)) rxNa++;
+    else if (rx >= -27) rxGood++;
+    else if (rx >= -30) rxWarn++;
+    else rxBad++;
   }
-  renderOntsTable(currentOnts, null, null);
-});
 
-socket.on("ont:removed", ({ frame, slot, pon, ontId }) => {
-  currentOnts = currentOnts.filter(o => 
-    !(o.frame == frame && o.slot == slot && o.pon == pon && o.ontId == ontId)
-  );
-  renderOntsTable(currentOnts, null, null);
-  toast("ONT eliminada", "info");
-});
+  // Numeros grandes
+  document.getElementById('sTotal').textContent = total;
+  document.getElementById('sOnline').textContent = online;
+  document.getElementById('sOffline').textContent = offline;
+  document.getElementById('sOther').textContent = other;
 
-// ─── Status bar ───────────────────────────────────────────────────────────────
-function updateStatusBar(s) {
-  const dot = document.getElementById("statusDot");
-  const text = document.getElementById("statusText");
-  const bar = document.getElementById("progressBar");
-  const fill = document.getElementById("progressFill");
-  const detail = document.getElementById("statusDetail");
+  // Barra de estado
+  renderBar('barState', [
+    { cls: 'seg-on', val: online, label: online ? pct(online, total) : '' },
+    { cls: 'seg-off', val: offline, label: offline ? pct(offline, total) : '' },
+    { cls: 'seg-oth', val: other, label: other ? pct(other, total) : '' },
+  ]);
 
-  dot.className = "status-dot";
+  // Barra RX
+  renderBar('barRx', [
+    { cls: 'seg-rx-good', val: rxGood, label: rxGood ? pct(rxGood, total) : '' },
+    { cls: 'seg-rx-warn', val: rxWarn, label: rxWarn ? pct(rxWarn, total) : '' },
+    { cls: 'seg-rx-bad', val: rxBad, label: rxBad ? pct(rxBad, total) : '' },
+    { cls: 'seg-rx-na', val: rxNa, label: rxNa ? pct(rxNa, total) : '' },
+  ]);
+
+  // Barra Match
+  renderBar('barMatch', [
+    { cls: 'seg-match', val: matchCnt, label: matchCnt ? pct(matchCnt, total) : '' },
+    { cls: 'seg-mismatch', val: mismatchCnt, label: mismatchCnt ? pct(mismatchCnt, total) : '' },
+    { cls: 'seg-match-na', val: matchNa, label: '' },
+  ]);
+}
+
+function pct(val, total) {
+  if (!total) return '0%';
+  const p = Math.round(val / total * 100);
+  return val > 0 && p < 5 ? val + '' : p + '%';
+}
+
+function renderBar(containerId, segments) {
+  const el = document.getElementById(containerId);
+  const total = segments.reduce((s, seg) => s + seg.val, 0);
+  if (!total) { el.innerHTML = '<div style="width:100%;text-align:center;color:#484f58;font-size:10px;line-height:22px">Sin datos</div>'; return; }
+
+  el.innerHTML = segments.map(seg => {
+    const w = (seg.val / total * 100);
+    if (w < 0.5) return ''; // no mostrar segmentos menores a 0.5%
+    return `<div class="bar-seg ${seg.cls}" style="width:${w}%" title="${seg.val} ONTs">${seg.label}</div>`;
+  }).join('');
+}
+
+/* ─── Sync status + tiempo real (websocket) ───────────────────────────────── */
+let socket = null;
+let wsConnected = false;
+
+function renderSyncStatus(s) {
+  const dot  = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  const btnQuick = document.getElementById('syncBtnQuick');
+  const btnFull  = document.getElementById('syncBtnFull');
+  const bar  = document.getElementById('progressBar');
+
   if (s.running) {
-    dot.classList.add("running");
-    text.textContent = s.step || "Procesando...";
-    bar.style.display = "block";
-    const pct = s.total > 0 ? Math.round((s.progress / s.total) * 100) : 0;
-    fill.style.width = pct + "%";
-    detail.textContent = s.progress + "/" + s.total;
-  } else if (s.lastError) {
-    dot.classList.add("error");
-    text.textContent = "Error: " + s.lastError;
-    bar.style.display = "none";
-    detail.textContent = "";
-  } else if (s.lastSync) {
-    text.textContent = "Sincronizado — " + new Date(s.lastSync).toLocaleString();
-    if (s.elapsed) detail.textContent = "en " + s.elapsed + "s";
-    if (s.changes) detail.textContent += " (" + s.changes.total + " ONTs)";
-    bar.style.display = "none";
+    dot.className = 'sync-dot running';
+    const modeLbl = s.mode === 'full' ? ' [Completa]' : s.mode === 'quick' ? ' [Incremental]' : '';
+    text.textContent = s.step + modeLbl + (s.total ? ` (${s.progress}/${s.total})` : '');
+    btnQuick.disabled = true;
+    btnFull.disabled = true;
+    bar.style.width = (s.total ? Math.round(s.progress / s.total * 100) : 0) + '%';
   } else {
-    text.textContent = "Listo";
-    bar.style.display = "none";
-    detail.textContent = "";
+    dot.className = s.lastError ? 'sync-dot err' : (s.lastSync ? 'sync-dot ok' : 'sync-dot');
+    text.textContent = s.lastError
+      ? 'Error: ' + s.lastError
+      : (s.lastSync ? 'Ultima sync: ' + new Date(s.lastSync).toLocaleString() : 'Sin sincronizar');
+    btnQuick.disabled = false;
+    btnFull.disabled = false;
+    bar.style.width = s.lastSync ? '100%' : '0';
+    if (s.lastSync && !allOnts.length) loadFromCache(true);
   }
 }
 
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll(".tab").forEach((t, i) => {
-    t.classList.toggle("active", t.textContent.toLowerCase().includes(name));
+function initSocket() {
+  socket = io();
+
+  socket.on('connect', () => { wsConnected = true; });
+  socket.on('disconnect', () => { wsConnected = false; });
+
+  // Estado de sincronizacion en vivo — ya no hace falta hacer polling para esto
+  socket.on('sync:status', renderSyncStatus);
+
+  // La lista base (frame/slot/pon/sn) queda lista antes que la optica/detalle;
+  // la mezclamos con lo que ya tengamos para no perder datos que ya estaban.
+  socket.on('onts:base', (baseOnts) => {
+    const byKey = new Map(allOnts.map(o => [ontKey(o), o]));
+    allOnts = baseOnts.map(o => ({ ...(byKey.get(ontKey(o)) || {}), ...o }));
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
   });
-  document.querySelectorAll(".tab-panel").forEach(p => {
-    p.classList.toggle("active", p.id === "panel-" + name);
+
+  // Una ONT puntual se acaba de sincronizar (durante un sync, o al abrir su
+  // detalle) — se actualiza esa fila nada más, sin resetear filtro/orden.
+  socket.on('ont:update', (ont) => {
+    const key = ontKey(ont);
+    const idx = allOnts.findIndex(o => ontKey(o) === key);
+    if (idx >= 0) allOnts[idx] = { ...allOnts[idx], ...ont }; else allOnts.push(ont);
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
+    if (currentOnt && ontKey(currentOnt) === key) currentOnt = { ...currentOnt, ...ont };
   });
-}
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function toast(msg, type = "info") {
-  const container = document.getElementById("toastContainer");
-  const el = document.createElement("div");
-  el.className = "toast toast-" + type;
-  el.textContent = msg;
-  container.appendChild(el);
-  setTimeout(() => el.remove(), 4000);
-}
-
-// ─── Modal ────────────────────────────────────────────────────────────────────
-function openModal(id) { document.getElementById(id).classList.add("active"); }
-function closeModal(id) { document.getElementById(id).classList.remove("active"); }
-
-// ─── Sync ─────────────────────────────────────────────────────────────────────
-async function doSync() {
-  try {
-    const r = await fetch("/api/sync", { method: "POST" });
-    const d = await r.json();
-    if (d.ok) toast("Sincronización iniciada", "success");
-    else toast(d.message, "error");
-  } catch (e) { toast("Error: " + e.message, "error"); }
-}
-
-async function doFullSync() {
-  try {
-    const r = await fetch("/api/sync/full", { method: "POST" });
-    const d = await r.json();
-    if (d.ok) toast("Sincronización completa iniciada", "success");
-    else toast(d.message, "error");
-  } catch (e) { toast("Error: " + e.message, "error"); }
-}
-
-// ─── Cargar ONTs ──────────────────────────────────────────────────────────────
-async function loadOnts() {
-  try {
-    const r = await fetch("/api/onts");
-    const d = await r.json();
-    if (d.cached && d.onts) {
-      currentOnts = d.onts;
-      renderOntsTable(d.onts, d.cacheAge, d.ts);
-    }
-    // Cargar status
-    const sr = await fetch("/api/status");
-    const sd = await sr.json();
-    updateStatusBar(sd);
-    // Info OLT
-    const hr = await fetch("/api/healthz");
-    const hd = await hr.json();
-    document.getElementById("oltInfo").textContent = "OLT: " + hd.olt + " | Cache: " + (d.cached ? d.cacheAge + "s" : "vacío");
-  } catch (e) {
-    document.getElementById("oltInfo").textContent = "Error cargando datos";
-  }
-}
-
-// ─── Render tabla ONTs ────────────────────────────────────────────────────────
-function renderOntsTable(onts, cacheAge, ts) {
-  const tbody = document.getElementById("ontsTable");
-  if (!onts.length) {
-    tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><p>Sin datos — presiona "Sincronizar"</p></td></tr>';
-    return;
-  }
-  tbody.innerHTML = onts.map(o => {
-    const loc = o.frame + "/" + o.slot + "/" + o.pon;
-    const stateClass = o.runState === "online" ? "badge-online" : 
-                       o.runState === "offline" ? "badge-offline" : "badge-los";
-    const rx = o.rxPower ? o.rxPower + " dBm" : "-";
-    const tx = o.txPower ? o.txPower + " dBm" : "-";
-    const temp = o.temperature ? o.temperature + "°C" : "-";
-    const dist = o.distance ? o.distance + "m" : "-";
-    const desc = o.description || "-";
-    return `<tr>
-      <td><code>${loc}</code></td>
-      <td><strong>${o.ontId}</strong></td>
-      <td><code style="font-size:0.75rem;">${o.sn}</code></td>
-      <td><span class="badge ${stateClass}">${o.runState || "?"}</span></td>
-      <td>${rx}</td>
-      <td>${tx}</td>
-      <td>${temp}</td>
-      <td>${dist}</td>
-      <td title="${desc}">${desc.length > 25 ? desc.slice(0, 25) + "..." : desc}</td>
-      <td>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${o.frame}','${o.slot}','${o.pon}','${o.ontId}','${o.sn}')">🗑</button>
-      </td>
-    </tr>`;
-  }).join("");
-}
-
-// ─── Autofind ─────────────────────────────────────────────────────────────────
-async function loadAutofind() {
-  switchTab("autofind");
-  const loading = document.getElementById("autofindLoading");
-  const content = document.getElementById("autofindContent");
-  loading.style.display = "block";
-  content.innerHTML = "";
-
-  try {
-    const r = await fetch("/api/autofind");
-    const d = await r.json();
-    loading.style.display = "none";
-    autofindData = d;
-
-    if (!d.onts || !d.onts.length) {
-      content.innerHTML = '<div class="empty-state"><p>No hay ONTs pendientes de autorización</p></div>';
-      return;
-    }
-
-    content.innerHTML = '<div class="autofind-grid">' + d.onts.map((o, i) => `
-      <div class="autofind-card">
-        <h3>🔩 ${o.sn}</h3>
-        <div class="field"><span class="field-label">F/S/P</span><span class="field-value">${o.frame}/${o.slot}/${o.pon}</span></div>
-        <div class="field"><span class="field-label">Vendor</span><span class="field-value">${o.vendorId || "-"}</span></div>
-        <div class="field"><span class="field-label">Versión</span><span class="field-value">${o.ontVer || "-"}</span></div>
-        <div class="field"><span class="field-label">Password</span><span class="field-value">${o.password || "-"}</span></div>
-        <div style="margin-top:12px;">
-          <button class="btn btn-primary btn-sm" onclick="openAuthFromAutofind(${i})">✅ Autorizar</button>
-        </div>
-      </div>
-    `).join("") + '</div>';
-  } catch (e) {
-    loading.style.display = "none";
-    content.innerHTML = '<div class="empty-state"><p style="color:#fca5a5;">Error: ' + e.message + '</p></div>';
-  }
-}
-
-// ─── Autorizar: abrir modal desde autofind ────────────────────────────────────
-async function openAuthFromAutofind(idx) {
-  const ont = autofindData.onts[idx];
-  document.getElementById("authFrame").value = ont.frame || "0";
-  document.getElementById("authSlot").value = ont.slot || "";
-  document.getElementById("authPon").value = ont.pon || "";
-  document.getElementById("authSn").value = ont.sn || "";
-  document.getElementById("authDesc").value = "";
-  document.getElementById("authVlan").value = "";
-  document.getElementById("authLog").classList.remove("visible");
-  document.getElementById("authLog").textContent = "";
-
-  // Reset modo a router (por defecto)
-  selectMode("router");
-
-  // Cargar profiles y next ID
-  await loadProfiles(ont.lineProfile, ont.srvProfile);
-  await loadNextId(ont.frame || "0", ont.slot, ont.pon);
-
-  openModal("modalAuth");
-}
-
-// ─── Autorizar: abrir modal manual ────────────────────────────────────────────
-async function openAuthManual() {
-  document.getElementById("authFrame").value = "0";
-  document.getElementById("authSlot").value = "";
-  document.getElementById("authPon").value = "";
-  document.getElementById("authOntId").value = "";
-  document.getElementById("authSn").value = "";
-  document.getElementById("authDesc").value = "";
-  document.getElementById("authVlan").value = "";
-  document.getElementById("authLog").classList.remove("visible");
-  document.getElementById("authLog").textContent = "";
-  document.getElementById("nextIdHint").textContent = "";
-
-  selectMode("router");
-  await loadProfiles();
-  openModal("modalAuth");
-}
-
-// ─── Modo selector ────────────────────────────────────────────────────────────
-function selectMode(mode) {
-  document.getElementById("authMode").value = mode;
-  document.querySelectorAll(".mode-option").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.mode === mode);
+  // Alguien borró una ONT (desde esta pestaña u otra)
+  socket.on('ont:removed', ({ frame, slot, pon, ontId }) => {
+    allOnts = allOnts.filter(o => !(String(o.frame) === String(frame) && String(o.slot) === String(slot) && String(o.pon) === String(pon) && String(o.ontId) === String(ontId)));
+    updateStats(allOnts);
+    filterTable(document.getElementById('filterInput').value);
   });
 }
 
-// ─── Auto-fill VLAN ───────────────────────────────────────────────────────────
-async function autoFillVlan() {
+// Respaldo por si el websocket se cae un momento: solo actúa cuando NO hay
+// conexión activa, para no duplicar refrescos innecesarios.
+async function pollStatusFallback() {
+  if (wsConnected) return;
   try {
-    const r = await fetch("/api/vlans");
+    const r = await fetch('/api/status');
+    renderSyncStatus(await r.json());
+    loadFromCache(false);
+  } catch {}
+}
+
+async function triggerSync(mode) {
+  const url = mode === 'full' ? '/api/sync/full' : '/api/sync';
+  const r = await fetch(url, { method: 'POST' });
+  const d = await r.json();
+  if (!d.ok) { alert(d.message); return; }
+  document.getElementById('syncBtnQuick').disabled = true;
+  document.getElementById('syncBtnFull').disabled = true;
+  document.getElementById('progressBar').style.width = '0';
+}
+
+/* ─── Tabla ────────────────────────────────────────────────────────────────── */
+async function loadFromCache(resetFilters = true) {
+  try {
+    const r = await fetch('/api/onts');
     const d = await r.json();
-    if (d.vlans && d.vlans.length > 0) {
-      document.getElementById("authVlan").value = d.vlans[0];
-      toast("VLAN " + d.vlans[0] + " asignada automáticamente", "info");
+    if (!r.ok || !d.onts) { renderEmpty(d.message || 'Sin datos'); return; }
+    allOnts = d.onts;
+    if (resetFilters) {
+      document.getElementById('filterInput').value = '';
+      document.getElementById('stateFilter').value = '';
+      document.getElementById('matchFilter').value = '';
+      updateStats(allOnts);
+      renderTable(allOnts);
     } else {
-      toast("No se encontraron VLANs en la OLT", "error");
+      // Refresco en vivo (ej. mientras sincroniza): no tocar lo que el usuario
+      // tenga escrito en el filtro, solo refrescar los datos.
+      updateStats(allOnts);
+      filterTable(document.getElementById('filterInput').value);
     }
-  } catch (e) {
-    toast("Error obteniendo VLANs: " + e.message, "error");
-  }
+  } catch (e) { renderEmpty('Error: ' + e.message); }
 }
 
-// ─── Cargar profiles ──────────────────────────────────────────────────────────
-async function loadProfiles(defaultLine, defaultSrv) {
-  const lpSel = document.getElementById("authLineProfile");
-  const spSel = document.getElementById("authSrvProfile");
-  
-  // Si ya tenemos datos del autofind, usar esos
-  if (autofindData && autofindData.lineProfiles) {
-    fillProfileSelect(lpSel, autofindData.lineProfiles, defaultLine || "101");
-    fillProfileSelect(spSel, autofindData.srvProfiles, defaultSrv || "1");
-    return;
-  }
-
-  try {
-    const r = await fetch("/api/profiles");
-    const d = await r.json();
-    fillProfileSelect(lpSel, d.lineProfiles, defaultLine || "101");
-    fillProfileSelect(spSel, d.srvProfiles, defaultSrv || "1");
-  } catch (e) {
-    lpSel.innerHTML = '<option value="101">101 (default)</option>';
-    spSel.innerHTML = '<option value="1">1 (default)</option>';
-  }
+function renderEmpty(msg) {
+  document.getElementById('ontBody').innerHTML = `<tr><td colspan="11" class="empty">${msg}</td></tr>`;
+  document.getElementById('countBadge').textContent = '--';
+  updateStats([]);
 }
 
-function fillProfileSelect(sel, profiles, defaultId) {
-  if (!profiles || !profiles.length) {
-    sel.innerHTML = '<option value="' + defaultId + '">' + defaultId + '</option>';
-    return;
-  }
-  sel.innerHTML = profiles.map(p => 
-    `<option value="${p.id}" ${p.id === String(defaultId) ? "selected" : ""}>${p.id} - ${p.name}</option>`
-  ).join("");
+function renderTable(onts) {
+  if (!onts.length) { renderEmpty('Sin ONTs que coincidan'); return; }
+
+  const onlineCount = onts.filter(o => o.runState === 'online').length;
+  const offlineCount = onts.filter(o => o.runState === 'offline').length;
+  document.getElementById('countBadge').innerHTML =
+    `<span style="color:#3fb950">${onlineCount} on</span> · <span style="color:#f85149">${offlineCount} off</span> · ${onts.length} total`;
+
+  document.getElementById('ontBody').innerHTML = onts.map(o => {
+    const age = ageMins(o.optTs);
+    const stale = age !== null && age > 60;
+    const isOff = o.runState === 'offline';
+    const rx = fmtOrDash(o.rxPower);
+    const tx = fmtOrDash(o.txPower);
+    const temp = fmtOrDash(o.temperature);
+    const dist = fmtOrDash(o.distance);
+    const desc = o.description || '--';
+
+    return `<tr class="${isOff ? 'offline-row' : ''}">
+      <td class="fsp">${o.frame}/${o.slot}/${o.pon}</td>
+      <td class="ont-id">${o.ontId}</td>
+      <td class="sn" title="${o.sn || ''}">${cleanSn(o.sn)}</td>
+      <td class="desc" title="${desc}">${desc}</td>
+      <td><span class="badge ${stateClass(o.runState)}">${o.runState || '--'}</span></td>
+      <td><span class="badge-match ${matchBadgeClass(o.matchState)}">${o.matchState || '--'}</span></td>
+      <td><span class="rx ${rxClass(rx)} ${stale ? 'stale' : ''}" title="${stale ? 'Dato de hace >1h' : ''}">${rx || '--'}</span></td>
+      <td><span class="rx na">${tx || '--'}</span></td>
+      <td><span class="temp-val ${tempClass(temp)}">${temp !== null ? temp + '\u00B0' : '--'}</span></td>
+      <td class="dist">${dist !== null ? Number(dist).toLocaleString() : '--'}</td>
+      <td><button class="btn-sm" onclick='openModal(${JSON.stringify(o).replace(/'/g, "&#39;")})'>Detalle</button></td>
+    </tr>`;
+  }).join('');
 }
 
-// ─── Cargar next ID ───────────────────────────────────────────────────────────
-async function loadNextId(frame, slot, pon) {
-  if (!frame || !slot || !pon) return;
-  try {
-    const r = await fetch("/api/ont/nextid/" + frame + "/" + slot + "/" + pon);
-    const d = await r.json();
-    document.getElementById("authOntId").value = d.nextId;
-    document.getElementById("nextIdHint").textContent = "Usados: " + (d.used.length ? d.used.join(", ") : "ninguno");
-  } catch (e) {}
-}
+function filterTable(q) {
+  const sq = q.toLowerCase();
+  const st = document.getElementById('stateFilter').value;
+  const mt = document.getElementById('matchFilter').value;
 
-// ─── Cambio de slot/pon → actualizar next ID ─────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  ["authSlot", "authPon"].forEach(id => {
-    document.getElementById(id).addEventListener("change", () => {
-      const f = document.getElementById("authFrame").value;
-      const s = document.getElementById("authSlot").value;
-      const p = document.getElementById("authPon").value;
-      if (f && s && p) loadNextId(f, s, p);
-    });
+  const r = allOnts.filter(o => {
+    const desc = o.description || '';
+    const matchQ = !sq
+      || (o.sn || '').toLowerCase().includes(sq)
+      || cleanSn(o.sn).toLowerCase().includes(sq)
+      || `${o.frame}/${o.slot}/${o.pon}`.includes(sq)
+      || o.ontId.toString().includes(sq)
+      || (o.runState || '').toLowerCase().includes(sq)
+      || (o.rxPower || '').toString().includes(sq)
+      || desc.toLowerCase().includes(sq);
+    const matchS = !st || o.runState === st;
+    const matchM = !mt || o.matchState === mt;
+    return matchQ && matchS && matchM;
   });
-});
+  updateStats(r);
+  renderTable(r);
+}
 
-// ─── Autorizar ONT ────────────────────────────────────────────────────────────
-async function doAuthorize() {
-  const btn = document.getElementById("btnAuthSubmit");
-  const log = document.getElementById("authLog");
-  
-  const payload = {
-    frame: document.getElementById("authFrame").value || "0",
-    slot: document.getElementById("authSlot").value,
-    pon: document.getElementById("authPon").value,
-    ontId: document.getElementById("authOntId").value,
-    sn: document.getElementById("authSn").value.toUpperCase().trim(),
-    lineProfile: document.getElementById("authLineProfile").value,
-    srvProfile: document.getElementById("authSrvProfile").value,
-    mode: document.getElementById("authMode").value,      // router o bridge
-    vlan: document.getElementById("authVlan").value || "", // vacío = automático
-    desc: document.getElementById("authDesc").value,
-    authType: "sn-auth"
+function sortBy(key) {
+  _sortDir[key] = _sortDir[key] === 'asc' ? 'desc' : 'asc';
+  document.querySelectorAll('thead th').forEach(th => th.classList.remove('sorted'));
+  const th = document.getElementById('th-' + key);
+  if (th) th.classList.add('sorted');
+
+  const dir = _sortDir[key] === 'asc' ? 1 : -1;
+
+  allOnts.sort((a, b) => {
+    let av, bv;
+
+    if (key === 'fsp') {
+      av = `${a.frame}/${a.slot}/${a.pon}`;
+      bv = `${b.frame}/${b.slot}/${b.pon}`;
+      return av.localeCompare(bv, undefined, { numeric: true }) * dir;
+    }
+
+    if (key === 'description') {
+      av = (a.description || '').toLowerCase();
+      bv = (b.description || '').toLowerCase();
+      return av.localeCompare(bv) * dir;
+    }
+
+    av = a[key] || '';
+    bv = b[key] || '';
+
+    const an = parseFloat(av);
+    const bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return (an - bn) * dir;
+
+    if (key === 'runState') {
+      const order = { online: 0, offline: 1 };
+      return ((order[av.toLowerCase()] ?? 2) - (order[bv.toLowerCase()] ?? 2)) * dir;
+    }
+    if (key === 'matchState') {
+      const order = { match: 0, mismatch: 1 };
+      return ((order[av.toLowerCase()] ?? 2) - (order[bv.toLowerCase()] ?? 2)) * dir;
+    }
+
+    return av.toString().localeCompare(bv.toString()) * dir;
+  });
+
+  filterTable(document.getElementById('filterInput').value);
+}
+
+/* ─── Modal ────────────────────────────────────────────────────────────────── */
+function openModal(o) {
+  currentOnt = o;
+  const desc = o.description || '--';
+  document.getElementById('modalTitle').textContent = cleanSn(o.sn) + ' \u2014 ' + desc;
+  document.getElementById('modalSub').textContent =
+    `F/S/P: ${o.frame}/${o.slot}/${o.pon} \u00B7 ONT-ID: ${o.ontId} \u00B7 ${o.runState || '--'}${o.matchState ? ' \u00B7 Match: ' + o.matchState : ''}`;
+  document.getElementById('opticalSection').style.display = 'none';
+  document.getElementById('opticalCards').innerHTML = '';
+  document.getElementById('modalAlert').innerHTML = '';
+  document.getElementById('syncOntBtn').disabled = false;
+
+  if (o.rxPower || o.txPower || o.temperature) {
+    renderOptical({
+      "Rx optical power(dBm)": o.rxPower,
+      "Tx optical power(dBm)": o.txPower,
+      "Temperature(C)": o.temperature,
+      "Laser bias current(mA)": o.laserBias,
+      "Voltage(V)": o.voltage,
+    });
+  }
+
+  const skip = new Set(['rxPower', 'txPower', 'temperature', 'laserBias', 'voltage', 'optTs']);
+  const kv = {};
+  for (const [k, v] of Object.entries(o)) {
+    if (!skip.has(k) && v !== null && v !== undefined && v !== 'null') kv[k] = v;
+  }
+  renderKV(kv);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  currentOnt = null;
+}
+
+/* ─── Modal Autorizar ONT nueva ─────────────────────────────────────────── */
+let authProfilesLoaded = false;
+
+function openAuthModal() {
+  document.getElementById('authOverlay').classList.add('open');
+  document.getElementById('authAlert').innerHTML = '';
+  if (!authProfilesLoaded) {
+    authProfilesLoaded = true;
+    loadAuthProfiles();
+    loadAuthVlans();
+  }
+  authModeChanged();
+  authWanModeChanged();
+}
+
+function closeAuthModal(e) {
+  if (e && e.target !== document.getElementById('authOverlay')) return;
+  document.getElementById('authOverlay').classList.remove('open');
+}
+
+async function loadAuthProfiles() {
+  try {
+    const r = await fetch('/api/profiles');
+    const data = await r.json();
+    const lp = document.getElementById('af_lineProfile');
+    const sp = document.getElementById('af_serviceProfile');
+    lp.innerHTML = (data.lineProfiles || []).map(p => `<option value="${p.id}">${p.id} - ${p.name}</option>`).join('') || '<option value="101">101</option>';
+    sp.innerHTML = (data.srvProfiles || []).map(p => `<option value="${p.id}">${p.id} - ${p.name}</option>`).join('') || '<option value="1">1</option>';
+  } catch (e) {
+    document.getElementById('authAlert').innerHTML = `<div class="alert err">No se pudieron cargar los perfiles: ${e.message}</div>`;
+  }
+}
+
+async function loadAuthVlans() {
+  try {
+    const r = await fetch('/api/vlans');
+    const data = await r.json();
+    const sel = document.getElementById('af_vlanSelect');
+    sel.innerHTML = '<option value="">-- VLAN de la OLT --</option>' +
+      (data.vlans || []).map(v => `<option value="${v}">${v}</option>`).join('');
+  } catch (e) {
+    document.getElementById('authAlert').innerHTML = `<div class="alert err">No se pudieron cargar las VLANs: ${e.message}</div>`;
+  }
+}
+
+function authModeChanged() {
+  const mode = document.querySelector('input[name="af_mode"]:checked').value;
+  document.getElementById('af_routerOpts').style.display = mode === 'router' ? 'block' : 'none';
+}
+
+function authWanModeChanged() {
+  const wanMode = document.querySelector('input[name="af_wanIpMode"]:checked')?.value || 'dhcp';
+  document.getElementById('af_pppoeFields').style.display = wanMode === 'pppoe' ? 'flex' : 'none';
+}
+
+async function authLoadNextId() {
+  const frame = document.getElementById('af_frame').value.trim() || '0';
+  const slot = document.getElementById('af_slot').value.trim();
+  const pon = document.getElementById('af_pon').value.trim();
+  if (!slot || !pon) return;
+  try {
+    const r = await fetch(`/api/ont/nextid/${frame}/${slot}/${pon}`);
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data && data.nextId !== undefined) document.getElementById('af_ontId').value = data.nextId;
+  } catch (e) { /* si falla, se completa manual */ }
+}
+
+async function submitAuth() {
+  const mode = document.querySelector('input[name="af_mode"]:checked').value;
+  const wanIpMode = document.querySelector('input[name="af_wanIpMode"]:checked')?.value || 'dhcp';
+  const vlan = document.getElementById('af_vlan').value.trim();
+  const body = {
+    frame: document.getElementById('af_frame').value.trim() || '0',
+    slot: document.getElementById('af_slot').value.trim(),
+    pon: document.getElementById('af_pon').value.trim(),
+    ontId: document.getElementById('af_ontId').value.trim(),
+    sn: document.getElementById('af_sn').value.trim(),
+    desc: document.getElementById('af_desc').value.trim(),
+    lineProfile: document.getElementById('af_lineProfile').value,
+    serviceProfile: document.getElementById('af_serviceProfile').value,
+    mode, vlan,
+    wanIpMode,
+    pppoeUser: document.getElementById('af_pppoeUser').value.trim(),
+    pppoePass: document.getElementById('af_pppoePass').value.trim(),
   };
 
-  // Validar
-  if (!payload.slot || !payload.pon || !payload.ontId || !payload.sn) {
-    toast("Faltan campos obligatorios", "error");
+  if (!body.slot || !body.pon || !body.ontId || !body.sn || !vlan) {
+    document.getElementById('authAlert').innerHTML = '<div class="alert err">Completá slot, PON, ONT ID, serial y VLAN.</div>';
     return;
   }
 
-  // Validar VLAN si se ingresó
-  if (payload.vlan) {
-    const vlanNum = parseInt(payload.vlan);
-    if (isNaN(vlanNum) || vlanNum < 100 || vlanNum > 4094) {
-      toast("VLAN debe ser entre 100 y 4094", "error");
-      return;
-    }
-  }
-
+  const btn = document.getElementById('authSubmitBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Autorizando...';
-  log.classList.add("visible");
-  log.textContent = "Enviando solicitud...\n";
+  document.getElementById('authAlert').innerHTML = '';
 
   try {
-    const r = await fetch("/api/ont/autorizar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    const r = await fetch('/api/ont/autorizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
     });
-    const d = await r.json();
-    
-    let logText = "═══ RESULTADO ═══\n";
-    logText += "Modo: " + (d.mode || payload.mode) + "\n";
-    logText += "VLAN: " + (d.vlan || "no asignada") + " (" + (d.vlanSource || "n/a") + ")\n";
-    logText += "Mensaje: " + (d.message || (d.ok ? "OK" : "Error")) + "\n";
-    if (d.commands) {
-      logText += "\n═══ COMANDOS EJECUTADOS ═══\n";
-      d.commands.forEach((cmd, i) => {
-        logText += (i + 1) + ". " + cmd + "\n";
-      });
-    }
-    if (d.raw) {
-      logText += "\n═══ RESPUESTA OLT ═══\n" + d.raw;
-    }
-    log.textContent = logText;
-
-    if (d.ok) {
-      toast(d.message || "ONT autorizada correctamente", "success");
-      // Cerrar modal después de un momento
-      setTimeout(() => {
-        closeModal("modalAuth");
-        // Refrescar tabla
-        loadOnts();
-      }, 2000);
+    const data = await r.json();
+    if (r.ok && data.ok) {
+      document.getElementById('authAlert').innerHTML = `<div class="alert ok">${data.message}</div>`;
+      loadFromCache();
+      setTimeout(() => closeAuthModal(), 1200);
     } else {
-      toast(d.message || "Error al autorizar", "error");
+      document.getElementById('authAlert').innerHTML =
+        `<div class="alert err">${data.message || data.error || 'Error al autorizar'}${data.raw ? '<pre style="white-space:pre-wrap;font-size:10px;margin-top:6px">' + data.raw + '</pre>' : ''}</div>`;
     }
   } catch (e) {
-    log.textContent += "\n\nERROR: " + e.message;
-    toast("Error de conexión: " + e.message, "error");
+    document.getElementById('authAlert').innerHTML = `<div class="alert err">${e.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "Autorizar ONT";
+    btn.textContent = 'Autorizar ONT';
   }
 }
 
-// ─── Eliminar ONT ─────────────────────────────────────────────────────────────
-function confirmDelete(f, s, p, id, sn) {
-  deleteTarget = { f, s, p, id };
-  document.getElementById("deleteInfo").textContent = f + "/" + s + "/" + p + "/" + id + " (" + sn + ")";
-  document.getElementById("deleteLog").classList.remove("visible");
-  document.getElementById("deleteLog").textContent = "";
-  openModal("modalDelete");
+function renderOptical(opt) {
+  const labels = {
+    "Rx optical power(dBm)": ["RX Power", "dBm"],
+    "Tx optical power(dBm)": ["TX Power", "dBm"],
+    "Temperature(C)": ["Temp", "\u00B0C"],
+    "Laser bias current(mA)": ["Laser Bias", "mA"],
+    "Voltage(V)": ["Voltaje", "V"],
+  };
+  const cards = Object.entries(opt)
+    .filter(([, v]) => v && v !== 'null' && v !== null && v !== '-')
+    .map(([k, v]) => {
+      const lbl = labels[k] || [k, ''];
+      const cls = k.toLowerCase().includes('rx') ? rxClass(v)
+        : k.toLowerCase().includes('temp') ? tempClass(v)
+        : 'na';
+      return `<div class="opt-card"><div class="v rx ${cls}">${v}</div><div class="l">${lbl[0]} ${lbl[1]}</div></div>`;
+    }).join('');
+  if (!cards) return;
+  document.getElementById('opticalSection').style.display = 'block';
+  document.getElementById('opticalCards').innerHTML = cards;
 }
 
-async function doDelete() {
-  if (!deleteTarget) return;
-  const btn = document.getElementById("btnDeleteSubmit");
-  const log = document.getElementById("deleteLog");
-  const { f, s, p, id } = deleteTarget;
+function renderKV(kv) {
+  document.getElementById('kvGrid').innerHTML = Object.entries(kv)
+    .map(([k, v]) => `<div class="kv-k">${k}</div><div class="kv-v">${v ?? '--'}</div>`)
+    .join('');
+}
 
+async function syncOnt() {
+  if (!currentOnt) return;
+  const btn = document.getElementById('syncOntBtn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Eliminando...';
-  log.classList.add("visible");
-  log.textContent = "Eliminando ONT " + f + "/" + s + "/" + p + "/" + id + "...\n";
-
+  btn.textContent = 'Obteniendo potencia...';
+  document.getElementById('modalAlert').innerHTML = '';
   try {
-    const r = await fetch("/api/ont/" + f + "/" + s + "/" + p + "/" + id, { method: "DELETE" });
+    const { frame: f, slot: s, pon: p, ontId: id } = currentOnt;
+    const r = await fetch(`/api/ont/${f}/${s}/${p}/${id}`);
     const d = await r.json();
-    log.textContent += d.raw || (d.ok ? "Eliminada correctamente" : d.message);
+    if (!r.ok) throw new Error(d.error || 'Error');
 
-    if (d.ok) {
-      toast(d.message || "ONT eliminada", "success");
-      setTimeout(() => closeModal("modalDelete"), 1000);
-    } else {
-      toast(d.message || "Error al eliminar", "error");
+    if (d.optical && Object.keys(d.optical).length) renderOptical(d.optical);
+    if (d.kv) renderKV(d.kv);
+
+    document.getElementById('modalAlert').innerHTML =
+      '<div class="alert ok">Potencia optica actualizada en tiempo real</div>';
+
+    const key = ontKey(currentOnt);
+    const idx = allOnts.findIndex(o => ontKey(o) === key);
+    if (idx >= 0) {
+      const opt = d.optical || {};
+      allOnts[idx].rxPower = opt["Rx optical power(dBm)"] || opt["RX optical power(dBm)"] || allOnts[idx].rxPower;
+      allOnts[idx].txPower = opt["Tx optical power(dBm)"] || opt["TX optical power(dBm)"] || allOnts[idx].txPower;
+      allOnts[idx].temperature = opt["Temperature(C)"] || allOnts[idx].temperature;
+      allOnts[idx].laserBias = opt["Laser bias current(mA)"] || allOnts[idx].laserBias;
+      allOnts[idx].voltage = opt["Voltage(V)"] || allOnts[idx].voltage;
+      allOnts[idx].optTs = Date.now();
+
+      if (d.kv) {
+        if (d.kv["Description"]) allOnts[idx].description = d.kv["Description"];
+        if (d.kv["Run state"]) allOnts[idx].runState = d.kv["Run state"];
+        if (d.kv["Match state"]) allOnts[idx].matchState = d.kv["Match state"];
+        if (d.kv["ONT distance(m)"]) allOnts[idx].distance = d.kv["ONT distance(m)"];
+      }
+
+      filterTable(document.getElementById('filterInput').value);
     }
   } catch (e) {
-    log.textContent += "\nERROR: " + e.message;
-    toast("Error: " + e.message, "error");
+    document.getElementById('modalAlert').innerHTML =
+      `<div class="alert err">${e.message}</div>`;
   } finally {
     btn.disabled = false;
-    btn.textContent = "Eliminar";
-    deleteTarget = null;
+    btn.textContent = 'Actualizar potencia optica en tiempo real';
   }
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-loadOnts();
+/* ─── Init ─────────────────────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  loadFromCache();
+  initSocket();
+  pollStatusFallback();
+  setInterval(pollStatusFallback, 5000);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
 </script>
 </body>
 </html>
