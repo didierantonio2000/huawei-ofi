@@ -17,31 +17,22 @@ app.use(express.static(path.join(__dirname, "public")));
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-// Cada cliente se une a una "room" por OLT (olt:<id>) para recibir solo los
-// eventos de la OLT que tiene seleccionada en ese momento. Puede cambiar de
-// OLT sin recargar la página, así que también manejamos el cambio de room.
 io.on("connection", (socket) => {
-  socket.currentOltRoom = null;
-
-  socket.on("olt:join", (oltId) => {
-    if (!oltId) return;
-    if (socket.currentOltRoom) socket.leave(socket.currentOltRoom);
-    const room = "olt:" + oltId;
-    socket.join(room);
-    socket.currentOltRoom = room;
-    socket.emit("sync:status", { oltId, ...ensureStatus(oltId) });
-  });
+  socket.emit("sync:status", syncStatus);
 });
 
-// ─── Config multi-OLT ──────────────────────────────────────────────────────
-// Antes había una sola OLT fija en el código. Ahora la lista de OLTs vive en
-// cache/olts.json y se puede administrar en caliente (agregar/eliminar) desde
-// la interfaz, sin tocar el código ni reiniciar el server.
+// ─── Config OLT ──────────────────────────────────────────────────────────────
+const OLT = { host: "45.162.79.228", port: 2333, user: "smartolt", pass: "smart2021" };
 const AUTO_SYNC_MINUTES = parseInt(process.env.AUTO_SYNC_MINUTES) || 5;
 const AUTO_SYNC_ENABLED = process.env.AUTO_SYNC_ENABLED === "1";
 
-const CACHE_DIR  = path.join(__dirname, "cache");
-const OLTS_FILE  = path.join(CACHE_DIR, "olts.json");
+// ─── Cache en disco ───────────────────────────────────────────────────────────
+const CACHE_DIR    = path.join(__dirname, "cache");
+const ONT_CACHE    = path.join(CACHE_DIR, "onts.json");
+const OPT_CACHE    = path.join(CACHE_DIR, "optical.json");
+const VLAN_CACHE   = path.join(CACHE_DIR, "vlans.json");
+const DETAIL_CACHE = path.join(CACHE_DIR, "detail.json");
+const PROFILE_CACHE = path.join(CACHE_DIR, "profiles.json");
 if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
 
 function readCache(file) {
@@ -51,72 +42,23 @@ function writeCache(file, data) {
   try { fs.writeFileSync(file, JSON.stringify(data, null, 2)); } catch (e) { console.error("Cache write error:", e.message); }
 }
 
-function slugify(s) {
-  return (s || "olt").toString().trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "olt";
-}
+let syncStatus = { running: false, step: "idle", progress: 0, total: 0, lastSync: null, lastError: null, mode: null, changes: null };
+let syncRunning = false;
 
-function loadOlts() {
-  let data = readCache(OLTS_FILE);
-  if (!data || !Array.isArray(data.olts) || !data.olts.length) {
-    // Semilla con la OLT que ya existía antes de multi-OLT, para no perder
-    // la config que el usuario ya tenía funcionando.
-    data = {
-      olts: [
-        { id: "barcelona", name: "BARCELONA", host: "45.162.79.228", port: 2333, user: "smartolt", pass: "smart2021", prompt: "BARCELONA" },
-      ],
-    };
-    writeCache(OLTS_FILE, data);
-  }
-  return data.olts;
+function setStatus(next) {
+  syncStatus = next;
+  io.emit("sync:status", syncStatus);
+  return syncStatus;
 }
-function saveOlts(list) { writeCache(OLTS_FILE, { olts: list }); }
-function getOltById(id) { return loadOlts().find((o) => o.id === id); }
-
-// Cache en disco por OLT (cache/<oltId>/*.json)
-function cachePaths(oltId) {
-  const dir = path.join(CACHE_DIR, oltId);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  return {
-    ONT:     path.join(dir, "onts.json"),
-    OPT:     path.join(dir, "optical.json"),
-    VLAN:    path.join(dir, "vlans.json"),
-    DETAIL:  path.join(dir, "detail.json"),
-    PROFILE: path.join(dir, "profiles.json"),
-    OFFLINE: path.join(dir, "offline.json"), // desde cuándo está offline cada ONT (visto por este server)
-  };
-}
-
-// ─── Estado de sincronización (uno por OLT) ──────────────────────────────────
-const syncStatusMap = {};
-const syncRunningMap = {};
-
-function ensureStatus(oltId) {
-  if (!syncStatusMap[oltId]) {
-    syncStatusMap[oltId] = { running: false, step: "idle", progress: 0, total: 0, lastSync: null, lastError: null, mode: null, changes: null };
-  }
-  return syncStatusMap[oltId];
-}
-function setStatus(oltId, next) {
-  syncStatusMap[oltId] = next;
-  io.to("olt:" + oltId).emit("sync:status", { oltId, ...syncStatusMap[oltId] });
-  return syncStatusMap[oltId];
-}
-function patchStatus(oltId, partial) {
-  syncStatusMap[oltId] = { ...ensureStatus(oltId), ...partial };
-  io.to("olt:" + oltId).emit("sync:status", { oltId, ...syncStatusMap[oltId] });
-  return syncStatusMap[oltId];
+function patchStatus(partial) {
+  syncStatus = { ...syncStatus, ...partial };
+  io.emit("sync:status", syncStatus);
+  return syncStatus;
 }
 
 // ─── Telnet Session ───────────────────────────────────────────────────────────
-// Ahora recibe la config de la OLT (host/port/user/pass/prompt) en vez de usar
-// una constante global — así una misma clase sirve para cualquier OLT Huawei
-// registrada, siempre que use el mismo estilo de CLI (usuario/clave + enable +
-// config, con el nombre de equipo como prompt).
 class OltSession {
-  constructor(olt, timeout = 40000) {
-    this.olt = olt;
+  constructor(timeout = 40000) {
     this.socket = new net.Socket();
     this.buffer = "";
     this.waiter = null;
@@ -125,14 +67,13 @@ class OltSession {
   }
 
   connect() {
-    const P = this.olt.prompt;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this._cleanup();
         reject(new Error("Timeout al conectar"));
       }, this.connectTimeout);
 
-      this.socket.connect(this.olt.port, this.olt.host, () => {
+      this.socket.connect(OLT.port, OLT.host, () => {
         this.socket.write(Buffer.from([0xff, 0xfa, 0x1f, 0x02, 0x00, 0x02, 0x00, 0xff, 0xf0]));
       });
 
@@ -149,26 +90,26 @@ class OltSession {
         if (this.waiter) this.waiter(this.buffer);
       });
 
-      this.socket.on("error", (e) => {
+      this.socket.on("error", (e) => { 
         clearTimeout(timer);
         this._cleanup();
-        reject(e);
+        reject(e); 
       });
-
-      this.socket.on("close", () => {
+      
+      this.socket.on("close", () => { 
         this._cleanup();
       });
 
       this.waitFor(">>User name:")
-        .then(() => { this.send(this.olt.user); return this.waitFor(">>User password:"); })
-        .then(() => { this.send(this.olt.pass); return this.waitFor(P + ">"); })
-        .then(() => { this.send("enable");  return this.waitFor(P + "#"); })
-        .then(() => { this.send("config");  return this.waitFor(P + "(config)#"); })
+        .then(() => { this.send(OLT.user); return this.waitFor(">>User password:"); })
+        .then(() => { this.send(OLT.pass); return this.waitFor("BARCELONA>"); })
+        .then(() => { this.send("enable");  return this.waitFor("BARCELONA#"); })
+        .then(() => { this.send("config");  return this.waitFor("BARCELONA(config)#"); })
         .then(() => { clearTimeout(timer); resolve(); })
-        .catch((e) => {
+        .catch((e) => { 
           clearTimeout(timer);
           this._cleanup();
-          reject(e);
+          reject(e); 
         });
     });
   }
@@ -193,25 +134,25 @@ class OltSession {
   }
   _strip(s) { return s.replace(/\x1b\[[0-9;]*[a-zA-Z]/g,"").replace(/\r/g,""); }
 
-  send(cmd) {
-    if (!this.closed) this.socket.write(cmd + "\r\n");
+  send(cmd) { 
+    if (!this.closed) this.socket.write(cmd + "\r\n"); 
   }
 
   waitFor(marker, timeout = 22000) {
     return new Promise((resolve, reject) => {
       if (this.closed) return reject(new Error("Session closed"));
-      if (this.buffer.includes(marker)) {
-        const r = this.buffer;
-        this.buffer = "";
-        return resolve(r);
+      if (this.buffer.includes(marker)) { 
+        const r = this.buffer; 
+        this.buffer = ""; 
+        return resolve(r); 
       }
-
-      const timer = setTimeout(() => {
+      
+      const timer = setTimeout(() => { 
         this.waiter = null;
         this._cleanup();
-        reject(new Error("Timeout esperando: " + marker));
+        reject(new Error("Timeout esperando: " + marker)); 
       }, timeout);
-
+      
       this.waiter = (buf) => {
         if (this.closed) {
           clearTimeout(timer);
@@ -219,20 +160,19 @@ class OltSession {
           return;
         }
         if (buf.includes(marker)) {
-          clearTimeout(timer);
-          this.waiter = null;
-          const r = this.buffer;
-          this.buffer = "";
+          clearTimeout(timer); 
+          this.waiter = null; 
+          const r = this.buffer; 
+          this.buffer = ""; 
           resolve(r);
         }
       };
     });
   }
 
-  async cmd(command, marker, timeout=22000) {
-    marker = marker || (this.olt.prompt + "(config)#");
-    this.buffer = "";
-    this.send(command);
+  async cmd(command, marker="BARCELONA(config)#", timeout=22000) {
+    this.buffer = ""; 
+    this.send(command); 
     return this.waitFor(marker, timeout);
   }
 
@@ -241,18 +181,18 @@ class OltSession {
       if (this.closed) return reject(new Error("Session closed"));
       const check = () => markers.find(mk => this.buffer.includes(mk));
       const hit = check();
-      if (hit) {
-        const r = this.buffer;
-        this.buffer = "";
-        return resolve({ raw: r, matched: hit });
+      if (hit) { 
+        const r = this.buffer; 
+        this.buffer = ""; 
+        return resolve({ raw: r, matched: hit }); 
       }
-
-      const timer = setTimeout(() => {
+      
+      const timer = setTimeout(() => { 
         this.waiter = null;
         this._cleanup();
-        reject(new Error("Timeout esperando: " + markers.join(" | ")));
+        reject(new Error("Timeout esperando: " + markers.join(" | "))); 
       }, timeout);
-
+      
       this.waiter = (buf) => {
         if (this.closed) {
           clearTimeout(timer);
@@ -260,26 +200,26 @@ class OltSession {
           return;
         }
         const m = check();
-        if (m) {
-          clearTimeout(timer);
-          this.waiter = null;
-          const r = this.buffer;
-          this.buffer = "";
-          resolve({ raw: r, matched: m });
+        if (m) { 
+          clearTimeout(timer); 
+          this.waiter = null; 
+          const r = this.buffer; 
+          this.buffer = ""; 
+          resolve({ raw: r, matched: m }); 
         }
       };
     });
   }
 
   async cmdAny(command, markers, timeout=22000) {
-    this.buffer = "";
-    this.send(command);
+    this.buffer = ""; 
+    this.send(command); 
     return this.waitForAny(markers, timeout);
   }
 
   async destroy() {
     this._cleanup();
-    try {
+    try { 
       await new Promise((resolve) => {
         this.socket.destroy();
         setTimeout(resolve, 100);
@@ -288,13 +228,13 @@ class OltSession {
   }
 }
 
-async function withOltRaw(olt, fn, timeout) {
-  const s = new OltSession(olt, timeout);
+async function withOltRaw(fn, timeout) {
+  const s = new OltSession(timeout);
   await s.connect();
   try { return await fn(s); } finally { await s.destroy(); }
 }
 
-// ─── Connection Pool para Telnet (uno por OLT) ────────────────────────────────
+// ─── Connection Pool para Telnet ──────────────────────────────────────────────
 const TELNET_POOL_SIZE = parseInt(process.env.TELNET_POOL_SIZE) || 3;
 
 class TelnetPool {
@@ -304,14 +244,14 @@ class TelnetPool {
     this.queue = [];
   }
 
-  async run(olt, fn, timeout) {
+  async run(fn, timeout) {
     while (this.running >= this.maxConcurrent) {
       await new Promise(resolve => this.queue.push(resolve));
     }
-
+    
     this.running++;
     try {
-      return await withOltRaw(olt, fn, timeout);
+      return await withOltRaw(fn, timeout);
     } finally {
       this.running--;
       const next = this.queue.shift();
@@ -320,21 +260,13 @@ class TelnetPool {
   }
 }
 
-const telnetPools = {};
-function getPool(oltId) {
-  if (!telnetPools[oltId]) telnetPools[oltId] = new TelnetPool(TELNET_POOL_SIZE);
-  return telnetPools[oltId];
-}
+const telnetPool = new TelnetPool(TELNET_POOL_SIZE);
 
-// fn recibe (session, olt)
-function withOlt(oltId, fn, timeout) {
-  const olt = getOltById(oltId);
-  if (!olt) return Promise.reject(new Error("OLT no encontrada: " + oltId));
-  return getPool(oltId).run(olt, (session) => fn(session, olt), timeout);
+function withOlt(fn, timeout) {
+  return telnetPool.run(fn, timeout);
 }
 
 // ─── Parsers ──────────────────────────────────────────────────────────────────
-
 const SN_RE = /^[0-9A-Fa-f]{8,20}$/;
 function looksLikeSn(s) { return !!s && SN_RE.test(s); }
 
@@ -414,21 +346,19 @@ function parseProfileList(raw) {
   return profiles;
 }
 
-async function getProfiles(session, olt) {
-  const P = olt.prompt;
-  const lineRaw = await session.cmd("display ont-lineprofile gpon all", P + "(config)#", 20000).catch(() => "");
-  const srvRaw  = await session.cmd("display ont-srvprofile gpon all", P + "(config)#", 20000).catch(() => "");
+async function getProfiles(session) {
+  const lineRaw = await session.cmd("display ont-lineprofile gpon all", "BARCELONA(config)#", 20000).catch(() => "");
+  const srvRaw  = await session.cmd("display ont-srvprofile gpon all", "BARCELONA(config)#", 20000).catch(() => "");
   return {
     lineProfiles: parseProfileList(lineRaw),
     srvProfiles:  parseProfileList(srvRaw),
   };
 }
 
-async function getAllOntsFull(session, olt) {
-  const P = olt.prompt;
-  await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-  await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-  const boardRaw = await session.cmd("display board 0", P + "(config)#", 30000);
+async function getAllOntsFull(session) {
+  await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
+  await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
+  const boardRaw = await session.cmd("display board 0", "BARCELONA(config)#", 30000);
   const slots = [];
   for (const line of boardRaw.split("\n")) {
     const m = line.match(/^\s*(\d+)\s+(\S+)/);
@@ -439,7 +369,7 @@ async function getAllOntsFull(session, olt) {
   for (const slot of targets) {
     for (let pon = 0; pon <= 15; pon++) {
       try {
-        const raw = await session.cmd("display ont info 0 " + slot + " " + pon + " all", P + "(config)#", 18000);
+        const raw = await session.cmd("display ont info 0 " + slot + " " + pon + " all", "BARCELONA(config)#", 18000);
         if (/^\s*Failure|invalid command|error/im.test(raw)) { if (pon === 0) break; continue; }
         const parsed = parseOntTable(raw);
         if (!parsed.length && pon > 0) break;
@@ -464,54 +394,25 @@ function safeDescription(desc) {
   return t;
 }
 
-// ─── Tracking local de "desde cuándo está offline" ───────────────────────────
-// La OLT no siempre entrega un campo confiable de "tiempo offline" por ONT,
-// así que lo llevamos nosotros: la primera vez que vemos una ONT en estado
-// offline guardamos el timestamp; si vuelve a online, se borra. Esto alimenta
-// la sección del dashboard de "offline +48h".
-function updateOfflineTracking(oltId, onts) {
-  const cp = cachePaths(oltId);
-  const offlineMap = readCache(cp.OFFLINE) || {};
-  const nowKeys = new Set();
-  for (const o of onts) {
-    const key = ontKey(o);
-    nowKeys.add(key);
-    const isOffline = (o.runState || "").toLowerCase() === "offline";
-    if (isOffline) {
-      if (!offlineMap[key]) offlineMap[key] = Date.now();
-    } else {
-      if (offlineMap[key]) delete offlineMap[key];
-    }
-  }
-  // Limpiar ONTs que ya no existen en la OLT
-  for (const key of Object.keys(offlineMap)) {
-    if (!nowKeys.has(key)) delete offlineMap[key];
-  }
-  writeCache(cp.OFFLINE, offlineMap);
-  return offlineMap;
-}
-
 // ─── QUICK SYNC (Incremental) ─────────────────────────────────────────────────
-async function runQuickSync(oltId) {
-  if (syncRunningMap[oltId]) { console.log("[SYNC " + oltId + "] Ya en progreso, se omite"); return; }
-  syncRunningMap[oltId] = true;
-  const cp = cachePaths(oltId);
-  setStatus(oltId, { running: true, step: "Escaneando tabla de ONTs...", progress: 0, total: 0, lastSync: null, lastError: null, mode: "quick", changes: null });
-  console.log("[QUICK SYNC " + oltId + "] Inicio sincronización incremental");
+async function runQuickSync() {
+  if (syncRunning) { console.log("[SYNC] Ya en progreso, se omite"); return; }
+  syncRunning = true;
+  setStatus({ running: true, step: "Escaneando tabla de ONTs...", progress: 0, total: 0, lastSync: null, lastError: null, mode: "quick", changes: null });
+  console.log("[QUICK SYNC] Inicio sincronización incremental");
   const t0 = Date.now();
 
   try {
-    const oldCache = readCache(cp.ONT);
+    const oldCache = readCache(ONT_CACHE);
     const hasCache = !!oldCache;
 
-    const onts = await withOlt(oltId, getAllOntsFull, 60000);
-    writeCache(cp.ONT, { ts: Date.now(), onts });
-    updateOfflineTracking(oltId, onts);
-    console.log("[QUICK SYNC " + oltId + "] " + onts.length + " ONTs en la OLT (escaneo: " + Math.round((Date.now()-t0)/1000) + "s)");
-    io.to("olt:" + oltId).emit("onts:base", { oltId, onts });
+    const onts = await withOlt(getAllOntsFull, 60000);
+    writeCache(ONT_CACHE, { ts: Date.now(), onts });
+    console.log("[QUICK SYNC] " + onts.length + " ONTs en la OLT (escaneo: " + Math.round((Date.now()-t0)/1000) + "s)");
+    io.emit("onts:base", onts);
 
-    const detCache = readCache(cp.DETAIL) || {};
-    const optCache = readCache(cp.OPT) || {};
+    const detCache = readCache(DETAIL_CACHE) || {};
+    const optCache = readCache(OPT_CACHE) || {};
     const newKeySet = new Set(onts.map(ontKey));
 
     let toFetch = [];
@@ -521,8 +422,8 @@ async function runQuickSync(oltId) {
     let descMissingCount = 0;
 
     if (!hasCache) {
-      console.log("[QUICK SYNC " + oltId + "] Sin caché previo — modo completo");
-      patchStatus(oltId, { mode: "full" });
+      console.log("[QUICK SYNC] Sin caché previo — modo completo");
+      patchStatus({ mode: "full" });
       toFetch = onts.map(o => ({ ont: o, needOptical: true, needDetail: true }));
       newCount = onts.length;
     } else {
@@ -572,15 +473,15 @@ async function runQuickSync(oltId) {
       }
     }
 
-    patchStatus(oltId, { total: toFetch.length });
+    patchStatus({ total: toFetch.length });
     const skipped = onts.length - toFetch.length;
 
     if (toFetch.length === 0) {
-      patchStatus(oltId, { step: "Sin cambios — todo al día" });
-      console.log("[QUICK SYNC " + oltId + "] Sin cambios detectados (" + Math.round((Date.now()-t0)/1000) + "s)");
+      patchStatus({ step: "Sin cambios — todo al día" });
+      console.log("[QUICK SYNC] Sin cambios detectados (" + Math.round((Date.now()-t0)/1000) + "s)");
     } else {
-      patchStatus(oltId, { step: "Actualizando " + toFetch.length + " ONTs..." });
-      console.log("[QUICK SYNC " + oltId + "] " + toFetch.length + " para actualizar (nuevas:" + newCount + " estado:" + stateChangeCount + " sin-desc:" + descMissingCount + ")");
+      patchStatus({ step: "Actualizando " + toFetch.length + " ONTs..." });
+      console.log("[QUICK SYNC] " + toFetch.length + " para actualizar (nuevas:" + newCount + " estado:" + stateChangeCount + " sin-desc:" + descMissingCount + ")");
 
       const groups = {};
       for (const item of toFetch) {
@@ -594,16 +495,15 @@ async function runQuickSync(oltId) {
       for (const gpKey of Object.keys(groups)) {
         const gp = groups[gpKey];
         try {
-          await withOlt(oltId, async (session, olt) => {
-            const P = olt.prompt;
-            await session.cmd("interface gpon " + gp.frame + "/" + gp.slot, P + "(config-if-gpon", 12000);
+          await withOlt(async (session) => {
+            await session.cmd("interface gpon " + gp.frame + "/" + gp.slot, "BARCELONA(config-if-gpon", 12000);
             for (const item of gp.items) {
               const o = item.ont;
               const key = ontKey(o);
 
               if (item.needOptical) {
                 try {
-                  const raw = await session.cmd("display ont optical-info " + o.pon + " " + o.ontId, P + "(config-if-gpon", 12000);
+                  const raw = await session.cmd("display ont optical-info " + o.pon + " " + o.ontId, "BARCELONA(config-if-gpon", 12000);
                   const parsed = parseOptical(raw);
                   optCache[key] = {
                     rxPower:    parsed["Rx optical power(dBm)"] || parsed["RX optical power(dBm)"] || null,
@@ -618,7 +518,7 @@ async function runQuickSync(oltId) {
 
               if (item.needDetail) {
                 try {
-                  const detRaw = await session.cmd("display ont info " + o.pon + " " + o.ontId, P + "(config-if-gpon", 15000);
+                  const detRaw = await session.cmd("display ont info " + o.pon + " " + o.ontId, "BARCELONA(config-if-gpon", 15000);
                   const kv = parseKV(detRaw);
                   const rawTemp = kv["Temperature"] || "";
                   detCache[key] = {
@@ -636,58 +536,56 @@ async function runQuickSync(oltId) {
               }
 
               done++;
-              io.to("olt:" + oltId).emit("ont:update", { oltId, ont: mergeOntView(o, optCache, detCache) });
-              patchStatus(oltId, { progress: done, step: "Actualizando: " + done + "/" + toFetch.length });
+              io.emit("ont:update", mergeOntView(o, optCache, detCache));
+              patchStatus({ progress: done, step: "Actualizando: " + done + "/" + toFetch.length });
             }
-            await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
+            await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
           }, 300000);
-        } catch (e) { console.error("[QUICK SYNC " + oltId + "] Error grupo " + gpKey + ":", e.message); }
-        writeCache(cp.OPT, optCache);
-        writeCache(cp.DETAIL, detCache);
+        } catch (e) { console.error("[QUICK SYNC] Error grupo " + gpKey + ":", e.message); }
+        writeCache(OPT_CACHE, optCache);
+        writeCache(DETAIL_CACHE, detCache);
       }
     }
 
     const elapsed = Math.round((Date.now() - t0) / 1000);
     const changes = { total: onts.length, newOnts: newCount, stateChanges: stateChangeCount, descMissing: descMissingCount, removedOnts: removedCount, updated: toFetch.length, skipped: skipped };
 
-    setStatus(oltId, {
+    setStatus({
       running: false, step: "Completado", progress: toFetch.length, total: toFetch.length,
       lastSync: new Date().toISOString(), lastError: null,
       mode: hasCache ? "quick" : "full", changes: changes, elapsed: elapsed,
     });
-    console.log("[QUICK SYNC " + oltId + "] OK en " + elapsed + "s — " + JSON.stringify(changes));
+    console.log("[QUICK SYNC] OK en " + elapsed + "s — " + JSON.stringify(changes));
 
   } catch (e) {
-    console.error("[QUICK SYNC " + oltId + "] Error:", e.message);
-    setStatus(oltId, { running: false, step: "Error", progress: 0, total: 0, lastSync: null, lastError: e.message, mode: "quick", changes: null });
+    console.error("[QUICK SYNC] Error:", e.message);
+    setStatus({ running: false, step: "Error", progress: 0, total: 0, lastSync: null, lastError: e.message, mode: "quick", changes: null });
   } finally {
-    syncRunningMap[oltId] = false;
+    syncRunning = false;
   }
 }
 
 // ─── FULL SYNC (forzada, todo) ───────────────────────────────────────────────
-async function runFullSync(oltId) {
-  if (syncRunningMap[oltId]) { console.log("[SYNC " + oltId + "] Ya en progreso, se omite"); return; }
-  syncRunningMap[oltId] = true;
-  const cp = cachePaths(oltId);
-  setStatus(oltId, { running: true, step: "Conectando al OLT...", progress: 0, total: 0, lastSync: null, lastError: null, mode: "full", changes: null });
-  console.log("[FULL SYNC " + oltId + "] Inicio sincronización completa");
+async function runFullSync() {
+  if (syncRunning) { console.log("[SYNC] Ya en progreso, se omite"); return; }
+  syncRunning = true;
+  setStatus({ running: true, step: "Conectando al OLT...", progress: 0, total: 0, lastSync: null, lastError: null, mode: "full", changes: null });
+  console.log("[FULL SYNC] Inicio sincronización completa");
   const t0 = Date.now();
 
   try {
-    patchStatus(oltId, { step: "Obteniendo lista de ONTs..." });
-    const onts = await withOlt(oltId, getAllOntsFull, 60000);
-    writeCache(cp.ONT, { ts: Date.now(), onts });
-    updateOfflineTracking(oltId, onts);
-    patchStatus(oltId, { total: onts.length });
-    console.log("[FULL SYNC " + oltId + "] " + onts.length + " ONTs encontradas");
-    io.to("olt:" + oltId).emit("onts:base", { oltId, onts });
+    patchStatus({ step: "Obteniendo lista de ONTs..." });
+    const onts = await withOlt(getAllOntsFull, 60000);
+    writeCache(ONT_CACHE, { ts: Date.now(), onts });
+    patchStatus({ total: onts.length });
+    console.log("[FULL SYNC] " + onts.length + " ONTs encontradas");
+    io.emit("onts:base", onts);
 
-    const detCache = readCache(cp.DETAIL) || {};
+    const detCache = readCache(DETAIL_CACHE) || {};
     const validKeys = new Set(onts.map(ontKey));
     for (const k of Object.keys(detCache)) { if (!validKeys.has(k)) delete detCache[k]; }
 
-    const opticalMap = { ...readCache(cp.OPT) || {} };
+    const opticalMap = { ...readCache(OPT_CACHE) || {} };
     const groups = {};
     for (const o of onts) {
       const k = o.frame + "/" + o.slot + "/" + o.pon;
@@ -695,18 +593,17 @@ async function runFullSync(oltId) {
       groups[k].onts.push(o);
     }
 
-    patchStatus(oltId, { step: "Sincronizando óptica + detalles..." });
+    patchStatus({ step: "Sincronizando óptica + detalles..." });
     let done = 0;
     for (const gpKey of Object.keys(groups)) {
       const gp = groups[gpKey];
       try {
-        await withOlt(oltId, async (session, olt) => {
-          const P = olt.prompt;
-          await session.cmd("interface gpon " + gp.frame + "/" + gp.slot, P + "(config-if-gpon", 12000);
+        await withOlt(async (session) => {
+          await session.cmd("interface gpon " + gp.frame + "/" + gp.slot, "BARCELONA(config-if-gpon", 12000);
           for (const o of gp.onts) {
             const key = ontKey(o);
             try {
-              const raw = await session.cmd("display ont optical-info " + gp.pon + " " + o.ontId, P + "(config-if-gpon", 12000);
+              const raw = await session.cmd("display ont optical-info " + gp.pon + " " + o.ontId, "BARCELONA(config-if-gpon", 12000);
               const parsed = parseOptical(raw);
               opticalMap[key] = {
                 rxPower:    parsed["Rx optical power(dBm)"] || parsed["RX optical power(dBm)"] || null,
@@ -718,7 +615,7 @@ async function runFullSync(oltId) {
               };
             } catch {}
             try {
-              const detRaw = await session.cmd("display ont info " + gp.pon + " " + o.ontId, P + "(config-if-gpon", 15000);
+              const detRaw = await session.cmd("display ont info " + gp.pon + " " + o.ontId, "BARCELONA(config-if-gpon", 15000);
               const kv = parseKV(detRaw);
               const rawTemp = kv["Temperature"] || "";
               detCache[key] = {
@@ -734,20 +631,20 @@ async function runFullSync(oltId) {
               };
             } catch {}
             done++;
-            io.to("olt:" + oltId).emit("ont:update", { oltId, ont: mergeOntView(o, opticalMap, detCache) });
-            patchStatus(oltId, { progress: done, step: "Óptica + Detalles: " + done + "/" + onts.length });
+            io.emit("ont:update", mergeOntView(o, opticalMap, detCache));
+            patchStatus({ progress: done, step: "Óptica + Detalles: " + done + "/" + onts.length });
           }
-          await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
+          await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
         }, 300000);
-      } catch (e) { console.error("[FULL SYNC " + oltId + "] Error grupo " + gpKey + ":", e.message); }
-      writeCache(cp.OPT, opticalMap);
-      writeCache(cp.DETAIL, detCache);
+      } catch (e) { console.error("[FULL SYNC] Error grupo " + gpKey + ":", e.message); }
+      writeCache(OPT_CACHE, opticalMap);
+      writeCache(DETAIL_CACHE, detCache);
     }
 
-    patchStatus(oltId, { step: "Obteniendo VLANs..." });
+    patchStatus({ step: "Obteniendo VLANs..." });
     try {
-      const vlans = await withOlt(oltId, async (session, olt) => {
-        const raw = await session.cmd("display vlan all", olt.prompt + "(config)#", 30000);
+      const vlans = await withOlt(async (session) => {
+        const raw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
         const found = new Set();
         for (const line of raw.split("\n")) {
           const ms = line.match(/\b(\d{2,4})\b/g);
@@ -755,25 +652,41 @@ async function runFullSync(oltId) {
         }
         return [...found].sort((a, b) => a - b);
       }, 60000);
-      writeCache(cp.VLAN, { ts: Date.now(), vlans: vlans });
-    } catch (e) { console.error("[FULL SYNC " + oltId + "] Error VLANs:", e.message); }
+      writeCache(VLAN_CACHE, { ts: Date.now(), vlans: vlans });
+    } catch (e) { console.error("[FULL SYNC] Error VLANs:", e.message); }
 
     const elapsed = Math.round((Date.now() - t0) / 1000);
-    setStatus(oltId, {
+    setStatus({
       running: false, step: "Completado", progress: done, total: onts.length,
       lastSync: new Date().toISOString(), lastError: null,
       mode: "full", changes: { total: onts.length, updated: onts.length, skipped: 0, newOnts: 0, removedOnts: 0, stateChanges: 0, descMissing: 0 }, elapsed: elapsed,
     });
-    console.log("[FULL SYNC " + oltId + "] OK en " + elapsed + "s");
+    console.log("[FULL SYNC] OK en " + elapsed + "s");
   } catch (e) {
-    console.error("[FULL SYNC " + oltId + "] Error fatal:", e.message);
-    setStatus(oltId, { running: false, step: "Error", progress: 0, total: 0, lastSync: null, lastError: e.message, mode: "full", changes: null });
+    console.error("[FULL SYNC] Error fatal:", e.message);
+    setStatus({ running: false, step: "Error", progress: 0, total: 0, lastSync: null, lastError: e.message, mode: "full", changes: null });
   } finally {
-    syncRunningMap[oltId] = false;
+    syncRunning = false;
   }
 }
 
-// Combina la fila cruda de la tabla con lo que haya en cache de óptica/detalle.
+// ─── Rutas API ────────────────────────────────────────────────────────────────
+
+app.get("/api/healthz", (_, res) => res.json({ status: "ok", olt: OLT.host }));
+app.get("/api/status", (_, res) => res.json(syncStatus));
+
+app.post("/api/sync", (req, res) => {
+  if (syncRunning) return res.json({ ok: false, message: "Sincronización en progreso" });
+  runQuickSync().catch(e => console.error(e.message));
+  res.json({ ok: true, message: "Sincronización rápida iniciada", mode: "quick" });
+});
+
+app.post("/api/sync/full", (req, res) => {
+  if (syncRunning) return res.json({ ok: false, message: "Sincronización en progreso" });
+  runFullSync().catch(e => console.error(e.message));
+  res.json({ ok: true, message: "Sincronización completa iniciada", mode: "full" });
+});
+
 function mergeOntView(o, optCache, detCache) {
   const key = ontKey(o);
   const opt = optCache[key] || {};
@@ -791,323 +704,30 @@ function mergeOntView(o, optCache, detCache) {
     distance:    det.distance    || null,
     matchState:  det.matchState  || o.matchState  || null,
     runState:    det.runState    || o.runState    || null,
-    onlineDuration: det.onlineDuration || null,
-    lastDownCause:  det.lastDownCause  || null,
   };
 }
 
-// ─── Rutas de administración de OLTs ─────────────────────────────────────────
-
-app.get("/api/olts", (_, res) => {
-  const olts = loadOlts().map(({ pass, ...rest }) => rest); // no exponemos la clave
-  res.json({ olts });
-});
-
-app.post("/api/olts", (req, res) => {
-  const { name, host, port, user, pass, prompt } = req.body || {};
-  if (!name || !host || !port || !user || !pass || !prompt) {
-    return res.status(400).json({ error: "Faltan datos: name, host, port, user, pass, prompt" });
-  }
-  const olts = loadOlts();
-  let id = slugify(name);
-  let n = 2;
-  while (olts.some(o => o.id === id)) { id = slugify(name) + "-" + n; n++; }
-
-  const newOlt = { id, name: String(name).trim(), host: String(host).trim(), port: parseInt(port), user: String(user), pass: String(pass), prompt: String(prompt).trim() };
-  olts.push(newOlt);
-  saveOlts(olts);
-  cachePaths(id); // crea la carpeta de caché ya de una vez
-
-  const { pass: _p, ...safe } = newOlt;
-  res.json({ ok: true, olt: safe });
-});
-
-app.delete("/api/olts/:id", (req, res) => {
-  const { id } = req.params;
-  const olts = loadOlts();
-  const filtered = olts.filter(o => o.id !== id);
-  if (filtered.length === olts.length) return res.status(404).json({ error: "OLT no encontrada" });
-  saveOlts(filtered);
-  delete telnetPools[id];
-  delete syncStatusMap[id];
-  try {
-    const dir = path.join(CACHE_DIR, id);
-    fs.rmSync(dir, { recursive: true, force: true });
-  } catch {}
-  res.json({ ok: true });
-});
-
-// ─── Middleware: validar que la OLT exista ───────────────────────────────────
-function requireOlt(req, res, next) {
-  const olt = getOltById(req.params.oltId);
-  if (!olt) return res.status(404).json({ error: "OLT no encontrada: " + req.params.oltId });
-  req.olt = olt;
-  next();
-}
-
-// ─── Rutas API por OLT ────────────────────────────────────────────────────────
-
-app.get("/api/olt/:oltId/healthz", requireOlt, (req, res) => res.json({ status: "ok", olt: req.olt.host }));
-app.get("/api/olt/:oltId/status", requireOlt, (req, res) => res.json({ oltId: req.params.oltId, ...ensureStatus(req.params.oltId) }));
-
-app.post("/api/olt/:oltId/sync", requireOlt, (req, res) => {
-  const { oltId } = req.params;
-  if (syncRunningMap[oltId]) return res.json({ ok: false, message: "Sincronización en progreso" });
-  runQuickSync(oltId).catch(e => console.error(e.message));
-  res.json({ ok: true, message: "Sincronización rápida iniciada", mode: "quick" });
-});
-
-app.post("/api/olt/:oltId/sync/full", requireOlt, (req, res) => {
-  const { oltId } = req.params;
-  if (syncRunningMap[oltId]) return res.json({ ok: false, message: "Sincronización en progreso" });
-  runFullSync(oltId).catch(e => console.error(e.message));
-  res.json({ ok: true, message: "Sincronización completa iniciada", mode: "full" });
-});
-
-app.get("/api/olt/:oltId/onts", requireOlt, (req, res) => {
-  const cp = cachePaths(req.params.oltId);
-  const ontCache = readCache(cp.ONT);
-  const optCache = readCache(cp.OPT) || {};
-  const detCache = readCache(cp.DETAIL) || {};
-  if (!ontCache) return res.json({ onts: [], cached: false, message: "Sin datos — ejecuta sincronizar primero" });
+app.get("/api/onts", (req, res) => {
+  const ontCache = readCache(ONT_CACHE);
+  const optCache = readCache(OPT_CACHE) || {};
+  const detCache = readCache(DETAIL_CACHE) || {};
+  if (!ontCache) return res.json({ onts: [], cached: false, message: "Sin datos — ejecuta POST /api/sync primero" });
 
   const onts = ontCache.onts.map(o => mergeOntView(o, optCache, detCache));
   res.json({ onts, cached: true, cacheAge: Math.round((Date.now() - ontCache.ts) / 1000), ts: ontCache.ts });
 });
 
-// Dashboard: ONTs offline >= 48h, ordenadas con la potencia más crítica primero.
-app.get("/api/olt/:oltId/dashboard/offline48", requireOlt, (req, res) => {
-  const { oltId } = req.params;
-  const cp = cachePaths(oltId);
-  const ontCache = readCache(cp.ONT);
-  const offlineMap = readCache(cp.OFFLINE) || {};
-  const optCache = readCache(cp.OPT) || {};
-  const detCache = readCache(cp.DETAIL) || {};
-  if (!ontCache) return res.json({ items: [], count: 0 });
-
-  const now = Date.now();
-  const THRESH_MS = 48 * 3600 * 1000;
-  const items = [];
-
-  for (const o of ontCache.onts) {
-    const key = ontKey(o);
-    const since = offlineMap[key];
-    if (!since) continue;
-    const downMs = now - since;
-    if (downMs < THRESH_MS) continue;
-    const merged = mergeOntView(o, optCache, detCache);
-    items.push({ ...merged, offlineSince: since, offlineHours: Math.floor(downMs / 3600000) });
-  }
-
-  // Potencia más crítica (más negativa / peor) primero; sin dato de potencia al final.
-  items.sort((a, b) => {
-    const ar = parseFloat(a.rxPower), br = parseFloat(b.rxPower);
-    const aNa = isNaN(ar), bNa = isNaN(br);
-    if (aNa !== bNa) return aNa ? 1 : -1;
-    if (!aNa && !bNa) return ar - br;
-    return b.offlineHours - a.offlineHours;
-  });
-
-  res.json({ items, count: items.length });
-});
-
-app.get("/api/olt/:oltId/profiles", requireOlt, async (req, res) => {
-  const { oltId } = req.params;
-  const cp = cachePaths(oltId);
-  const force = req.query.force === "1" || req.query.force === "true";
-  const cached = !force ? readCache(cp.PROFILE) : null;
-  if (cached && (Date.now() - cached.ts) < 3600000) {
-    return res.json({ lineProfiles: cached.lineProfiles, srvProfiles: cached.srvProfiles, cached: true });
-  }
-  try {
-    const profiles = await withOlt(oltId, getProfiles, 40000);
-    writeCache(cp.PROFILE, { ts: Date.now(), ...profiles });
-    res.json({ ...profiles, cached: false });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/olt/:oltId/vlans", requireOlt, async (req, res) => {
-  const { oltId } = req.params;
-  const cp = cachePaths(oltId);
-  const cached = readCache(cp.VLAN);
-  if (cached && (Date.now() - cached.ts) < 3600000) return res.json({ vlans: cached.vlans, cached: true });
-  try {
-    const vlans = await withOlt(oltId, async (session, olt) => {
-      const raw = await session.cmd("display vlan all", olt.prompt + "(config)#", 30000);
-      const found = new Set();
-      for (const line of raw.split("\n")) {
-        const ms = line.match(/\b(\d{2,4})\b/g);
-        if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.add(n); });
-      }
-      return [...found].sort((a, b) => a - b);
-    }, 60000);
-    writeCache(cp.VLAN, { ts: Date.now(), vlans: vlans });
-    res.json({ vlans, cached: false });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-app.post("/api/olt/:oltId/ont/autorizar", requireOlt, async (req, res) => {
-  const { oltId } = req.params;
-  const {
-    frame = "0", slot, pon, ontId, sn,
-    lineProfile = "101", serviceProfile = "1",
-    desc = "", vlan, authType = "sn-auth"
-  } = req.body;
-
-  if (!slot || !pon || !ontId || !sn) {
-    return res.status(400).json({ error: "Faltan: slot, pon, ontId, sn" });
-  }
-
-  const cleanDesc = (desc || sn).replace(/["']/g, "");
-  const authMethod = authType === "password-auth" ? "password-auth" : "sn-auth";
-
-  const ontCmd = [
-    "ont", "add", pon,
-    ontId,
-    authMethod, sn,
-    "omci",
-    "ont-lineprofile-id", lineProfile,
-    "ont-srvprofile-id", serviceProfile,
-    "desc", `"${cleanDesc}"`
-  ].join(" ");
-
-  try {
-    const result = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("interface gpon " + frame + "/" + slot, P + "(config-if-gpon", 12000);
-      const r = await session.cmd(ontCmd, P + "(config-if-gpon", 25000);
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-
-      return {
-        success: r.toLowerCase().includes("success") || r.includes("ont-add"),
-        raw: r,
-        cmd: ontCmd
-      };
-    }, 90000);
-
-    if (result.success) {
-      res.json({ ok: true, message: "ONT autorizada correctamente", raw: result.raw, cmd: result.cmd });
-    } else {
-      res.status(400).json({ ok: false, message: "Posible error — revisa respuesta OLT", raw: result.raw, cmd: result.cmd });
-    }
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-
-app.delete("/api/olt/:oltId/ont/:f/:s/:p/:id", requireOlt, async (req, res) => {
-  const { oltId, f, s, p, id } = req.params;
-  const cp = cachePaths(oltId);
-  try {
-    const result = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("interface gpon " + f + "/" + s, P + "(config-if-gpon", 12000);
-
-      const step1 = await session.cmdAny(
-        "ont delete " + p + " " + id,
-        [P + "(config-if-gpon", "are you sure", "Are you sure"],
-        15000
-      );
-
-      let raw = step1.raw;
-      if (/sure/i.test(step1.raw)) {
-        session.send("y");
-        const step2 = await session.waitFor(P + "(config-if-gpon", 10000).catch(() => "");
-        raw += step2;
-      }
-
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-
-      return {
-        success: !/failure|error/i.test(raw),
-        raw,
-      };
-    }, 60000);
-
-    const ontCache = readCache(cp.ONT);
-    if (ontCache) {
-      ontCache.onts = ontCache.onts.filter(o => !(String(o.frame) === String(f) && String(o.slot) === String(s) && String(o.pon) === String(p) && String(o.ontId) === String(id)));
-      writeCache(cp.ONT, ontCache);
-    }
-    const optCache = readCache(cp.OPT) || {};
-    delete optCache[f + "/" + s + "/" + p + "/" + id];
-    writeCache(cp.OPT, optCache);
-    const detCache = readCache(cp.DETAIL) || {};
-    delete detCache[f + "/" + s + "/" + p + "/" + id];
-    writeCache(cp.DETAIL, detCache);
-    const offlineMap = readCache(cp.OFFLINE) || {};
-    delete offlineMap[f + "/" + s + "/" + p + "/" + id];
-    writeCache(cp.OFFLINE, offlineMap);
-
-    if (result.success) {
-      io.to("olt:" + oltId).emit("ont:removed", { oltId, frame: f, slot: s, pon: p, ontId: id });
-      res.json({ ok: true, message: "ONT " + f + "/" + s + "/" + p + "/" + id + " eliminada", raw: result.raw });
-    } else {
-      res.status(400).json({ ok: false, message: "Posible error al eliminar — revisa respuesta OLT", raw: result.raw });
-    }
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// Reiniciar (reset) una ONT desde el botón de Diagnóstico.
-// Nota importante: "ont reset <pon> <ont-id>" es el comando estándar Huawei
-// GPON documentado para reiniciar una ONT dentro de "interface gpon". No lo
-// hemos podido confirmar contra el firmware exacto de cada OLT registrada acá,
-// así que esta ruta NUNCA asume éxito por sí sola: siempre devuelve la
-// respuesta cruda de la OLT (raw) para que se pueda verificar qué contestó
-// realmente el equipo, en vez de fingir que funcionó.
-app.post("/api/olt/:oltId/ont/:f/:s/:p/:id/reboot", requireOlt, async (req, res) => {
-  const { oltId, f, s, p, id } = req.params;
-  try {
-    const result = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("interface gpon " + f + "/" + s, P + "(config-if-gpon", 12000);
-
-      const step1 = await session.cmdAny(
-        "ont reset " + p + " " + id,
-        [P + "(config-if-gpon", "are you sure", "Are you sure"],
-        15000
-      );
-
-      let raw = step1.raw;
-      if (/sure/i.test(step1.raw)) {
-        session.send("y");
-        const step2 = await session.waitFor(P + "(config-if-gpon", 15000).catch(() => "");
-        raw += step2;
-      }
-
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-
-      return {
-        success: !/failure|error|invalid|unknown command/i.test(raw),
-        raw,
-      };
-    }, 60000);
-
-    if (result.success) {
-      res.json({ ok: true, message: "Comando de reinicio enviado a la ONT — verifica el estado en unos minutos", raw: result.raw });
-    } else {
-      res.status(400).json({ ok: false, message: "La OLT respondió con un posible error. Revisa el detalle antes de asumir que se reinició.", raw: result.raw });
-    }
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.get("/api/olt/:oltId/ont/nextid/:f/:s/:p", requireOlt, (req, res) => {
-  const { oltId, f, s, p } = req.params;
-  const cp = cachePaths(oltId);
-  const profCache = readCache(cp.PROFILE);
+app.get("/api/ont/nextid/:f/:s/:p", (req, res) => {
+  const { f, s, p } = req.params;
+  const profCache = readCache(PROFILE_CACHE);
   const profiles = { lineProfiles: profCache ? profCache.lineProfiles : null, srvProfiles: profCache ? profCache.srvProfiles : null };
+  
+  // Incluir VLANs disponibles para el formulario
+  const vlanCache = readCache(VLAN_CACHE);
+  const vlans = vlanCache ? vlanCache.vlans : [];
 
-  const ontCache = readCache(cp.ONT);
-  if (!ontCache) return res.json({ nextId: 0, used: [], ...profiles });
+  const ontCache = readCache(ONT_CACHE);
+  if (!ontCache) return res.json({ nextId: 0, used: [], vlans, ...profiles });
 
   const used = new Set(
     ontCache.onts
@@ -1116,24 +736,22 @@ app.get("/api/olt/:oltId/ont/nextid/:f/:s/:p", requireOlt, (req, res) => {
   );
   let next = 0;
   while (used.has(next) && next < 128) next++;
-  res.json({ nextId: next, used: [...used].sort((a, b) => a - b), ...profiles });
+  res.json({ nextId: next, used: [...used].sort((a, b) => a - b), vlans, ...profiles });
 });
 
-app.get("/api/olt/:oltId/ont/:f/:s/:p/:id", requireOlt, async (req, res) => {
-  const { oltId, f, s, p, id } = req.params;
-  const cp = cachePaths(oltId);
+app.get("/api/ont/:f/:s/:p/:id", async (req, res) => {
+  const { f, s, p, id } = req.params;
   try {
-    const detail = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      const raw = await session.cmd("display ont info " + f + " " + s + " " + p + " " + id, P + "(config)#", 20000);
+    const detail = await withOlt(async (session) => {
+      const raw = await session.cmd("display ont info " + f + " " + s + " " + p + " " + id, "BARCELONA(config)#", 20000);
       const kv = parseKV(raw);
       let optical = {};
       try {
-        await session.cmd("interface gpon " + f + "/" + s, P + "(config-if-gpon", 10000);
-        const optRaw = await session.cmd("display ont optical-info " + p + " " + id, P + "(config-if-gpon", 15000);
+        await session.cmd("interface gpon " + f + "/" + s, "BARCELONA(config-if-gpon", 10000);
+        const optRaw = await session.cmd("display ont optical-info " + p + " " + id, "BARCELONA(config-if-gpon", 15000);
         optical = parseOptical(optRaw);
 
-        const optCache = readCache(cp.OPT) || {};
+        const optCache = readCache(OPT_CACHE) || {};
         const key = f + "/" + s + "/" + p + "/" + id;
         optCache[key] = {
           rxPower:    optical["Rx optical power(dBm)"] || optical["RX optical power(dBm)"] || null,
@@ -1143,11 +761,11 @@ app.get("/api/olt/:oltId/ont/:f/:s/:p/:id", requireOlt, async (req, res) => {
           voltage:    optical["Voltage(V)"] || optical["Voltage"] || null,
           ts:         Date.now(),
         };
-        writeCache(cp.OPT, optCache);
-        await session.cmd("quit", P + "(config)#", 5000);
+        writeCache(OPT_CACHE, optCache);
+        await session.cmd("quit", "BARCELONA(config)#", 5000);
       } catch {}
 
-      const detCache = readCache(cp.DETAIL) || {};
+      const detCache = readCache(DETAIL_CACHE) || {};
       const detKey = f + "/" + s + "/" + p + "/" + id;
       const rawTemp = kv["Temperature"] || "";
       detCache[detKey] = {
@@ -1161,341 +779,355 @@ app.get("/api/olt/:oltId/ont/:f/:s/:p/:id", requireOlt, async (req, res) => {
         numericTemp:    rawTemp.replace(/\(C\)/g, "").trim() || null,
         ts:             Date.now(),
       };
-      writeCache(cp.DETAIL, detCache);
+      writeCache(DETAIL_CACHE, detCache);
       return { kv, optical };
     });
     res.json(detail);
 
     try {
-      const ontCache = readCache(cp.ONT);
+      const ontCache = readCache(ONT_CACHE);
       const row = ontCache && ontCache.onts.find(o => String(o.frame) === String(f) && String(o.slot) === String(s) && String(o.pon) === String(p) && String(o.ontId) === String(id));
       if (row) {
-        const optCache = readCache(cp.OPT) || {};
-        const detCache2 = readCache(cp.DETAIL) || {};
-        io.to("olt:" + oltId).emit("ont:update", { oltId, ont: mergeOntView(row, optCache, detCache2) });
+        const optCache = readCache(OPT_CACHE) || {};
+        const detCache2 = readCache(DETAIL_CACHE) || {};
+        io.emit("ont:update", mergeOntView(row, optCache, detCache2));
       }
     } catch (e2) { console.error("[WS] Error emitiendo ont:update:", e2.message); }
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get("/api/olt/:oltId/autofind", requireOlt, async (req, res) => {
-  const { oltId } = req.params;
-  const cp = cachePaths(oltId);
+app.get("/api/autofind", async (req, res) => {
   try {
-    const cachedProfiles = readCache(cp.PROFILE);
+    const cachedProfiles = readCache(PROFILE_CACHE);
     const profilesFresh = cachedProfiles && (Date.now() - cachedProfiles.ts) < 3600000;
+    
+    // También cargar VLANs cacheadas
+    const cachedVlans = readCache(VLAN_CACHE);
+    const vlansFresh = cachedVlans && (Date.now() - cachedVlans.ts) < 3600000;
 
-    const result = await withOlt(oltId, async (session, olt) => {
-      const raw = await session.cmd("display ont autofind all", olt.prompt + "(config)#", 35000);
+    const result = await withOlt(async (session) => {
+      const raw = await session.cmd("display ont autofind all", "BARCELONA(config)#", 35000);
       const onts = parseAutofind(raw);
 
       let profiles;
       if (profilesFresh) {
         profiles = { lineProfiles: cachedProfiles.lineProfiles, srvProfiles: cachedProfiles.srvProfiles };
       } else {
-        profiles = await getProfiles(session, olt);
-        writeCache(cp.PROFILE, { ts: Date.now(), ...profiles });
+        profiles = await getProfiles(session);
+        writeCache(PROFILE_CACHE, { ts: Date.now(), ...profiles });
       }
 
-      return { onts, ...profiles };
+      // Obtener VLANs si no están frescas
+      let vlans;
+      if (vlansFresh) {
+        vlans = cachedVlans.vlans;
+      } else {
+        const vlanRaw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
+        const found = new Set();
+        for (const line of vlanRaw.split("\n")) {
+          const ms = line.match(/\b(\d{2,4})\b/g);
+          if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.add(n); });
+        }
+        vlans = [...found].sort((a, b) => a - b);
+        writeCache(VLAN_CACHE, { ts: Date.now(), vlans: vlans });
+      }
+
+      return { onts, vlans, ...profiles };
     }, 60000);
 
     res.json(result);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get("/api/olt/:oltId/optical/cache", requireOlt, (req, res) => {
-  const cp = cachePaths(req.params.oltId);
-  res.json(readCache(cp.OPT) || {});
+app.get("/api/profiles", async (req, res) => {
+  const force = req.query.force === "1" || req.query.force === "true";
+  const cached = !force ? readCache(PROFILE_CACHE) : null;
+  if (cached && (Date.now() - cached.ts) < 3600000) {
+    return res.json({ lineProfiles: cached.lineProfiles, srvProfiles: cached.srvProfiles, cached: true });
+  }
+  try {
+    const profiles = await withOlt(getProfiles, 40000);
+    writeCache(PROFILE_CACHE, { ts: Date.now(), ...profiles });
+    res.json({ ...profiles, cached: false });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete("/api/olt/:oltId/cache", requireOlt, (req, res) => {
-  const cp = cachePaths(req.params.oltId);
-  [cp.ONT, cp.OPT, cp.VLAN, cp.DETAIL, cp.PROFILE, cp.OFFLINE].forEach(f => { try { fs.unlinkSync(f); } catch {} });
-  res.json({ ok: true, message: "Caché limpiada" });
+app.get("/api/vlans", async (req, res) => {
+  const cached = readCache(VLAN_CACHE);
+  if (cached && (Date.now() - cached.ts) < 3600000) return res.json({ vlans: cached.vlans, cached: true });
+  try {
+    const vlans = await withOlt(async (session) => {
+      const raw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
+      const found = new Set();
+      for (const line of raw.split("\n")) {
+        const ms = line.match(/\b(\d{2,4})\b/g);
+        if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.add(n); });
+      }
+      return [...found].sort((a, b) => a - b);
+    }, 60000);
+    writeCache(VLAN_CACHE, { ts: Date.now(), vlans: vlans });
+    res.json({ vlans, cached: false });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// ─── EDITAR DESCRIPCIÓN DE ONT ────────────────────────────────────────────────
-// Comando Huawei: ont modify <pon> <ont-id> description "<desc>"
-app.patch('/api/olt/:oltId/ont/:f/:s/:p/:id/desc', requireOlt, async (req, res) => {
-  const { oltId, f, s, p, id } = req.params;
-  const { description } = req.body || {};
-  if (description === undefined || description === null) {
-    return res.status(400).json({ error: 'Falta el campo description' });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENDPOINT DE AUTORIZACIÓN — CORREGIDO: AHORA CONFIGURA VLAN Y MODO ROUTER/BRIDGE
+// ═══════════════════════════════════════════════════════════════════════════════
+app.post("/api/ont/autorizar", async (req, res) => {
+  const { 
+    frame = "0", slot, pon, ontId, sn, 
+    lineProfile = "101", serviceProfile = "1", 
+    desc = "", 
+    vlan: reqVlan,           // VLAN opcional — si no viene, se obtiene de la OLT
+    mode = "router",         // Modo: "router" (por defecto) o "bridge"
+    authType = "sn-auth" 
+  } = req.body;
+  
+  if (!slot || !pon || !ontId || !sn) {
+    return res.status(400).json({ error: "Faltan: slot, pon, ontId, sn" });
   }
-  // Sanitizar: quitar comillas dobles que rompen el comando CLI
-  const cleanDesc = String(description).replace(/"/g, '').trim();
+
+  // Limpiar comillas internas por seguridad
+  const cleanDesc = (desc || sn).replace(/["']/g, "");
+
+  const authMethod = authType === "password-auth" ? "password-auth" : "sn-auth";
+  
+  // Normalizar modo: solo "bridge" o "router" (default)
+  const isBridge = mode && mode.toLowerCase() === "bridge";
+  const effectiveMode = isBridge ? "bridge" : "router";
+
+  // Comando 1: Alta de ONT
+  const ontCmd = [
+    "ont", "add", pon,
+    ontId,
+    authMethod, sn,
+    "omci",
+    "ont-lineprofile-id", lineProfile,
+    "ont-srvprofile-id", serviceProfile,
+    "desc", `"${cleanDesc}"`
+  ].join(" ");
 
   try {
-    const result = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("interface gpon " + f + "/" + s, P + "(config-if-gpon", 12000);
+    const result = await withOlt(async (session) => {
+      // Aumentar ancho del terminal para evitar cortes
+      await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
+      await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
 
-      // ── Modificar descripción: comando standard Huawei GPON ──
-      // Forma: ont modify <pon> <ont-id> desc <string>
-      // NOTA: en firmwares algunos aceptan "description" y otros solo "desc"
-      // Probamos primero "desc" (más portable), si falla probamos "description"
-      let raw;
-      try {
-        raw = await session.cmd(
-          'ont modify ' + p + ' ' + id + ' desc "' + cleanDesc + '"',
-          P + "(config-if-gpon",
-          15000
-        );
-      } catch (e1) {
-        // Si falla con "desc", intentamos con "description"
-        raw = await session.cmd(
-          'ont modify ' + p + ' ' + id + ' description "' + cleanDesc + '"',
-          P + "(config-if-gpon",
-          15000
-        );
+      // Entrar a la interfaz GPON
+      await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
+
+      // ─── PASO 1: Alta de la ONT ─────────────────────────────────────────
+      const r1 = await session.cmd(ontCmd, "BARCELONA(config-if-gpon", 25000);
+      const addSuccess = r1.toLowerCase().includes("success") || r1.includes("ont-add");
+      
+      if (!addSuccess) {
+        await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
+        return { 
+          success: false, 
+          raw: r1, 
+          cmd: ontCmd,
+          step: "ont-add",
+          message: "Error al agregar ONT — revisar serial/profiles"
+        };
       }
 
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("commit", P + "(config)#", 8000).catch(() => {}); // algunos firmwares requieren commit
+      let allRaw = r1;
+      let usedVlan = null;
+      let vlanSource = "none";
+      const commandsExecuted = [ontCmd];
+
+      // ─── PASO 2: Obtener VLAN (automático si no se proporcionó) ─────────
+      if (reqVlan && parseInt(reqVlan) >= 100 && parseInt(reqVlan) <= 4094) {
+        // VLAN proporcionada manualmente
+        usedVlan = parseInt(reqVlan);
+        vlanSource = "manual";
+      } else {
+        // Obtener VLAN de la OLT automáticamente
+        try {
+          // Salir temporalmente para consultar VLANs
+          await session.cmd("quit", "BARCELONA(config)#", 5000);
+          const vlanRaw = await session.cmd("display vlan all", "BARCELONA(config)#", 30000);
+          const found = [];
+          for (const line of vlanRaw.split("\n")) {
+            const ms = line.match(/\b(\d{2,4})\b/g);
+            if (ms) ms.forEach(v => { const n = parseInt(v); if (n >= 100 && n <= 4094) found.push(n); });
+          }
+          const uniqueVlans = [...new Set(found)].sort((a, b) => a - b);
+          
+          // Guardar en caché
+          writeCache(VLAN_CACHE, { ts: Date.now(), vlans: uniqueVlans });
+          
+          // Usar la primera VLAN disponible
+          if (uniqueVlans.length > 0) {
+            usedVlan = uniqueVlans[0];
+            vlanSource = "auto-olt";
+          }
+          
+          // Volver a entrar a la interfaz
+          await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
+        } catch (e) {
+          console.error("[AUTH] Error obteniendo VLAN automática:", e.message);
+          // Intentar volver a la interfaz
+          try {
+            await session.cmd("interface gpon " + frame + "/" + slot, "BARCELONA(config-if-gpon", 12000);
+          } catch {}
+        }
+      }
+
+      // ─── PASO 3: Configurar VLAN nativa en el puerto ETH de la ONT ──────
+      if (usedVlan) {
+        // Comando para asignar VLAN nativa al puerto 1 de la ONT
+        const vlanCmd = "ont port native-vlan " + pon + " " + ontId + " eth 1 vlan " + usedVlan;
+        const r2 = await session.cmd(vlanCmd, "BARCELONA(config-if-gpon", 15000);
+        allRaw += "\n\n[VLAN] " + vlanCmd + "\n" + r2;
+        commandsExecuted.push(vlanCmd);
+      }
+
+      // ─── PASO 4: Configurar modo ROUTER o BRIDGE ────────────────────────
+      if (effectiveMode === "router") {
+        // En modo ROUTER: configurar IP por DHCP en la ONT
+        // Esto hace que la ONT obtenga IP del servidor DHCP del ISP
+        const ipCmd = "ont ip config " + pon + " " + ontId + " dhcp";
+        const r3 = await session.cmd(ipCmd, "BARCELONA(config-if-gpon", 15000);
+        allRaw += "\n\n[ROUTER] " + ipCmd + "\n" + r3;
+        commandsExecuted.push(ipCmd);
+        
+        // También configurar la VLAN en el contexto IP si es necesario
+        if (usedVlan) {
+          const ipVlanCmd = "ont ip config " + pon + " " + ontId + " dhcp vlan " + usedVlan;
+          const r4 = await session.cmd(ipVlanCmd, "BARCELONA(config-if-gpon", 15000).catch(() => "");
+          if (r4) {
+            allRaw += "\n\n[ROUTER+VLAN] " + ipVlanCmd + "\n" + r4;
+            commandsExecuted.push(ipVlanCmd);
+          }
+        }
+      }
+      // En modo BRIDGE: no se necesita comando adicional de IP.
+      // La ONT actúa como switch transparente y el CPE/Router del cliente 
+      // se encarga de la capa 3 (PPPoE/DHCP). La VLAN nativa ya está configurada.
+
+      // Salir de la interfaz
+      await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
+
+      return { 
+        success: true, 
+        raw: allRaw, 
+        commands: commandsExecuted,
+        vlan: usedVlan,
+        vlanSource: vlanSource,
+        mode: effectiveMode,
+        message: "ONT autorizada en modo " + effectiveMode + (usedVlan ? " con VLAN " + usedVlan : "")
+      };
+    }, 90000);
+
+    if (result.success) {
+      res.json({ 
+        ok: true, 
+        message: result.message,
+        raw: result.raw, 
+        commands: result.commands,
+        vlan: result.vlan,
+        vlanSource: result.vlanSource,
+        mode: result.mode
+      });
+    } else {
+      res.status(400).json({ 
+        ok: false, 
+        message: result.message || "Error al autorizar",
+        raw: result.raw, 
+        cmd: result.cmd,
+        step: result.step
+      });
+    }
+  } catch (e) { 
+    res.status(500).json({ error: e.message }); 
+  }
+});
+
+app.delete("/api/ont/:f/:s/:p/:id", async (req, res) => {
+  const { f, s, p, id } = req.params;
+  try {
+    const result = await withOlt(async (session) => {
+      await session.cmd("terminal width 512", "BARCELONA(config)#", 5000).catch(() => {});
+      await session.cmd("terminal length 0", "BARCELONA(config)#", 5000).catch(() => {});
+
+      await session.cmd("interface gpon " + f + "/" + s, "BARCELONA(config-if-gpon", 12000);
+
+      const step1 = await session.cmdAny(
+        "ont delete " + p + " " + id,
+        ["BARCELONA(config-if-gpon", "are you sure", "Are you sure"],
+        15000
+      );
+
+      let raw = step1.raw;
+      if (/sure/i.test(step1.raw)) {
+        session.send("y");
+        const step2 = await session.waitFor("BARCELONA(config-if-gpon", 10000).catch(() => "");
+        raw += step2;
+      }
+
+      await session.cmd("quit", "BARCELONA(config)#", 5000).catch(() => {});
 
       return {
-        success: !/failure|error|invalid|unknown command/i.test(raw),
-        raw: raw,
+        success: !/failure|error/i.test(raw),
+        raw,
       };
     }, 60000);
 
+    const ontCache = readCache(ONT_CACHE);
+    if (ontCache) {
+      ontCache.onts = ontCache.onts.filter(o => !(String(o.frame) === String(f) && String(o.slot) === String(s) && String(o.pon) === String(p) && String(o.ontId) === String(id)));
+      writeCache(ONT_CACHE, ontCache);
+    }
+    const optCache = readCache(OPT_CACHE) || {};
+    delete optCache[f + "/" + s + "/" + p + "/" + id];
+    writeCache(OPT_CACHE, optCache);
+    const detCache = readCache(DETAIL_CACHE) || {};
+    delete detCache[f + "/" + s + "/" + p + "/" + id];
+    writeCache(DETAIL_CACHE, detCache);
+
     if (result.success) {
-      // Actualizar caché local
-      const cp = cachePaths(oltId);
-      const detCache = readCache(cp.DETAIL) || {};
-      const key = f + "/" + s + "/" + p + "/" + id;
-      if (detCache[key]) {
-        detCache[key].description = cleanDesc || null;
-        detCache[key].ts = Date.now();
-        writeCache(cp.DETAIL, detCache);
-      }
-      // También actualizar en la tabla base si tiene descripción那里
-      const ontCache = readCache(cp.ONT);
-      if (ontCache) {
-        const row = ontCache.onts.find(o =>
-          String(o.frame) === String(f) && String(o.slot) === String(s) &&
-          String(o.pon) === String(p) && String(o.ontId) === String(id)
-        );
-        if (row) {
-          row.description = cleanDesc || null;
-          writeCache(cp.ONT, ontCache);
-        }
-      }
-
-      io.to("olt:" + oltId).emit("ont:update", {
-        oltId,
-        ont: {
-          frame: f, slot: s, pon: p, ontId: id,
-          description: cleanDesc || null,
-        },
-      });
-
-      res.json({ ok: true, message: "Descripción actualizada", raw: result.raw });
+      io.emit("ont:removed", { frame: f, slot: s, pon: p, ontId: id });
+      res.json({ ok: true, message: "ONT " + f + "/" + s + "/" + p + "/" + id + " eliminada", raw: result.raw });
     } else {
-      res.status(400).json({ ok: false, message: "Posible error — revisa respuesta OLT", raw: result.raw });
+      res.status(400).json({ ok: false, message: "Posible error al eliminar — revisa respuesta OLT", raw: result.raw });
     }
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── MOVER ONT ENTRE PUERTOS PON ─────────────────────────────────────────────
-// Flujo: 1) Leer config actual desde caché  2) Eliminar del puerto viejo
-//         3) Autorizar en el puerto nuevo con misma config
-app.post('/api/olt/:oltId/ont/move', requireOlt, async (req, res) => {
-  const { oltId } = req.params;
-  const { oldF, oldS, oldP, oldId, newF, newS, newP, sn } = req.body || {};
-
-  if (!oldF || !oldS || !oldP || !oldId || !newF || !newS || !newP || !sn) {
-    return res.status(400).json({ error: "Faltan datos: oldF, oldS, oldP, oldId, newF, newS, newP, sn" });
-  }
-
-  const cp = cachePaths(oltId);
-  const oldKey = oldF + "/" + oldS + "/" + oldP + "/" + oldId;
-
-  // Leer config actual de la ONT desde caché
-  const detCache = readCache(cp.DETAIL) || {};
-  const ontCache = readCache(cp.ONT) || {};
-  const oldDet = detCache[oldKey] || {};
-  const oldRow = (ontCache.onts || []).find(o => ontKey(o) === oldKey) || {};
-
-  // Valores para la nueva autorización
-  const description = oldDet.description || oldRow.description || sn;
-  const cleanDesc = String(description).replace(/"/g, '').trim();
-
-  // Intentar obtener perfiles del detalle o usar defaults
-  let lineProfile = "101";
-  let serviceProfile = "1";
-
-  // Buscar perfiles en caché de profiles
-  const profCache = readCache(cp.PROFILE);
-  if (profCache && profCache.lineProfiles && profCache.lineProfiles.length) {
-    lineProfile = profCache.lineProfiles[0].id || "101";
-  }
-  if (profCache && profCache.srvProfiles && profCache.srvProfiles.length) {
-    serviceProfile = profCache.srvProfiles[0].id || "1";
-  }
-
-  try {
-    const result = await withOlt(oltId, async (session, olt) => {
-      const P = olt.prompt;
-      await session.cmd("terminal width 512", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("terminal length 0", P + "(config)#", 5000).catch(() => {});
-
-      // ── Paso 1: Eliminar del puerto viejo ──
-      // Comando: undo ont add <pon> <ontId> (estándar Huawei GPON)
-      await session.cmd("interface gpon " + oldF + "/" + oldS, P + "(config-if-gpon", 12000);
-
-      // Probar primero con "undo ont add" (más común), luego "ont delete"
-      let delRaw;
-      try {
-        const delStep1 = await session.cmdAny(
-          "undo ont add " + oldP + " " + oldId,
-          [P + "(config-if-gpon", "are you sure", "Are you sure"],
-          15000
-        );
-        delRaw = delStep1.raw;
-        if (/sure/i.test(delStep1.raw)) {
-          session.send("y");
-          const delStep2 = await session.waitFor(P + "(config-if-gpon", 10000).catch(() => "");
-          delRaw += delStep2;
-        }
-      } catch (eDel1) {
-        // Fallback: "ont delete" para firmwares que lo usan
-        const delStep1 = await session.cmdAny(
-          "ont delete " + oldP + " " + oldId,
-          [P + "(config-if-gpon", "are you sure", "Are you sure"],
-          15000
-        );
-        delRaw = delStep1.raw;
-        if (/sure/i.test(delStep1.raw)) {
-          session.send("y");
-          const delStep2 = await session.waitFor(P + "(config-if-gpon", 10000).catch(() => "");
-          delRaw += delStep2;
-        }
-      }
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-
-      const delOk = !/failure|error|invalid/i.test(delRaw);
-
-      // ── Paso 2: Obtener próximo ID disponible en el nuevo puerto ──
-      await session.cmd("interface gpon " + newF + "/" + newS, P + "(config-if-gpon", 12000);
-      const newIdRaw = await session.cmd("display ont info " + newP + " all", P + "(config-if-gpon", 18000);
-      const usedIds = new Set();
-      const idRe = /(\d+)\s*\/\s*\d+\s*\/\s*\d+\s+(\d+)\s+/g;
-      let m;
-      while ((m = idRe.exec(newIdRaw)) !== null) {
-        if (m[1] === newP) usedIds.add(parseInt(m[2]));
-      }
-      let newId = 0;
-      while (usedIds.has(newId) && newId < 128) newId++;
-
-      // ── Paso 3: Autorizar en el puerto nuevo ──
-      // Comando ont add standard Huawei GPON
-      // Formato: ont add <pon> <ont-id> sn-auth <sn> omci ont-lineprofile-id <lp> ont-srvprofile-id <sp> desc "<desc>"
-      const addCmd = [
-        "ont", "add", newP, String(newId),
-        "sn-auth", sn,
-        "omci",
-        "ont-lineprofile-id", lineProfile,
-        "ont-srvprofile-id", serviceProfile
-      ].join(" ") + (cleanDesc ? ' desc "' + cleanDesc + '"' : '');
-
-      const addRaw = await session.cmd(addCmd, P + "(config-if-gpon", 25000);
-      await session.cmd("quit", P + "(config)#", 5000).catch(() => {});
-      await session.cmd("commit", P + "(config)#", 8000).catch(() => {}); // algunos Huawei OLT requieren commit
-
-      const addOk = /success|ont-add/i.test(addRaw.toLowerCase()) || !/failure|error|invalid/i.test(addRaw);
-
-      return {
-        delOk: delOk,
-        delRaw: delRaw,
-        addOk: addOk,
-        addRaw: addRaw,
-        newId: newId,
-        newF: newF,
-        newS: newS,
-        newP: newP,
-        description: cleanDesc,
-        lineProfile: lineProfile,
-        serviceProfile: serviceProfile,
-      };
-    }, 120000);
-
-    if (result.addOk) {
-      // Limpiar caché vieja
-      delete detCache[oldKey];
-      writeCache(cp.DETAIL, detCache);
-
-      if (ontCache.onts) {
-        ontCache.onts = ontCache.onts.filter(o => ontKey(o) !== oldKey);
-        writeCache(cp.ONT, ontCache);
-      }
-
-      // Limpiar offline tracking viejo
-      const offMap = readCache(cp.OFFLINE) || {};
-      delete offMap[oldKey];
-      writeCache(cp.OFFLINE, offMap);
-
-      // Notificar vía WebSocket que la ONT vieja fue removida
-      io.to("olt:" + oltId).emit("ont:removed", {
-        oltId,
-        frame: oldF, slot: oldS, pon: oldP, ontId: oldId,
-      });
-
-      res.json({
-        ok: true,
-        message: "ONT movida a " + result.newF + "/" + result.newS + "/" + result.newP + "/" + result.newId,
-        newLocation: {
-          frame: result.newF, slot: result.newS,
-          pon: result.newP, ontId: result.newId,
-        },
-        delRaw: result.delRaw,
-        addRaw: result.addRaw,
-      });
-    } else {
-      res.status(400).json({
-        ok: false,
-        message: "Error al autorizar en el nuevo puerto — revisa respuesta",
-        delRaw: result.delRaw,
-        addRaw: result.addRaw,
-      });
-    }
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+app.get("/api/optical/cache", (_, res) => res.json(readCache(OPT_CACHE) || {}));
+app.delete("/api/cache", (_, res) => {
+  [ONT_CACHE, OPT_CACHE, VLAN_CACHE, DETAIL_CACHE, PROFILE_CACHE].forEach(f => { try { fs.unlinkSync(f); } catch {} });
+  res.json({ ok: true, message: "Caché limpiada" });
 });
+
 // ─── Arranque ─────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  const olts = loadOlts();
-  console.log("╔══════════════════════════════════════════════════╗");
-  console.log("║  OLT Manager (multi-OLT) corriendo en :" + PORT);
-  console.log("║  http://localhost:" + PORT);
-  console.log("║  OLTs registradas: " + olts.map(o => o.name + " (" + o.host + ")").join(", "));
-  console.log("║  Websocket: activo (mismo puerto, /socket.io)     ║");
-  console.log("║  Auto-sync: " + (AUTO_SYNC_ENABLED ? ("cada " + AUTO_SYNC_MINUTES + " min (incremental, todas las OLTs)") : "DESACTIVADO — solo manual (botón)"));
-  console.log("╚══════════════════════════════════════════════════╝");
+  console.log("╔══════════════════════════════════════════════════════════════╗");
+  console.log("║  OLT Manager corriendo en :" + PORT + "                          ║");
+  console.log("║  http://localhost:" + PORT + "                                    ║");
+  console.log("║  OLT: " + OLT.host + ":" + OLT.port + "                                  ║");
+  console.log("║  Websocket: activo (mismo puerto, /socket.io)             ║");
+  console.log("║  Auto-sync: " + (AUTO_SYNC_ENABLED ? ("cada " + AUTO_SYNC_MINUTES + " min (incremental)") : "DESACTIVADO — solo manual (botón)") + "       ║");
+  console.log("╚══════════════════════════════════════════════════════════════╝");
 
   if (AUTO_SYNC_ENABLED) {
-    for (const olt of olts) {
-      const cp = cachePaths(olt.id);
-      const c = readCache(cp.ONT);
-      if (!c || (Date.now() - c.ts) > 1800000) {
-        console.log("\n[AUTO] Primera sync de " + olt.id + " en 3s...");
-        setTimeout(() => runQuickSync(olt.id).catch(e => console.error(e.message)), 3000);
-      }
+    const c = readCache(ONT_CACHE);
+    if (!c || (Date.now() - c.ts) > 1800000) {
+      console.log("\n[AUTO] Primera sync en 3s...");
+      setTimeout(() => runQuickSync().catch(e => console.error(e.message)), 3000);
+    } else {
+      console.log("\n[AUTO] Caché de hace " + Math.round((Date.now()-c.ts)/60000) + "min, próxima auto-sync en " + AUTO_SYNC_MINUTES + " min");
     }
+
     setInterval(() => {
-      for (const olt of loadOlts()) {
-        if (!syncRunningMap[olt.id]) {
-          runQuickSync(olt.id).catch(e => console.error(e.message));
-        }
+      if (!syncRunning) {
+        console.log("\n[AUTO] Quick sync programada (" + AUTO_SYNC_MINUTES + " min)...");
+        runQuickSync().catch(e => console.error(e.message));
       }
     }, AUTO_SYNC_MINUTES * 60000);
   } else {
-    console.log("\n[AUTO] Sync automática desactivada. Las tablas se sirven desde caché hasta que se presione 'Sincronizar'.");
+    console.log("\n[AUTO] Sync automática desactivada. La tabla se sirve desde caché hasta que se presione 'Sincronizar'.");
   }
 });
